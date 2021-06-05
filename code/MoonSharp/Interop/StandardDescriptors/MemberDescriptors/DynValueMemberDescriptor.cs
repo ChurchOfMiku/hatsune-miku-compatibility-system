@@ -135,7 +135,8 @@ namespace MoonSharp.Interpreter.Interop
 
 					break;
 				case DataType.UserData:
-					if (Value.UserData.Object == null)
+					throw new System.Exception( "nyi" );
+					/*if (Value.UserData.Object == null)
 					{
 						t.Set("type", DynValue.NewString("userdata"));
 						t.Set("staticType", DynValue.NewString(Value.UserData.Descriptor.Type.FullName));
@@ -144,7 +145,7 @@ namespace MoonSharp.Interpreter.Interop
 					else
 					{
 						t.Set("error", DynValue.NewString("Wiring of non-static userdata value members not supported."));
-					}
+					}*/
 					break;
 				default:
 					t.Set("error", DynValue.NewString(string.Format("Wiring of '{0}' value members not supported.", Value.Type.ToErrorTypeString())));

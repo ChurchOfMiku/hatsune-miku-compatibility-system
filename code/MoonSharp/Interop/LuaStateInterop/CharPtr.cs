@@ -157,23 +157,23 @@ namespace MoonSharp.Interpreter.Interop.LuaStateInterop
 		}
 		public static int operator -(CharPtr ptr1, CharPtr ptr2)
 		{
-			Debug.Assert(ptr1.chars == ptr2.chars); return ptr1.index - ptr2.index;
+			Sandbox.Assert.True(ptr1.chars == ptr2.chars); return ptr1.index - ptr2.index;
 		}
 		public static bool operator <(CharPtr ptr1, CharPtr ptr2)
 		{
-			Debug.Assert(ptr1.chars == ptr2.chars); return ptr1.index < ptr2.index;
+			Sandbox.Assert.True( ptr1.chars == ptr2.chars); return ptr1.index < ptr2.index;
 		}
 		public static bool operator <=(CharPtr ptr1, CharPtr ptr2)
 		{
-			Debug.Assert(ptr1.chars == ptr2.chars); return ptr1.index <= ptr2.index;
+			Sandbox.Assert.True( ptr1.chars == ptr2.chars); return ptr1.index <= ptr2.index;
 		}
 		public static bool operator >(CharPtr ptr1, CharPtr ptr2)
 		{
-			Debug.Assert(ptr1.chars == ptr2.chars); return ptr1.index > ptr2.index;
+			Sandbox.Assert.True( ptr1.chars == ptr2.chars); return ptr1.index > ptr2.index;
 		}
 		public static bool operator >=(CharPtr ptr1, CharPtr ptr2)
 		{
-			Debug.Assert(ptr1.chars == ptr2.chars); return ptr1.index >= ptr2.index;
+			Sandbox.Assert.True( ptr1.chars == ptr2.chars); return ptr1.index >= ptr2.index;
 		}
 		public static bool operator ==(CharPtr ptr1, CharPtr ptr2)
 		{

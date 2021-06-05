@@ -49,7 +49,8 @@ namespace MoonSharp.Interpreter.Interop
 
 		public void PrepareForWiring(Table t)
 		{
-			if (AccessMode == InteropAccessMode.HideMembers || Framework.Do.GetAssembly(Type) == Framework.Do.GetAssembly(this.GetType()))
+			throw new Exception( "nyi" );
+			/*if (AccessMode == InteropAccessMode.HideMembers || Framework.Do.GetAssembly(Type) == Framework.Do.GetAssembly(this.GetType()))
 			{
 				t.Set("skip", DynValue.NewBoolean(true));
 			}
@@ -65,7 +66,7 @@ namespace MoonSharp.Interpreter.Interop
 
 				Serialize(tm.Table, Members);
 				Serialize(tmm.Table, MetaMembers);
-			}
+			}*/
 		}
 
 		private void Serialize(Table t, IEnumerable<KeyValuePair<string, IMemberDescriptor>> members)

@@ -120,24 +120,5 @@ namespace MoonSharp.Interpreter.Interop.UserDataRegistries
 
 			return null;
 		}
-
-		private static Type GetGenericMatch(Type extensionType, Type extendedType)
-		{
-			if (!extensionType.IsGenericParameter)
-			{
-				extensionType = extensionType.GetGenericTypeDefinition();
-
-				foreach (Type t in extendedType.GetAllImplementedTypes())
-				{
-					if (Framework.Do.IsGenericType(t) && t.GetGenericTypeDefinition() == extensionType)
-					{
-						return t;
-					}
-				}
-			}
-
-			return null;
-		}
-
 	}
 }

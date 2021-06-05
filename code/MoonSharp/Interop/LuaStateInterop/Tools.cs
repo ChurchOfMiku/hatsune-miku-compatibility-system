@@ -278,14 +278,7 @@ namespace MoonSharp.Interpreter.Interop.LuaStateInterop
 			}
 		}
 		#endregion
-		#region fprintf
-		public static void fprintf(TextWriter Destination, string Format, params object[] Parameters)
-		{
-			Destination.Write(Tools.sprintf(Format, Parameters));
-		}
 
-
-		#endregion
 		#region sprintf
 		internal static Regex r = new Regex(@"\%(\d*\$)?([\'\#\-\+ ]*)(\d*)(?:\.(\d+))?([hl])?([dioxXucsfeEgGpn%])");
 		public static string sprintf(string Format, params object[] Parameters)

@@ -69,14 +69,11 @@ namespace MoonSharp.Interpreter.Platforms
 			IsRunningOnUnity = true;
 			IsUnityNative = true;
 
-	#if ENABLE_IL2CPP
+#if ENABLE_IL2CPP
 					IsUnityIL2CPP = true;
-	#endif
-	#elif !(NETFX_CORE)
-			IsRunningOnUnity = AppDomain.CurrentDomain
-				.GetAssemblies()
-				.SelectMany(a => a.SafeGetTypes())
-				.Any(t => t.FullName.StartsWith("UnityEngine."));
+#endif
+#elif !(NETFX_CORE)
+			IsRunningOnUnity = false;
 	#endif
 #endif
 
