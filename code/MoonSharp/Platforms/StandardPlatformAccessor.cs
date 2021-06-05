@@ -1,4 +1,5 @@
-﻿#if (PCL) || (UNITY_5) || NETFX_CORE
+﻿// miku should use dummpy impl
+#if TRUE
 // Dummy implementation for PCL and Unity targets
 using System;
 using System.IO;

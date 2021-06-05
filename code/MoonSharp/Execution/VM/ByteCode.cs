@@ -59,23 +59,6 @@ namespace MoonSharp.Interpreter.Execution.VM
 			m_CurrentSourceRef = (m_SourceRefStack.Count > 0) ? m_SourceRefStack[m_SourceRefStack.Count - 1] : null;
 		}
 
-	#if (!PCL) && ((!UNITY_5) || UNITY_STANDALONE) && (!(NETFX_CORE))
-		public void Dump(string file)
-		{
-			StringBuilder sb = new StringBuilder();
-
-			for (int i = 0; i < Code.Count; i++)
-			{
-				if (Code[i].OpCode == OpCode.Debug)
-					sb.AppendFormat("    {0}\n", Code[i]);
-				else
-					sb.AppendFormat("{0:X8}  {1}\n", i, Code[i]);
-			}
-
-			File.WriteAllText(file, sb.ToString());
-		}
-	#endif
-
 		public int GetJumpPointForNextInstruction()
 		{
 			return Code.Count;
