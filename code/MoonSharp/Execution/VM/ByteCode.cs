@@ -132,11 +132,11 @@ namespace MoonSharp.Interpreter.Execution.VM
 			return i;
 		}
 
-
-		[Conditional("EMIT_DEBUG_OPS")]
 		public void Emit_Debug(string str)
 		{
+#if EMIT_DEBUG_OPS
 			AppendInstruction(new Instruction(m_CurrentSourceRef) { OpCode = OpCode.Debug, Name = str.Substring(0, Math.Min(32, str.Length)) });
+#endif
 		}
 
 		public Instruction Emit_Enter(RuntimeScopeBlock runtimeScopeBlock)

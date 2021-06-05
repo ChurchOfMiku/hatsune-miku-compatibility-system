@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
 using MoonSharp.Interpreter.DataStructs;
 using MoonSharp.Interpreter.Debugging;
 
@@ -132,11 +131,7 @@ namespace MoonSharp.Interpreter.Execution.VM
 
 		int GetThreadId()
 		{
-			#if ENABLE_DOTNET || NETFX_CORE
-				return 1;
-			#else
-				return Thread.CurrentThread.ManagedThreadId;
-			#endif
+			return 1;
 		}
 
 		private void EnterProcessor()

@@ -1,4 +1,5 @@
 ﻿// Disable warnings about XML documentation
+/*
 #pragma warning disable 1591
 
 using System;
@@ -285,3 +286,4 @@ namespace MoonSharp.Interpreter.CoreLib
 		}
 	}
 }
+*/
