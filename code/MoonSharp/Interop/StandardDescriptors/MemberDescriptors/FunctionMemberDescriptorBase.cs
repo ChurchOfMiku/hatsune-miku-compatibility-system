@@ -106,20 +106,6 @@ namespace MoonSharp.Interpreter.Interop
 		}
 
 		/// <summary>
-		/// Creates a callback DynValue starting from a MethodInfo.
-		/// </summary>
-		/// <param name="script">The script.</param>
-		/// <param name="mi">The mi.</param>
-		/// <param name="obj">The object.</param>
-		/// <returns></returns>
-		public static DynValue CreateCallbackDynValue(Script script, MethodInfo mi, object obj = null)
-		{
-			var desc = new MethodMemberDescriptor(mi);
-			return desc.GetCallbackAsDynValue(script, obj);
-		}
-
-
-		/// <summary>
 		/// Builds the argument list.
 		/// </summary>
 		/// <param name="script">The script.</param>

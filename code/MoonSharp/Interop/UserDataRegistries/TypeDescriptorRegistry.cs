@@ -21,51 +21,6 @@ namespace MoonSharp.Interpreter.Interop.UserDataRegistries
 		private static InteropAccessMode s_DefaultAccessMode;
 
 		/// <summary>
-		/// Registers all types marked with a MoonSharpUserDataAttribute that ar contained in an assembly.
-		/// </summary>
-		/// <param name="asm">The assembly.</param>
-		/// <param name="includeExtensionTypes">if set to <c>true</c> extension types are registered to the appropriate registry.</param>
-		internal static void RegisterAssembly(Assembly asm = null, bool includeExtensionTypes = false)
-		{
-			if (asm == null)
-			{
-				#if NETFX_CORE || DOTNET_CORE
-					throw new NotSupportedException("Assembly.GetCallingAssembly is not supported on target framework.");
-				#else
-					asm = Assembly.GetCallingAssembly();
-				#endif
-			}
-
-			if (includeExtensionTypes)
-			{
-				var extensionTypes = from t in asm.SafeGetTypes()
-									 let attributes = Framework.Do.GetCustomAttributes(t, typeof(ExtensionAttribute), true)
-									 where attributes != null && attributes.Length > 0
-									 select new { Attributes = attributes, DataType = t };
-
-				foreach (var extType in extensionTypes)
-				{
-					UserData.RegisterExtensionType(extType.DataType);
-				}
-			}
-
-
-			var userDataTypes = from t in asm.SafeGetTypes()
-								let attributes = Framework.Do.GetCustomAttributes(t, typeof(MoonSharpUserDataAttribute), true)
-								where attributes != null && attributes.Length > 0
-								select new { Attributes = attributes, DataType = t };
-
-			foreach (var userDataType in userDataTypes)
-			{
-				UserData.RegisterType(userDataType.DataType, userDataType.Attributes
-					.OfType<MoonSharpUserDataAttribute>()
-					.First()
-					.AccessMode);
-			}
-		}
-
-
-		/// <summary>
 		/// Determines whether the specified type is registered. Note that this should be used only to check if a descriptor
 		/// has been registered EXACTLY. For many types a descriptor can still be created, for example through the descriptor
 		/// of a base type or implemented interfaces.

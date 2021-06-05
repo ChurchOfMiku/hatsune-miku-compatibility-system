@@ -103,7 +103,9 @@ namespace MoonSharp.Interpreter.Interop.Converters
 		/// </summary>
 		internal static DynValue ObjectToDynValue(Script script, object obj)
 		{
-			DynValue v = TryObjectToSimpleDynValue(script, obj);
+			throw new NotImplementedException();
+			// miku: needed for standard libs, but relies too much on reflection
+			/*DynValue v = TryObjectToSimpleDynValue(script, obj);
 
 			if (v != null) return v;
 
@@ -148,7 +150,7 @@ namespace MoonSharp.Interpreter.Interop.Converters
 			if (enumerator != null) return enumerator;
 
 
-			throw ScriptRuntimeException.ConvertObjectFailed(obj);
+			throw ScriptRuntimeException.ConvertObjectFailed(obj);*/
 		}
 
 		/// <summary>

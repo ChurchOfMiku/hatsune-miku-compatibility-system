@@ -32,43 +32,6 @@ namespace MoonSharp.Interpreter.Interop.UserDataRegistries
 			}
 		}
 
-		/// <summary>
-		/// Registers an extension Type (that is a type containing extension methods)
-		/// </summary>
-		/// <param name="type">The type.</param>
-		/// <param name="mode">The InteropAccessMode.</param>
-		public static void RegisterExtensionType(Type type, InteropAccessMode mode = InteropAccessMode.Default)
-		{
-			lock (s_Lock)
-			{
-				bool changesDone = false;
-
-				foreach (MethodInfo mi in Framework.Do.GetMethods(type).Where(_mi => _mi.IsStatic))
-				{
-					if (mi.GetCustomAttributes(typeof(ExtensionAttribute), false).Count() == 0)
-						continue;
-
-					if (mi.ContainsGenericParameters)
-					{
-						s_UnresolvedGenericsRegistry.Add(mi.Name, new UnresolvedGenericMethod(mi, mode));
-						changesDone = true;
-						continue;
-					}
-
-					if (!MethodMemberDescriptor.CheckMethodIsCompatible(mi, false))
-						continue;
-
-					var desc = new MethodMemberDescriptor(mi, mode);
-
-					s_Registry.Add(mi.Name, desc);
-					changesDone = true;
-				}
-
-				if (changesDone)
-					++s_ExtensionMethodChangeVersion;
-			}
-		}
-
 		private static object FrameworkGetMethods()
 		{
 			throw new NotImplementedException();
@@ -104,7 +67,9 @@ namespace MoonSharp.Interpreter.Interop.UserDataRegistries
 		/// <returns></returns>
 		public static List<IOverloadableMemberDescriptor> GetExtensionMethodsByNameAndType(string name, Type extendedType)
 		{
-			List<UnresolvedGenericMethod> unresolvedGenerics = null;
+			// miku: this seems to be used by a couple of things
+			throw new NotImplementedException();
+			/*List<UnresolvedGenericMethod> unresolvedGenerics = null;
 
 			lock (s_Lock)
 			{
@@ -140,7 +105,7 @@ namespace MoonSharp.Interpreter.Interop.UserDataRegistries
 
 			return s_Registry.Find(name)
 				.Where(d => d.ExtensionMethodType != null && Framework.Do.IsAssignableFrom(d.ExtensionMethodType, extendedType))
-				.ToList();
+				.ToList();*/
 		}
 
 		private static MethodInfo InstantiateMethodInfo(MethodInfo mi, Type extensionType, Type genericType, Type extendedType)

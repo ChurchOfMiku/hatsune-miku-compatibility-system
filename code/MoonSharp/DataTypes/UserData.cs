@@ -134,26 +134,6 @@ namespace MoonSharp.Interpreter
 			return TypeDescriptorRegistry.RegisterType_Impl(customDescriptor.Type, InteropAccessMode.Default, null, customDescriptor);
 		}
 
-
-		/// <summary>
-		/// Registers all types marked with a MoonSharpUserDataAttribute that ar contained in an assembly.
-		/// </summary>
-		/// <param name="asm">The assembly.</param>
-		/// <param name="includeExtensionTypes">if set to <c>true</c> extension types are registered to the appropriate registry.</param>
-		public static void RegisterAssembly(Assembly asm = null, bool includeExtensionTypes = false)
-		{
-			if (asm == null)
-			{
-				#if NETFX_CORE || DOTNET_CORE
-					throw new NotSupportedException("Assembly.GetCallingAssembly is not supported on target framework.");
-				#else
-					asm = Assembly.GetCallingAssembly();
-				#endif
-			}
-
-			TypeDescriptorRegistry.RegisterAssembly(asm, includeExtensionTypes);
-		}
-
 		/// <summary>
 		/// Determines whether the specified type is registered. Note that this should be used only to check if a descriptor
 		/// has been registered EXACTLY. For many types a descriptor can still be created, for example through the descriptor
@@ -292,16 +272,6 @@ namespace MoonSharp.Interpreter
 		{
 			get { return TypeDescriptorRegistry.DefaultAccessMode; }
 			set { TypeDescriptorRegistry.DefaultAccessMode = value; }
-		}
-
-		/// <summary>
-		/// Registers an extension Type (that is a type containing extension methods)
-		/// </summary>
-		/// <param name="type">The type.</param>
-		/// <param name="mode">The InteropAccessMode.</param>
-		public static void RegisterExtensionType(Type type, InteropAccessMode mode = InteropAccessMode.Default)
-		{
-			ExtensionMethodsRegistry.RegisterExtensionType(type, mode);
 		}
 
 		/// <summary>
