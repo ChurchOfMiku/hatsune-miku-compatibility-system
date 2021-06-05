@@ -537,7 +537,8 @@ namespace MoonSharp.Interpreter.Interop.BasicDescriptors
 
 		private int PerformComparison(object obj, object p1, object p2)
 		{
-			IComparable comp = (IComparable)obj;
+			// miku: IComparable not whitelisted.
+			/*IComparable comp = (IComparable)obj;
 
 			if (comp != null)
 			{
@@ -545,7 +546,7 @@ namespace MoonSharp.Interpreter.Interop.BasicDescriptors
 					return comp.CompareTo(p2);
 				else if (object.ReferenceEquals(obj, p2))
 					return -comp.CompareTo(p1);
-			}
+			}*/
 
 			throw new InternalErrorException("unexpected case");
 		}
@@ -553,26 +554,30 @@ namespace MoonSharp.Interpreter.Interop.BasicDescriptors
 
 		private DynValue MultiDispatchLessThanOrEqual(Script script, object obj)
 		{
-			IComparable comp = obj as IComparable;
+			// miku: IComparable not whitelisted.
+			/*IComparable comp = obj as IComparable;
 			if (comp != null)
 			{
 				return DynValue.NewCallback(
 					(context, args) =>
 						DynValue.NewBoolean(PerformComparison(obj, args[0].ToObject(), args[1].ToObject()) <= 0));
-			}
+			}*/
+			throw new InternalErrorException( "NOPE" );
 
 			return null;
 		}
 
 		private DynValue MultiDispatchLessThan(Script script, object obj)
 		{
-			IComparable comp = obj as IComparable;
+			// miku: IComparable not whitelisted.
+			/*IComparable comp = obj as IComparable;
 			if (comp != null)
 			{
 				return DynValue.NewCallback(
 					(context, args) =>
 						DynValue.NewBoolean(PerformComparison(obj, args[0].ToObject(), args[1].ToObject()) < 0));
-			}
+			}*/
+			throw new InternalErrorException( "NOPE" );
 
 			return null;
 		}

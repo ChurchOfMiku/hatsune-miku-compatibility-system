@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MoonSharp.Compatibility;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -538,7 +539,7 @@ namespace MoonSharp.Interpreter
 				case DataType.Boolean:
 					return Boolean.ToString().ToLower();
 				case DataType.Number:
-					return Number.ToString(CultureInfo.InvariantCulture);
+					return SboxWhitelistFix.FloatToStringCultureInvariant(Number);
 				case DataType.String:
 					return "\"" + String + "\"";
 				case DataType.Function:
@@ -710,7 +711,7 @@ namespace MoonSharp.Interpreter
 			else if (rv.Type == DataType.String)
 			{
 				double num;
-				if (double.TryParse(rv.String, NumberStyles.Any, CultureInfo.InvariantCulture, out num))
+				if ( SboxWhitelistFix.TryParseFloatCultureInvariant(rv.String, out num))    
 					return num;
 			}
 			return null;

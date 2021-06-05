@@ -2,17 +2,19 @@
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using MoonSharp.Compatibility;
 using MoonSharp.Interpreter.Compatibility;
 
 namespace MoonSharp.Interpreter.Tree
 {
 	internal static class LexerUtils
 	{
+
 		public static double ParseNumber(Token T)
 		{
 			string txt = T.Text;
 			double res;
-			if (!double.TryParse(txt, NumberStyles.Float, CultureInfo.InvariantCulture, out res))
+			if (!SboxWhitelistFix.TryParseFloatCultureInvariant( txt, out res))
 				throw new SyntaxErrorException(T, "malformed number near '{0}'", txt);
 
 			return res;
@@ -26,7 +28,7 @@ namespace MoonSharp.Interpreter.Tree
 
 			ulong res;
 
-			if (!ulong.TryParse(txt.Substring(2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out res))
+			if (!SboxWhitelistFix.TryParseHexCultureInvariant( txt.Substring(2), out res))
 				throw new SyntaxErrorException(T, "malformed number near '{0}'", txt);
 
 			return (double)res;
@@ -87,7 +89,7 @@ namespace MoonSharp.Interpreter.Tree
 
 					s = s.Substring(s[1] == '+' ? 2 : 1);
 
-					int exp1 = int.Parse(s, CultureInfo.InvariantCulture);
+					int exp1 = SboxWhitelistFix.ParseIntCultureInvariant(s);
 
 					exp += exp1;
 				}
@@ -190,7 +192,7 @@ namespace MoonSharp.Interpreter.Tree
 						{
 							if (c == '}')
 							{
-								int i = int.Parse(val, NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+								int i = SboxWhitelistFix.ParseHexCultureInvariant(val);
 								sb.Append(ConvertUtf32ToChar(i));
 								unicode_state = 0;
 								val = string.Empty;
@@ -212,7 +214,7 @@ namespace MoonSharp.Interpreter.Tree
 								val += c;
 								if (val.Length == 2)
 								{
-									int i = int.Parse(val, NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+									int i = SboxWhitelistFix.ParseHexCultureInvariant( val );
 									sb.Append(ConvertUtf32ToChar(i));
 									zmode = false;
 									escape = false;
@@ -232,7 +234,7 @@ namespace MoonSharp.Interpreter.Tree
 
 							if (val.Length == 3 || !CharIsDigit(c))
 							{
-								int i = int.Parse(val, CultureInfo.InvariantCulture);
+								int i = SboxWhitelistFix.ParseIntCultureInvariant( val );
 
 								if (i > 255)
 									throw new SyntaxErrorException(token, "decimal escape too large near '\\{0}'", val);
@@ -269,7 +271,7 @@ namespace MoonSharp.Interpreter.Tree
 
 			if (escape && !hex && val.Length > 0)
 			{
-				int i = int.Parse(val, CultureInfo.InvariantCulture);
+				int i = SboxWhitelistFix.ParseIntCultureInvariant( val );
 				sb.Append(ConvertUtf32ToChar(i));
 				escape = false;
 			}
