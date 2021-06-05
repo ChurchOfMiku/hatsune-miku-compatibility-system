@@ -35,9 +35,7 @@ namespace MoonSharp.Interpreter
 			if (modules.Has(CoreModules.Coroutine)) RegisterModuleType<CoroutineModule>(table);
 			if (modules.Has(CoreModules.Bit32)) RegisterModuleType<Bit32Module>(table);
 			if (modules.Has(CoreModules.Dynamic)) RegisterModuleType<DynamicModule>(table);
-			if (modules.Has(CoreModules.OS_System)) RegisterModuleType<OsSystemModule>(table);
 			if (modules.Has(CoreModules.OS_Time)) RegisterModuleType<OsTimeModule>(table);
-			if (modules.Has(CoreModules.IO)) RegisterModuleType<IoModule>(table);
 			if (modules.Has(CoreModules.Debug)) RegisterModuleType<DebugModule>(table);
 
 			return table;
