@@ -1,4 +1,5 @@
-﻿#if DOTNET_CORE || (!(PCL || ENABLE_DOTNET || NETFX_CORE))
+﻿// miku: filesystem loading not supported
+#if FALSE
 using System.IO;
 
 namespace MoonSharp.Interpreter.Loaders

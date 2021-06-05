@@ -1,4 +1,5 @@
-﻿#if !(PCL || ENABLE_DOTNET || NETFX_CORE)
+﻿// miku: do not support, why do we even need the REPL?
+#if FALSE
 using System;
 using MoonSharp.Interpreter.Loaders;
 

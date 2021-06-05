@@ -44,7 +44,6 @@ namespace MoonSharp.Interpreter
 		{
 			RegistrationPolicy = InteropRegistrationPolicy.Default;
 
-			RegisterType<EventFacade>(InteropAccessMode.NoReflectionAllowed);
 			RegisterType<AnonWrapper>(InteropAccessMode.HideMembers);
 			RegisterType<EnumerableWrapper>(InteropAccessMode.NoReflectionAllowed);
 			RegisterType<JsonNull>(InteropAccessMode.Reflection);

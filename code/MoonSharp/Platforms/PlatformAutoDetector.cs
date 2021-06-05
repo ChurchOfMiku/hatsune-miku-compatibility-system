@@ -111,18 +111,7 @@ namespace MoonSharp.Interpreter.Platforms
 		{
 			AutoDetectPlatformFlags();
 
-			if (IsRunningOnUnity)
-				return new UnityAssetsScriptLoader();
-			else
-			{
-#if (DOTNET_CORE)
-				return new FileSystemScriptLoader();
-#elif (PCL || ENABLE_DOTNET || NETFX_CORE)
-				return new InvalidScriptLoader("Portable Framework");
-#else
-				return new FileSystemScriptLoader();
-#endif
-			}
+			return new InvalidScriptLoader("Hatsune Miku :D");
 		}
 	}
 }
