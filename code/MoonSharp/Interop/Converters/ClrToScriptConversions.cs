@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reflection;
 using System.Text;
 using MoonSharp.Interpreter.Interop.RegistrationPolicies;
 
@@ -81,7 +80,8 @@ namespace MoonSharp.Interpreter.Interop.Converters
 
 			if (obj is Delegate)
 			{
-				Delegate d = (Delegate)obj;
+				throw new Exception( "attempt to create lua value from delegate" );
+				/*Delegate d = (Delegate)obj;
 
 
 #if NETFX_CORE
@@ -91,7 +91,7 @@ namespace MoonSharp.Interpreter.Interop.Converters
 #endif
 
 				if (CallbackFunction.CheckCallbackSignature(mi, false))
-					return DynValue.NewCallback((Func<ScriptExecutionContext, CallbackArguments, DynValue>)d);
+					return DynValue.NewCallback((Func<ScriptExecutionContext, CallbackArguments, DynValue>)d);*/
 			}
 
 			return null;
