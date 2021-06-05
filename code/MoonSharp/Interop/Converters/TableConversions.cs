@@ -137,7 +137,8 @@ namespace MoonSharp.Interpreter.Interop.Converters
 				dictionaryType = dictionaryType.MakeGenericType(keyType, valueType);
 			}
 
-			System.Collections.IDictionary dic = (System.Collections.IDictionary)Activator.CreateInstance(dictionaryType);
+			throw new Exception("todo table to generic type conversion");
+			System.Collections.IDictionary dic = null;//(System.Collections.IDictionary)Activator.CreateInstance(dictionaryType);
 
 			foreach (var kvp in table.Pairs)
 			{
@@ -164,7 +165,8 @@ namespace MoonSharp.Interpreter.Interop.Converters
 				lst.Add(o);
 			}
 
-			System.Collections.IList array = (System.Collections.IList)Activator.CreateInstance(arrayType, new object[] { lst.Count });
+			throw new Exception( "todo table to generic type conversion" );
+			System.Collections.IList array = null;// (System.Collections.IList)Activator.CreateInstance(arrayType, new object[] { lst.Count });
 
 			for (int i = 0; i < lst.Count; i++)
 				array[i] = lst[i];
@@ -184,7 +186,8 @@ namespace MoonSharp.Interpreter.Interop.Converters
 				listType = listType.MakeGenericType(itemType);
 			}
 
-			System.Collections.IList lst = (System.Collections.IList)Activator.CreateInstance(listType);
+			throw new Exception( "todo table to generic type conversion" );
+			System.Collections.IList lst = null;// (System.Collections.IList)Activator.CreateInstance(listType);
 
 			for (int i = 1, l = table.Length; i <= l; i++)
 			{

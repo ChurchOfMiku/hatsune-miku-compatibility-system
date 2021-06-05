@@ -85,15 +85,12 @@ namespace MoonSharp.Interpreter
 		/// <summary>
 		/// Checks the callback signature of a method is compatible for callbacks
 		/// </summary>
-		public static bool CheckCallbackSignature(System.Reflection.MethodInfo mi, bool requirePublicVisibility)
+		/*public static bool CheckCallbackSignature(System.Reflection.MethodInfo mi, bool requirePublicVisibility)
 		{
 			System.Reflection.ParameterInfo[] pi = mi.GetParameters();
 
 			return (pi.Length == 2 && pi[0].ParameterType == typeof(ScriptExecutionContext)
 				&& pi[1].ParameterType == typeof(CallbackArguments) && mi.ReturnType == typeof(DynValue) && (requirePublicVisibility || mi.IsPublic));
-		}
-
-
-
+		}*/
 	}
 }

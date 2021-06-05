@@ -169,8 +169,7 @@ namespace MoonSharp.Interpreter
 			{
 				code = code.Substring(StringModule.BASE64_DUMP_HEADER.Length);
 				byte[] data = Convert.FromBase64String(code);
-				using (MemoryStream ms = new MemoryStream(data))
-					return LoadStream(ms, globalTable, codeFriendlyName);
+				throw new Exception( "base64 loading NYI" );
 			}
 
 			string chunkName = string.Format("{0}", codeFriendlyName ?? "chunk_" + m_Sources.Count.ToString());
@@ -187,52 +186,6 @@ namespace MoonSharp.Interpreter
 			SignalByteCodeChange();
 
 			return MakeClosure(address, globalTable ?? m_GlobalTable);
-		}
-
-		/// <summary>
-		/// Loads a Lua/MoonSharp script from a System.IO.Stream. NOTE: This will *NOT* close the stream!
-		/// </summary>
-		/// <param name="stream">The stream containing code.</param>
-		/// <param name="globalTable">The global table to bind to this chunk.</param>
-		/// <param name="codeFriendlyName">Name of the code - used to report errors, etc.</param>
-		/// <returns>
-		/// A DynValue containing a function which will execute the loaded code.
-		/// </returns>
-		public DynValue LoadStream(Stream stream, Table globalTable = null, string codeFriendlyName = null)
-		{
-			this.CheckScriptOwnership(globalTable);
-
-			Stream codeStream = new UndisposableStream(stream);
-
-			if (!Processor.IsDumpStream(codeStream))
-			{
-				using (StreamReader sr = new StreamReader(codeStream))
-				{
-					string scriptCode = sr.ReadToEnd();
-					return LoadString(scriptCode, globalTable, codeFriendlyName);
-				}
-			}
-			else
-			{
-				string chunkName = string.Format("{0}", codeFriendlyName ?? "dump_" + m_Sources.Count.ToString());
-
-				SourceCode source = new SourceCode(codeFriendlyName ?? chunkName,
-					string.Format("-- This script was decoded from a binary dump - dump_{0}", m_Sources.Count),
-					m_Sources.Count, this);
-
-				m_Sources.Add(source);
-
-				bool hasUpvalues;
-				int address = m_MainProcessor.Undump(codeStream, m_Sources.Count - 1, globalTable ?? m_GlobalTable, out hasUpvalues);
-
-				SignalSourceCodeChange(source);
-				SignalByteCodeChange();
-
-				if (hasUpvalues)
-					return MakeClosure(address, globalTable ?? m_GlobalTable);
-				else
-					return MakeClosure(address);
-			}
 		}
 
 		/// <summary>
@@ -290,22 +243,6 @@ namespace MoonSharp.Interpreter
 			{
 				return LoadString((string)code, globalContext, friendlyFilename ?? filename);
 			}
-			else if (code is byte[])
-			{
-				using (MemoryStream ms = new MemoryStream((byte[])code))
-					return LoadStream(ms, globalContext, friendlyFilename ?? filename);
-			}
-			else if (code is Stream)
-			{
-				try
-				{
-					return LoadStream((Stream)code, globalContext, friendlyFilename ?? filename);
-				}
-				finally
-				{
-					((Stream)code).Dispose();
-				}
-			}
 			else
 			{
 				if (code == null)
@@ -330,23 +267,6 @@ namespace MoonSharp.Interpreter
 			DynValue func = LoadString(code, globalContext, codeFriendlyName);
 			return Call(func);
 		}
-
-
-		/// <summary>
-		/// Loads and executes a stream containing a Lua/MoonSharp script.
-		/// </summary>
-		/// <param name="stream">The stream.</param>
-		/// <param name="globalContext">The global context.</param>
-		/// <param name="codeFriendlyName">Name of the code - used to report errors, etc. Also used by debuggers to locate the original source file.</param>
-		/// <returns>
-		/// A DynValue containing the result of the processing of the loaded chunk.
-		/// </returns>
-		public DynValue DoStream(Stream stream, Table globalContext = null, string codeFriendlyName = null)
-		{
-			DynValue func = LoadStream(stream, globalContext, codeFriendlyName);
-			return Call(func);
-		}
-
 
 		/// <summary>
 		/// Loads and executes a file containing a Lua/MoonSharp script.

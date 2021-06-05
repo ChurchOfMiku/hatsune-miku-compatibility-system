@@ -689,7 +689,9 @@ namespace MoonSharp.Interpreter.Interop.LuaStateInterop
 
 			if (IsNumericType(Value))
 			{
-				w = String.Format(CultureInfo.InvariantCulture, numberFormat, Value);
+				//w = String.Format(CultureInfo.InvariantCulture, numberFormat, Value);
+				throw new Exception("string formatting");
+				w = "";
 
 				if (Left2Right || Padding == ' ')
 				{

@@ -102,23 +102,6 @@ namespace MoonSharp.Interpreter.Interop.BasicDescriptors
 				RestrictType(typeRestriction);
 			}
 		}
-		
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="ParameterDescriptor"/> class.
-		/// </summary>
-		/// <param name="pi">A ParameterInfo taken from reflection.</param>
-		public ParameterDescriptor(ParameterInfo pi)
-		{
-			Name = pi.Name;
-			Type = pi.ParameterType;
-			HasDefaultValue = !(Framework.Do.IsDbNull(pi.DefaultValue));
-			DefaultValue = pi.DefaultValue;
-			IsOut = pi.IsOut;
-			IsRef = pi.ParameterType.IsByRef;
-			IsVarArgs = (pi.ParameterType.IsArray && pi.GetCustomAttributes(typeof(ParamArrayAttribute), true).Any());
-		}
-
 
 		/// <summary>
 		/// Returns a <see cref="System.String" /> that represents this instance.

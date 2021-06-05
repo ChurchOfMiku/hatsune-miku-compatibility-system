@@ -158,7 +158,7 @@ namespace MoonSharp.Interpreter.Platforms
 		/// <exception cref="System.NotImplementedException"></exception>
 		public override void DefaultPrint(string content)
 		{
-			System.Diagnostics.Debug.WriteLine(content);
+			Sandbox.Log.Info(content);
 		}
 	}
 }

@@ -54,7 +54,7 @@ namespace MoonSharp.Interpreter.IO
 			}
 			else
 			{
-				throw new IOException("string map failure");
+				throw new System.Exception("string map failure");
 			}
 		}
 	}

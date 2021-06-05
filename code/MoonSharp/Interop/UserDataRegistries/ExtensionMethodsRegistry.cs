@@ -20,7 +20,7 @@ namespace MoonSharp.Interpreter.Interop.UserDataRegistries
 
 		private class UnresolvedGenericMethod
 		{
-			public readonly MethodInfo Method;
+			/*public readonly MethodInfo Method;
 			public readonly InteropAccessMode AccessMode;
 			public readonly HashSet<Type> AlreadyAddedTypes = new HashSet<Type>();
 
@@ -28,7 +28,7 @@ namespace MoonSharp.Interpreter.Interop.UserDataRegistries
 			{
 				AccessMode = mode;
 				Method = mi;
-			}
+			}*/
 		}
 
 		private static object FrameworkGetMethods()
@@ -106,7 +106,7 @@ namespace MoonSharp.Interpreter.Interop.UserDataRegistries
 				.ToList();*/
 		}
 
-		private static MethodInfo InstantiateMethodInfo(MethodInfo mi, Type extensionType, Type genericType, Type extendedType)
+		/*private static MethodInfo InstantiateMethodInfo(MethodInfo mi, Type extensionType, Type genericType, Type extendedType)
 		{
 			Type[] defs = mi.GetGenericArguments();
 			Type[] tdefs = Framework.Do.GetGenericArguments(genericType);
@@ -117,6 +117,6 @@ namespace MoonSharp.Interpreter.Interop.UserDataRegistries
 			}
 
 			return null;
-		}
+		}*/
 	}
 }

@@ -90,8 +90,9 @@ namespace MoonSharp.Interpreter.Interop
 		{
 			this.CheckAccess(MemberDescriptorAccess.CanRead, obj);
 
-			object vto = Activator.CreateInstance(ValueTypeDefaultCtor);
-			return ClrToScriptConversions.ObjectToDynValue(script, vto);
+			throw new Exception("execute");
+			//object vto = Activator.CreateInstance(ValueTypeDefaultCtor);
+			//return ClrToScriptConversions.ObjectToDynValue(script, vto);
 		}
 
 
@@ -127,8 +128,9 @@ namespace MoonSharp.Interpreter.Interop
 		{
 			this.CheckAccess(MemberDescriptorAccess.CanRead, obj);
 
-			object vto = Activator.CreateInstance(ValueTypeDefaultCtor);
-			return ClrToScriptConversions.ObjectToDynValue(script, vto);
+			throw new Exception( "get value" );
+			//object vto = Activator.CreateInstance(ValueTypeDefaultCtor);
+			//return ClrToScriptConversions.ObjectToDynValue(script, vto);
 		}
 
 		/// <summary>

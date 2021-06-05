@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Threading;
 using MoonSharp.Interpreter.Compatibility;
 using MoonSharp.Interpreter.Interop.BasicDescriptors;
 using MoonSharp.Interpreter.Interop.RegistrationPolicies;
@@ -122,11 +119,12 @@ namespace MoonSharp.Interpreter.Interop.UserDataRegistries
 
 						if (accessMode == InteropAccessMode.BackgroundOptimized)
 						{
-#if NETFX_CORE
+							throw new Exception("threading dependency: WHY?");
+/*#if NETFX_CORE
 							System.Threading.Tasks.Task.Run(() => ((IOptimizableDescriptor)udd).Optimize());
 #else
 							ThreadPool.QueueUserWorkItem(o => ((IOptimizableDescriptor)udd).Optimize());
-#endif
+#endif*/
 						}
 
 						return PerformRegistration(type, udd, oldDescriptor);

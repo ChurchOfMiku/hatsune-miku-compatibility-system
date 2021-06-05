@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using MoonSharp.Compatibility;
 using MoonSharp.Interpreter.Debugging;
 
 namespace MoonSharp.Interpreter.CoreLib
@@ -223,7 +224,7 @@ namespace MoonSharp.Interpreter.CoreLib
 					return DynValue.Nil;
 
 				double d;
-				if (double.TryParse(e.String, NumberStyles.Any, CultureInfo.InvariantCulture, out d))
+				if (SboxWhitelistFix.TryParseFloatCultureInvariant(e.String, out d))
 				{
 					return DynValue.NewNumber(d);
 				}
@@ -235,10 +236,10 @@ namespace MoonSharp.Interpreter.CoreLib
                 //UPDATE: added support for 3-9 base numbers
                 DynValue ee;
 
-				if (args[0].Type != DataType.Number)
-					ee = args.AsType(0, "tonumber", DataType.String, false);
+				if ( args[0].Type != DataType.Number )
+					ee = args.AsType( 0, "tonumber", DataType.String, false );
 				else
-					ee = DynValue.NewString(args[0].Number.ToString(CultureInfo.InvariantCulture)); ;
+					ee = DynValue.NewString( SboxWhitelistFix.FloatToStringCultureInvariant( args[0].Number ) );
 
 				int bb = (int)b.Number;
 
