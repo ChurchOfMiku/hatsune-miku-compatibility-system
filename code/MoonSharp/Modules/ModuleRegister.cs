@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Reflection;
 using MoonSharp.Interpreter.Compatibility;
 using MoonSharp.Interpreter.CoreLib;
 using MoonSharp.Interpreter.Platforms;
@@ -81,7 +80,7 @@ namespace MoonSharp.Interpreter
 		/// <exception cref="System.ArgumentException">If the module contains some incompatibility</exception>
 		public static Table RegisterModuleType(this Table gtable, Type t)
 		{
-			Table table = CreateModuleNamespace(gtable, t);
+			/*Table table = CreateModuleNamespace(gtable, t);
 
 			foreach (MethodInfo mi in Framework.Do.GetMethods(t).Where(__mi => __mi.IsStatic))
 			{
@@ -129,9 +128,11 @@ namespace MoonSharp.Interpreter
 				RegisterScriptFieldAsConst(fi, null, table, t, name);
 			}
 
-			return gtable;
+			return gtable;*/
+			throw new Exception( "module loading NYI, I have no idea how to make this work." );
 		}
 
+		/*
 		private static void RegisterScriptFieldAsConst(FieldInfo fi, object o, Table table, Type t, string name)
 		{
 			if (fi.FieldType == typeof(string))
@@ -162,7 +163,7 @@ namespace MoonSharp.Interpreter
 			DynValue fn = table.OwnerScript.LoadFunction(val, table, name);
 
 			table.Set(name, fn);
-		}
+		}*/
 
 
 		private static Table CreateModuleNamespace(Table gtable, Type t)
