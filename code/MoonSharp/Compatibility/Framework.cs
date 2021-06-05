@@ -9,8 +9,8 @@ namespace MoonSharp.Interpreter.Compatibility
 {
 	public static class Framework
 	{
-		static FrameworkStubs s_FrameworkCurrent = new FrameworkStubs();
+		static FrameworkImpl s_FrameworkCurrent = new FrameworkImpl();
 
-		public static FrameworkBase Do { get { return s_FrameworkCurrent; } }
+		public static FrameworkImpl Do { get { return s_FrameworkCurrent; } }
 	}
 }

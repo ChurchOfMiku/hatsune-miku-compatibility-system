@@ -14,7 +14,6 @@ namespace MoonSharp.Interpreter.Interop.UserDataRegistries
 	/// </summary>
 	internal class ExtensionMethodsRegistry
 	{
-		private static object s_Lock = new object();
 		private static MultiDictionary<string, IOverloadableMemberDescriptor> s_Registry = new MultiDictionary<string, IOverloadableMemberDescriptor>();
 		private static MultiDictionary<string, UnresolvedGenericMethod> s_UnresolvedGenericsRegistry = new MultiDictionary<string, UnresolvedGenericMethod>();
 		private static int s_ExtensionMethodChangeVersion = 0;
@@ -44,8 +43,7 @@ namespace MoonSharp.Interpreter.Interop.UserDataRegistries
 		/// <returns></returns>
 		public static IEnumerable<IOverloadableMemberDescriptor> GetExtensionMethodsByName(string name)
 		{
-			lock (s_Lock)
-				return new List<IOverloadableMemberDescriptor>(s_Registry.Find(name));
+			return new List<IOverloadableMemberDescriptor>(s_Registry.Find(name));
 		}
 
 		/// <summary>

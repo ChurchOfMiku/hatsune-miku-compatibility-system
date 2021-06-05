@@ -15,7 +15,6 @@ namespace MoonSharp.Interpreter.Interop.UserDataRegistries
 	/// </summary>
 	internal static class TypeDescriptorRegistry
 	{
-		private static object s_Lock = new object();
 		private static Dictionary<Type, IUserDataDescriptor> s_TypeRegistry = new Dictionary<Type, IUserDataDescriptor>();
 		private static Dictionary<Type, IUserDataDescriptor> s_TypeRegistryHistory = new Dictionary<Type, IUserDataDescriptor>();
 		private static InteropAccessMode s_DefaultAccessMode;
@@ -29,8 +28,7 @@ namespace MoonSharp.Interpreter.Interop.UserDataRegistries
 		/// <returns></returns>
 		internal static bool IsTypeRegistered(Type type)
 		{
-			lock (s_Lock)
-				return s_TypeRegistry.ContainsKey(type);
+			return s_TypeRegistry.ContainsKey(type);
 		}
 
 
@@ -43,12 +41,9 @@ namespace MoonSharp.Interpreter.Interop.UserDataRegistries
 		/// <param name="t">The The type to be unregistered</param>
 		internal static void UnregisterType(Type t)
 		{
-			lock (s_Lock)
+			if (s_TypeRegistry.ContainsKey(t))
 			{
-				if (s_TypeRegistry.ContainsKey(t))
-				{
-					PerformRegistration(t, null, s_TypeRegistry[t]);
-				}
+				PerformRegistration(t, null, s_TypeRegistry[t]);
 			}
 		}
 
@@ -97,7 +92,6 @@ namespace MoonSharp.Interpreter.Interop.UserDataRegistries
 		{
 			accessMode = ResolveDefaultAccessModeForType(accessMode, type);
 
-			lock (s_Lock)
 			{
 				IUserDataDescriptor oldDescriptor = null;
 				s_TypeRegistry.TryGetValue(type, out oldDescriptor);
@@ -200,7 +194,6 @@ namespace MoonSharp.Interpreter.Interop.UserDataRegistries
 		/// <returns></returns>
 		internal static IUserDataDescriptor GetDescriptorForType(Type type, bool searchInterfaces)
 		{
-			lock (s_Lock)
 			{
 				IUserDataDescriptor typeDescriptor = null;
 
@@ -318,7 +311,7 @@ namespace MoonSharp.Interpreter.Interop.UserDataRegistries
 		/// </value>
 		public static IEnumerable<KeyValuePair<Type, IUserDataDescriptor>> RegisteredTypes
 		{
-			get { lock (s_Lock) return s_TypeRegistry.ToArray(); }
+			get { return s_TypeRegistry.ToArray(); }
 		}
 
 		/// <summary>
@@ -329,7 +322,7 @@ namespace MoonSharp.Interpreter.Interop.UserDataRegistries
 		/// </value>
 		public static IEnumerable<KeyValuePair<Type, IUserDataDescriptor>> RegisteredTypesHistory
 		{
-			get { lock (s_Lock) return s_TypeRegistryHistory.ToArray(); }
+			get { return s_TypeRegistryHistory.ToArray(); }
 		}
 
 
