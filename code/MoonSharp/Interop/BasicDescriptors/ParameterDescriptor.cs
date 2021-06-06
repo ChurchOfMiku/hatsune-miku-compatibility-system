@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Linq;
-using System.Reflection;
 using MoonSharp.Interpreter.Compatibility;
 
 namespace MoonSharp.Interpreter.Interop.BasicDescriptors
@@ -111,7 +109,7 @@ namespace MoonSharp.Interpreter.Interop.BasicDescriptors
 		/// </returns>
 		public override string ToString()
 		{
-			return string.Format("{0} {1}{2}", Type.Name, Name, HasDefaultValue ? " = ..." : "");
+			return string.Format("{0} {1}{2}", Type.ToString(), Name, HasDefaultValue ? " = ..." : "");
 		}
 
 		/// <summary>

@@ -13,8 +13,12 @@ namespace MoonSharp.Interpreter.Interop
 
 		internal ProxyUserDataDescriptor(IProxyFactory proxyFactory, IUserDataDescriptor proxyDescriptor, string friendlyName = null)
 		{
+			if (friendlyName == null)
+			{
+				throw new Exception( "bad name" );
+			}
 			m_ProxyFactory = proxyFactory;
-			Name = friendlyName ?? (proxyFactory.TargetType.Name + "::proxy");
+			Name = friendlyName;
 			m_ProxyDescriptor = proxyDescriptor;
 		}
 

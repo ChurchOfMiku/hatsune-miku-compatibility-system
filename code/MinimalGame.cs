@@ -21,11 +21,14 @@ namespace MinimalExample
 	/// Your game needs to be registered (using [Library] here) with the same name 
 	/// as your game addon. If it isn't then we won't be able to find it.
 	/// </summary>
-	[Library( "minimal" )]
+	[Library( "miku" )]
 	public partial class MinimalGame : Sandbox.Game
 	{
 		public MinimalGame()
 		{
+			Type t = typeof(MinimalGame);
+			//object meme = t.GetMember( "ClientJoined" );
+			//Log.Info( ">> " + meme );
 			if ( IsServer )
 			{
 				Log.Info( "My Gamemode Has Created Serverside!" );

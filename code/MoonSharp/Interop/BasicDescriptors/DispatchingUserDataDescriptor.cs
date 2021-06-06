@@ -57,9 +57,13 @@ namespace MoonSharp.Interpreter.Interop.BasicDescriptors
 		/// <param name="friendlyName">A friendly name for the type, or null.</param>
 		protected DispatchingUserDataDescriptor(Type type, string friendlyName = null)
 		{
+			if (friendlyName == null)
+			{
+				throw new Exception( "no friendly name" );
+			}
 			Type = type;
 			Name = type.FullName;
-			FriendlyName = friendlyName ?? type.Name;
+			FriendlyName = friendlyName;
 		}
 
 		/// <summary>

@@ -19,12 +19,13 @@ namespace MoonSharp.Interpreter.Interop
 		/// <returns></returns>
 		public static string GetConversionMethodName(this Type type)
 		{
-			StringBuilder sb = new StringBuilder(type.Name);
+			throw new Exception( "get name" );
+			/*StringBuilder sb = new StringBuilder(type.Name);
 
 			for (int i = 0; i < sb.Length; i++)
 				if (!char.IsLetterOrDigit(sb[i])) sb[i] = '_';
 
-			return "__to" + sb.ToString();
+			return "__to" + sb.ToString();*/
 		}
 
 		/// <summary>
