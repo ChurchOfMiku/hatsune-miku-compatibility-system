@@ -1,14 +1,10 @@
 ﻿
 using Sandbox;
-using Sandbox.UI.Construct;
-using System;
-using System.IO;
-using System.Threading.Tasks;
 
 //
 // You don't need to put things in a namespace, but it doesn't hurt.
 //
-namespace MinimalExample
+namespace Miku
 {
 
 	/// <summary>
@@ -26,9 +22,6 @@ namespace MinimalExample
 	{
 		public MinimalGame()
 		{
-			Type t = typeof(MinimalGame);
-			//object meme = t.GetMember( "ClientJoined" );
-			//Log.Info( ">> " + meme );
 			if ( IsServer )
 			{
 				Log.Info( "My Gamemode Has Created Serverside!" );
