@@ -10,7 +10,7 @@ namespace MoonSharp.Interpreter
 	/// </summary>
 	public class ScriptGlobalOptions {
 		internal ScriptGlobalOptions() {
-			Platform = PlatformAutoDetector.GetDefaultPlatform();
+			Platform = new LimitedPlatformAccessor();
 			CustomConverters = new CustomConvertersCollection();
 			FuzzySymbolMatching = FuzzySymbolMatchingBehavior.Camelify | FuzzySymbolMatchingBehavior.UpperFirstLetter | FuzzySymbolMatchingBehavior.PascalCase;
 		}
@@ -26,7 +26,7 @@ namespace MoonSharp.Interpreter
 		/// <value>
 		/// The current platform abstraction.
 		/// </value>
-		public IPlatformAccessor Platform { get; set; }
+		public LimitedPlatformAccessor Platform { get; set; }
 
 		/// <summary>
 		/// Gets or sets a value indicating whether interpreter exceptions should be 

@@ -15,7 +15,6 @@ namespace MoonSharp.Interpreter
 
 		internal ScriptOptions(ScriptOptions defaults)
 		{
-			this.DebugInput = defaults.DebugInput;
 			this.DebugPrint = defaults.DebugPrint;
 
 			this.UseLuaErrorLocations = defaults.UseLuaErrorLocations;
@@ -38,11 +37,6 @@ namespace MoonSharp.Interpreter
 		/// Gets or sets the debug print handler
 		/// </summary>
 		public Action<string> DebugPrint { get; set; }
-
-		/// <summary>
-		/// Gets or sets the debug input handler (takes a prompt as an input, for interactive interpreters, like debug.debug).
-		/// </summary>
-		public Func<string, string> DebugInput { get; set; }
 
 		/// <summary>
 		/// Gets or sets a value indicating whether error messages will use Lua error locations instead of MoonSharp 

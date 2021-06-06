@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using MoonSharp.Interpreter.CoreLib;
+
 using MoonSharp.Interpreter.Debugging;
 using MoonSharp.Interpreter.Diagnostics;
 using MoonSharp.Interpreter.Execution.VM;
@@ -47,26 +47,13 @@ namespace MoonSharp.Interpreter
 			DefaultOptions = new ScriptOptions()
 			{
 				DebugPrint = s => { Script.GlobalOptions.Platform.DefaultPrint(s); },
-				DebugInput = s => { return Script.GlobalOptions.Platform.DefaultInput(s); },
 				CheckThreadAccess = true,
-				ScriptLoader = PlatformAutoDetector.GetDefaultScriptLoader(),
+				ScriptLoader = new Loaders.MikuScriptLoader(),
 				TailCallOptimizationThreshold = 65536
 			};
 		}
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="Script"/> clas.s
-		/// </summary>
 		public Script()
-			: this(CoreModules.Preset_Default)
-		{
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="Script"/> class.
-		/// </summary>
-		/// <param name="coreModules">The core modules to be pre-registered in the default global table.</param>
-		public Script(CoreModules coreModules)
 		{
 			Options = new ScriptOptions(DefaultOptions);
 			PerformanceStats = new PerformanceStatistics();
@@ -74,7 +61,6 @@ namespace MoonSharp.Interpreter
 
 			m_ByteCode = new ByteCode(this);
 			m_MainProcessor = new Processor(this, m_GlobalTable, m_ByteCode);
-			m_GlobalTable = new Table(this).RegisterCoreModules(coreModules);
 		}
 
 
@@ -164,13 +150,6 @@ namespace MoonSharp.Interpreter
 		public DynValue LoadString(string code, Table globalTable = null, string codeFriendlyName = null)
 		{
 			this.CheckScriptOwnership(globalTable);
-
-			if (code.StartsWith(StringModule.BASE64_DUMP_HEADER))
-			{
-				code = code.Substring(StringModule.BASE64_DUMP_HEADER.Length);
-				byte[] data = Convert.FromBase64String(code);
-				throw new Exception( "base64 loading NYI" );
-			}
 
 			string chunkName = string.Format("{0}", codeFriendlyName ?? "chunk_" + m_Sources.Count.ToString());
 
@@ -588,17 +567,6 @@ namespace MoonSharp.Interpreter
 				throw new ArgumentException("Specified type not supported : " + type.ToString());
 		}
 
-
-		/// <summary>
-		/// Warms up the parser/lexer structures so that MoonSharp operations start faster.
-		/// </summary>
-		public static void WarmUp()
-		{
-			Script s = new Script(CoreModules.Basic);
-			s.LoadString("return 1;");
-		}
-
-
 		/// <summary>
 		/// Creates a new dynamic expression.
 		/// </summary>
@@ -655,7 +623,7 @@ namespace MoonSharp.Interpreter
 			subproduct = (subproduct != null) ? (subproduct + " ") : "";
 
 			StringBuilder sb = new StringBuilder();
-			sb.AppendLine(string.Format("MoonSharp {0}{1} [{2}]", subproduct, Script.VERSION, Script.GlobalOptions.Platform.GetPlatformName()));
+			sb.AppendLine(string.Format("MoonSharp {0}{1} [Miku]", subproduct, Script.VERSION));
 			sb.AppendLine("Copyright (C) 2014-2016 Marco Mastropaolo");
 			sb.AppendLine("http://www.moonsharp.org");
 			return sb.ToString();
