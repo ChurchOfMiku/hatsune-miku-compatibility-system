@@ -1,5 +1,10 @@
-﻿namespace Miku.Lua
+﻿using System;
+
+namespace Miku.Lua
 {
+
+	using UserFunction = Func<ValueSlot[], ValueSlot[]?>;
+
 	enum ValueKind
 	{
 		Nil,
@@ -8,6 +13,8 @@
 		Number,
 		String,
 		Table,
+		Function,
+		UserFunction,
 		ProtoFunction
 	}
 
@@ -40,6 +47,105 @@
 		public static ValueSlot ProtoFunction( ProtoFunction x )
 		{
 			return new ValueSlot() { kind = ValueKind.ProtoFunction, reference = x };
+		}
+
+		public static ValueSlot Function( Function x )
+		{
+			return new ValueSlot() { kind = ValueKind.Function, reference = x };
+		}
+
+		public static ValueSlot UserFunction( UserFunction x )
+		{
+			return new ValueSlot() { kind = ValueKind.UserFunction, reference = x };
+		}
+
+		public bool IsNil()
+		{
+			return kind == ValueKind.Nil;
+		}
+
+		public bool IsFunction()
+		{
+			return kind == ValueKind.Function;
+		}
+
+		public Table GetTable()
+		{
+			if ( this.kind == ValueKind.Table )
+			{
+				return (Table)this.reference;
+			}
+			throw new Exception( $"{this} is not a table." );
+		}
+
+		public double GetNumber()
+		{
+			if ( this.kind == ValueKind.Number )
+			{
+				return this.number;
+			}
+			throw new Exception( $"{this} is not a number." );
+		}
+
+		public ProtoFunction GetProtoFunction()
+		{
+			if (this.kind == ValueKind.ProtoFunction)
+			{
+				return (ProtoFunction)this.reference;
+			}
+			throw new System.Exception("wrong kind");
+		}
+
+		public string GetString()
+		{
+			if ( this.kind == ValueKind.String )
+			{
+				return (string)this.reference;
+			}
+			throw new System.Exception( "wrong kind" );
+		}
+
+		public Function GetFunction()
+		{
+			if ( this.kind == ValueKind.Function )
+			{
+				return (Function)this.reference;
+			}
+			throw new System.Exception( $"{this} is not a function." );
+		}
+
+		public UserFunction GetUserFunction()
+		{
+			if ( this.kind == ValueKind.UserFunction )
+			{
+				return (UserFunction)this.reference;
+			}
+			throw new System.Exception( $"{this} is not a user function." );
+		}
+
+		public ValueSlot CloneCheck()
+		{
+			switch (this.kind)
+			{
+				case ValueKind.Nil:
+				case ValueKind.Number:
+					return this;
+				default:
+					throw new System.Exception( $"cc: {this.kind}" );
+			}
+		}
+
+		public override string ToString()
+		{
+			if (this.kind == ValueKind.String)
+			{
+				return this.reference.ToString();
+			}
+			if (this.kind == ValueKind.Number)
+			{
+				return this.number.ToString();
+			}
+			return this.kind.ToString();
 		}
 	}
 }

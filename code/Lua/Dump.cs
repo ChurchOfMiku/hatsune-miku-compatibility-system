@@ -77,7 +77,18 @@ namespace Miku.Lua
 							var table = new Table();
 							for (int j=0;j < size_array; j++ )
 							{
-								table.PushVal( ReadTableEntry( reader ) );
+								var entry = ReadTableEntry( reader );
+								if (j == 0)
+								{
+									if ( !entry.IsNil() )
+									{
+										throw new Exception( "T[0] init is non-nil" );
+									}
+								}
+								else
+								{
+									table.PushVal( entry );
+								}
 							}
 							Assert.True(size_hash == 0);
 							proto.constGC[i] = ValueSlot.Table( table );

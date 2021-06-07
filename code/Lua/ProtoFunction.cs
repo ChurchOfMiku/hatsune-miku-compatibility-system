@@ -9,5 +9,15 @@
 		public ushort[] upVars;
 		public ValueSlot[] constGC;
 		public double[] constNum;
+
+		public ValueSlot GetConstGC(uint index)
+		{
+			return this.constGC[this.constGC.Length - 1 - index];
+		}
+
+		public double GetConstNum( uint index )
+		{
+			return this.constNum[index];
+		}
 	}
 }
