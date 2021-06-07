@@ -129,6 +129,7 @@ namespace Miku.Lua
 			{
 				case ValueKind.Nil:
 				case ValueKind.Number:
+				case ValueKind.String:
 					return this;
 				default:
 					throw new System.Exception( $"cc: {this.kind}" );

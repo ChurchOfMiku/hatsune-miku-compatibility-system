@@ -80,9 +80,10 @@ namespace Miku.Lua
 								var entry = ReadTableEntry( reader );
 								if (j == 0)
 								{
+									// Skip the zeroth entry unless it is actually provided
 									if ( !entry.IsNil() )
 									{
-										throw new Exception( "T[0] init is non-nil" );
+										table.Set( 0, entry );
 									}
 								}
 								else
@@ -99,7 +100,7 @@ namespace Miku.Lua
 								proto.constGC[i] = ValueSlot.String( reader.ReadStringN( const_type - 5 ) );
 							} else
 							{
-								throw new Exception( "=> " + const_type );
+								throw new Exception( "handle const type " + const_type );
 							}
 							break;
 					}
@@ -107,12 +108,15 @@ namespace Miku.Lua
 
 				for (int i = 0; i < proto.constNum.Length; i++ )
 				{
-					var n = reader.Read7BitEncodedInt();
+					var n = reader.Read7BitEncodedInt64();
 					var is_double = (n & 1) == 1;
 					n >>= 1;
 					if (is_double)
 					{
-						throw new Exception( "double" );
+						var m = reader.Read7BitEncodedInt64();
+						long x = (m << 32) | n;
+						double d = BitConverter.Int64BitsToDouble(x);
+						proto.constNum[i] = d;
 					} else
 					{
 						proto.constNum[i] = n;
