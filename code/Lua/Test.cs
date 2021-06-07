@@ -70,7 +70,7 @@ namespace Miku.Lua
 			var bytes = FileSystem.Mounted.ReadAllBytes( $"lua_bootstrap/{filename}.bc" );
 
 			var proto = Dump.Read( bytes.ToArray() );
-			var func = new Function( env, proto );
+			var func = new Function( env, proto, new Executor.UpValueBox[0] );
 			var exec = new Executor( func );
 			exec.Run();
 		}

@@ -17,6 +17,25 @@ namespace Miku.Lua
 			public int RetCount;
 		}
 
+		public class UpValueBox
+		{
+			public (Executor, int)? StackSlot;
+			public ValueSlot Value;
+
+			public ValueSlot Get()
+			{
+				if ( StackSlot != null )
+				{
+					var ss = StackSlot.Value;
+					return ss.Item1.ValueStack[ss.Item2];
+				}
+				else
+				{
+					return Value;
+				}
+			}
+		}
+
 		private int pc = 0;
 		private int MultiRes = 0;
 		private int StackTop = 0; // last entry in the stack + 1
@@ -24,6 +43,7 @@ namespace Miku.Lua
 
 		private List<ValueSlot> ValueStack = new List<ValueSlot>();
 		private Stack<FrameInfo> CallStack = new Stack<FrameInfo>();
+		private SortedDictionary<int, UpValueBox> OpenUpValues = new SortedDictionary<int, UpValueBox>();
 
 		public Executor( Function func )
 		{
@@ -312,28 +332,48 @@ namespace Miku.Lua
 				// Upvalues and Function Init
 				case OpCode.UGET:
 					{
-						// top two bits are flags
-						var uv = Func.prototype.upVars[D];
-						// 0x8000 = local
-						// 0x4000 = immutable
-						if ((uv & 0x8000) == 0)
-						{
-							throw new Exception( "uv tree traversal" );
-						}
-						var var_index = uv & 0x3FFF;
-						throw new Exception( String.Format("upval {0:X}", var_index ) );
+						var val = Func.UpValues[D].Get();
+						StackSet( A, val );
 						break;
 					}
 				case OpCode.UCLO:
 					{
-						Log.Warning( "Close Upvalue!" );
+						int upval_close_base = GetRealStackIndex( A );
+						for (int i= upval_close_base; i<StackTop;i++)
+						{
+							UpValueBox uv;
+							if (OpenUpValues.TryGetValue( i, out uv ))
+							{
+								uv.Value = ValueStack[uv.StackSlot.Value.Item2];
+								OpenUpValues.Remove( i );
+								uv.StackSlot = null;
+								Log.Warning( $"Close Upvalue: {i} {uv.Value}" );
+							}
+						}
 						Jump( D );
 						break;
 					}
 				case OpCode.FNEW:
 					{
 						var new_proto = Func.prototype.GetConstGC(D).GetProtoFunction();
-						var new_func = new Function( Func.env, new_proto );
+						var upvals = new UpValueBox[new_proto.UpValues.Length];
+						for (int i=0;i< upvals.Length; i++ )
+						{
+							var uv_code = new_proto.UpValues[i];
+							if ( (uv_code & 0x8000) == 0 )
+							{
+								throw new Exception( "uv tree traversal" );
+							}
+							var uv_slot = uv_code & 0x3FFF;
+							int real_stack_index = GetRealStackIndex( (uint)uv_slot );
+							var uv_box = new UpValueBox()
+							{
+								StackSlot = (this, real_stack_index)
+							};
+							upvals[i] = uv_box;
+							OpenUpValues.Add( real_stack_index , uv_box );
+						}
+						var new_func = new Function( Func.env, new_proto, upvals );
 						StackSet( A, ValueSlot.Function( new_func ) );
 						break;
 					}

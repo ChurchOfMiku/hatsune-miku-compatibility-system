@@ -43,7 +43,7 @@ namespace Miku.Lua
 				proto.flags = reader.ReadByte();
 				proto.numArgs = reader.ReadByte();
 				proto.numSlots = reader.ReadByte();
-				proto.upVars = new ushort[reader.ReadByte()];
+				proto.UpValues = new ushort[reader.ReadByte()];
 
 				proto.constGC = new ValueSlot[reader.Read7BitEncodedInt()];
 				proto.constNum = new double[reader.Read7BitEncodedInt()];
@@ -58,9 +58,9 @@ namespace Miku.Lua
 					proto.code[i] = reader.ReadUInt32();
 				}
 
-				for ( int i = 0; i < proto.upVars.Length; i++ )
+				for ( int i = 0; i < proto.UpValues.Length; i++ )
 				{
-					proto.upVars[i] = reader.ReadUInt16();
+					proto.UpValues[i] = reader.ReadUInt16();
 				}
 
 				for ( int i = 0; i < proto.constGC.Length; i++ )

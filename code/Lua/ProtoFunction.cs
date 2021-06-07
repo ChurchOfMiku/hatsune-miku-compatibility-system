@@ -6,7 +6,7 @@
 		public byte numSlots;
 
 		public uint[] code;
-		public ushort[] upVars;
+		public ushort[] UpValues;
 		public ValueSlot[] constGC;
 		public double[] constNum;
 
