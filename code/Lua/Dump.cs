@@ -36,7 +36,7 @@ namespace Miku.Lua
 			var chunkFlags = reader.Read7BitEncodedInt64();
 			var chunkName = reader.ReadString();
 
-			var protos = new Queue<ProtoFunction>();
+			var protos = new Stack<ProtoFunction>();
 			int proto_len;
 			while ( (proto_len = reader.Read7BitEncodedInt()) != 0 ) {
 				var proto = new ProtoFunction();
@@ -69,7 +69,7 @@ namespace Miku.Lua
 					switch (const_type)
 					{
 						case 0:
-							proto.constGC[i] = ValueSlot.ProtoFunction( protos.Dequeue() );
+							proto.constGC[i] = ValueSlot.ProtoFunction( protos.Pop() );
 							break;
 						case 1:
 							var size_array = reader.Read7BitEncodedInt();
@@ -91,7 +91,12 @@ namespace Miku.Lua
 									table.PushVal( entry );
 								}
 							}
-							Assert.True(size_hash == 0);
+							for (int j=0;j < size_hash; j++ )
+							{
+								var key = ReadTableEntry( reader );
+								var val = ReadTableEntry( reader );
+								table.Set( key, val );
+							}
 							proto.constGC[i] = ValueSlot.Table( table );
 							break;
 						default:
@@ -126,10 +131,10 @@ namespace Miku.Lua
 				// skip debuginfo for now
 				reader.ReadBytes(debugSize);
 
-				protos.Enqueue(proto);
+				protos.Push(proto);
 			}
 
-			var result = protos.Dequeue();
+			var result = protos.Pop();
 			Assert.NotNull(result);
 			return result;
 		}

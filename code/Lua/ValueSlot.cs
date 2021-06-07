@@ -3,7 +3,7 @@
 namespace Miku.Lua
 {
 
-	using UserFunction = Func<ValueSlot[], ValueSlot[]?>;
+	using UserFunction = Func<ValueSlot[], Table, ValueSlot[]?>;
 
 	enum ValueKind
 	{

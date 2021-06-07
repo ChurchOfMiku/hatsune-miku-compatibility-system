@@ -190,12 +190,31 @@ namespace Miku.Lua
 							case OpCode.ISGE: skip = !(nA >= nD); break;
 							case OpCode.ISLE: skip = !(nA <= nD); break;
 							case OpCode.ISGT: skip = !(nA > nD); break;
-							case OpCode.ISEQV: skip = !(nA == nD); break;
-							case OpCode.ISNEV: skip = !(nA != nD); break;
+							case OpCode.ISEQV: skip = !(nA == nD); break; // TODO BAD
+							case OpCode.ISNEV: skip = !(nA != nD); break; // TODO BAD
 						}
 						if (skip) { pc++; }
 						break;
 					}
+				case OpCode.ISEQS:
+					{
+						var vB = StackGet( B );
+						var vC = Func.prototype.GetConstGC( C );
+						bool skip = !vB.Equals(vC);
+						if ( skip ) { pc++; }
+						break;
+					}
+				// ISEQS
+				case OpCode.ISNES:
+					{
+						var vB = StackGet( B );
+						var vC = Func.prototype.GetConstGC( C );
+						bool skip = vB.Equals( vC );
+						if ( skip ) { pc++; }
+						break;
+					}
+				// ISEQN
+				// ISNEN
 				// Move and Unary Ops
 				case OpCode.MOV:
 					{
@@ -291,6 +310,26 @@ namespace Miku.Lua
 						break;
 					}
 				// Upvalues and Function Init
+				case OpCode.UGET:
+					{
+						// top two bits are flags
+						var uv = Func.prototype.upVars[D];
+						// 0x8000 = local
+						// 0x4000 = immutable
+						if ((uv & 0x8000) == 0)
+						{
+							throw new Exception( "uv tree traversal" );
+						}
+						var var_index = uv & 0x3FFF;
+						throw new Exception( String.Format("upval {0:X}", var_index ) );
+						break;
+					}
+				case OpCode.UCLO:
+					{
+						Log.Warning( "Close Upvalue!" );
+						Jump( D );
+						break;
+					}
 				case OpCode.FNEW:
 					{
 						var new_proto = Func.prototype.GetConstGC(D).GetProtoFunction();
@@ -340,7 +379,13 @@ namespace Miku.Lua
 				// TGETB
 
 				// TSETV
-				// TSETS
+				case OpCode.TSETS:
+					{
+						var table = StackGet( B ).GetTable();
+						var str = Func.prototype.GetConstGC( C );
+						table.Set( str, StackGet( A ) );
+						break;
+					}
 				case OpCode.TSETB:
 					{
 						var table = StackGet( B ).GetTable();
@@ -378,7 +423,7 @@ namespace Miku.Lua
 							{
 								args[i] = ValueStack[arg_base - i];
 							}
-							var rets = user_func( args );
+							var rets = user_func( args, Func.env );
 							var nil = ValueSlot.Nil();
 
 							// return all
