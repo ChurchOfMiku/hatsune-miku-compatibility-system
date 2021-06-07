@@ -68,8 +68,8 @@ namespace Miku.Lua
 
 			Stopwatch sw = Stopwatch.StartNew();
 			exec.Run();
-			exec.LogState();
 			Log.Warning( $"TOOK: {sw.ElapsedMilliseconds}" );
+			exec.LogState();
 		}
 	}
 }
