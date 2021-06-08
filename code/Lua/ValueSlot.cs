@@ -50,6 +50,22 @@ namespace Miku.Lua
 			}
 		}
 
+		public static ValueSlot Prim(uint t)
+		{
+			if ( t == 1 )
+			{
+				return new ValueSlot() { kind = ValueKind.False };
+			}
+			else if ( t == 2 )
+			{
+				return new ValueSlot() { kind = ValueKind.True };
+			}
+			else
+			{
+				return ValueSlot.Nil();
+			}
+		}
+
 		public static ValueSlot Table( Table x )
 		{
 			return new ValueSlot() { kind = ValueKind.Table, reference = x };
@@ -78,6 +94,11 @@ namespace Miku.Lua
 		public bool IsFunction()
 		{
 			return kind == ValueKind.Function;
+		}
+
+		public bool IsTruthy()
+		{
+			return !(kind == ValueKind.Nil || kind == ValueKind.False);
 		}
 
 		public Table GetTable()

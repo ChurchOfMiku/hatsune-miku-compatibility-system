@@ -87,11 +87,18 @@ namespace Miku.Lua
 		{
 			var env = new Table();
 
-			/*var lib_bit = new Table();
+			var lib_bit = new Table();
 			env.Set( "bit", ValueSlot.Table( lib_bit ) );
+			lib_bit.Set( "band", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
+				int x = (int)args[0].GetNumber();
+				int y = (int)args[1].GetNumber();
+				return new ValueSlot[] { ValueSlot.Number(x & y) };
+			}));
 
-			var lib_string = new Table();
-			env.Set( "string", ValueSlot.Table( lib_string ) );*/
+			lib_bit.Set( "bnot", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
+				int x = (int)args[0].GetNumber();
+				return new ValueSlot[] { ValueSlot.Number( ~x ) };
+			}));
 
 			/*var table_lib = new Table();
 			env.Set( "table", ValueSlot.Table(table_lib) );

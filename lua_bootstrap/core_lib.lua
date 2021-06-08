@@ -1,6 +1,3 @@
-bit = {}
-bit.band = function(a,b,c) error("bit.band",a,b,c) end
-
 string = {}
 string.sub = function() error("string.sub") end
 string.byte = function() error("string.byte") end
@@ -9,11 +6,18 @@ string.char = function() error("string.char") end
 local ffi = {}
 ffi.typeof = function(x) return "typeof["..x.."]" end
 
+local module_cache = {}
+module_cache.ffi = ffi
+module_cache.bit = bit
+module_cache.jit = {version_num = 20100}
+
 require = function(name)
-    if name == "ffi" then
-        return ffi
+    if module_cache[name] then
+        return module_cache[name]
     end
-    return _MIKU_BOOTSTRAP_REQUIRE(name)
+    local mod = _MIKU_BOOTSTRAP_REQUIRE(name)
+    module_cache[name] = mod
+    return mod
 end
 
 --[[

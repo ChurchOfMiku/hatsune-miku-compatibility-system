@@ -56,6 +56,12 @@ namespace Miku.Lua
 			return Get( ValueSlot.String( key ) );
 		}
 
+		// Special case for integer keys: Try using the array section first.
+		public ValueSlot Get( int key )
+		{
+			return Get( ValueSlot.Number( key ) );
+		}
+
 		public Table CloneProto()
 		{
 			var result = new Table();

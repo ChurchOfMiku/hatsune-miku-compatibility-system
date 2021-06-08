@@ -56,6 +56,11 @@ namespace Miku.Lua
 					Value = val;
 				}
 			}
+
+			public override string ToString()
+			{
+				return "upval "+StackSlot+" "+Value;
+			}
 		}
 
 		private int pc = 0;
@@ -72,9 +77,9 @@ namespace Miku.Lua
 		public Executor( Function func, ValueSlot[] args )
 		{
 			AddFrame( func, 0, 0 );
-			for (int i=0;i<args.Length;i++ )
+			for (uint i=0;i<args.Length;i++ )
 			{
-				ValueStack[i] = args[i];
+				StackSet(i, args[i]);
 			}
 		}
 
@@ -184,12 +189,12 @@ namespace Miku.Lua
 		{
 			Log.Info( "======= STACK =======" );
 			int slot_i = 0;
-			foreach (var level in CallStack)
+			foreach (var level in CallStack.Reverse() )
 			{
 				var slot_count = level.Func.prototype.numSlots;
 				for (int j = 0; j < slot_count; j++ )
 				{
-					Log.Info( $"> {slot_count - j - 1}: {ValueStack[slot_i]}" );
+					Log.Info( $"({slot_i}) {slot_count - j - 1}: {ValueStack[slot_i]}" );
 					slot_i++;
 				}
 				Log.Info( "^^^--- " + level.Func.prototype.DebugName );
@@ -198,7 +203,7 @@ namespace Miku.Lua
 				var slot_count = Func.prototype.numSlots;
 				for ( int j = 0; j < slot_count; j++ )
 				{
-					Log.Info( $"> {slot_count - j - 1}: {ValueStack[slot_i]}" );
+					Log.Info( $"({slot_i}) {slot_count - j - 1}: {ValueStack[slot_i]}" );
 					slot_i++;
 				}
 				Log.Info( "^^^--- " + Func.prototype.DebugName );
@@ -266,6 +271,46 @@ namespace Miku.Lua
 						if ( skip ) { pc++; }
 						break;
 					}
+				case OpCode.ISNEP:
+					{
+						var vB = StackGet( B );
+						var vC = ValueSlot.Prim( C );
+						bool skip = vB.Equals( vC );
+						if ( skip ) { pc++; }
+						break;
+					}
+				// Test and Copy
+				case OpCode.ISTC:
+					{
+						var val = StackGet( D );
+						if (val.IsTruthy())
+						{
+							StackSet( A, val );
+						} else
+						{
+							pc++;
+						}
+						break;
+					}
+				case OpCode.ISFC:
+					{
+						var val = StackGet( D );
+						if ( !val.IsTruthy() )
+						{
+							StackSet( A, val );
+						}
+						else
+						{
+							pc++;
+						}
+						break;
+					}
+				case OpCode.ISF:
+					if ( StackGet( D ).IsTruthy() )
+					{
+						pc++;
+					}
+					break;
 				// ISEQN
 				// ISNEN
 				// Move and Unary Ops
@@ -350,7 +395,7 @@ namespace Miku.Lua
 						StackSet( A,  str );
 						break;
 					}
-				// KCDATA
+				// KCDATA: don't care
 				case OpCode.KSHORT:
 					{
 						var num = (short)D; // TODO signed?
@@ -365,18 +410,7 @@ namespace Miku.Lua
 					}
 				case OpCode.KPRI:
 					{
-						ValueSlot val;
-						if (D == 1)
-						{
-							val = ValueSlot.Bool(false);
-						} else if (D == 2)
-						{
-							val = ValueSlot.Bool(true);
-						} else
-						{
-							val = ValueSlot.Nil();
-						}
-						StackSet( A, val );
+						StackSet( A, ValueSlot.Prim(D) );
 						break;
 					}
 				case OpCode.KNIL:
@@ -403,12 +437,13 @@ namespace Miku.Lua
 				case OpCode.UCLO:
 					{
 						int upval_close_base = GetRealStackIndex( A );
-						for (int i= upval_close_base; i<StackTop;i++)
+						int frame_top = GetRealStackIndex((uint)(Func.prototype.numSlots - 1));
+						for (int i= upval_close_base; i>= frame_top; i--)
 						{
 							UpValueBox uv;
 							if (OpenUpValues.TryGetValue( i, out uv ))
 							{
-								uv.Value = ValueStack[uv.StackSlot.Value.Item2];
+								uv.Value = ValueStack[i];
 								OpenUpValues.Remove( i );
 								uv.StackSlot = null;
 							}
@@ -488,9 +523,18 @@ namespace Miku.Lua
 						StackSet( A, table.Get( str ) );
 						break;
 					}
-				// TGETB
-
-				// TSETV
+				case OpCode.TGETB:
+					{
+						var table = StackGet( B ).GetTable();
+						StackSet( A, table.Get( (int)C ) );
+						break;
+					}
+				case OpCode.TSETV:
+					{
+						var table = StackGet( B ).GetTable();
+						table.Set( StackGet(C), StackGet( A ) );
+						break;
+					}
 				case OpCode.TSETS:
 					{
 						var table = StackGet( B ).GetTable();
@@ -521,13 +565,33 @@ namespace Miku.Lua
 						{
 							if (OP == OpCode.CALLT)
 							{
-								throw new Exception( "todo tailcall for lua funcs" );
-							}
-							AddFrame( call_func.GetFunction(), ret_base, ret_count );
+								// Save arguments.
+								var args = new ValueSlot[arg_count];
+								for ( int i = 0; i < arg_count; i++ )
+								{
+									args[i] = ValueStack[arg_base - i];
+								}
 
-							for (int i=0;i<arg_count;i++ )
+								// Clear current function and reset stack.
+								StackTop -= Func.prototype.numSlots;
+								Func = null;
+
+								AddFrame( call_func.GetFunction(), 0, 0 );
+
+								for ( int i = 0; i < arg_count; i++ )
+								{
+									StackSet( (uint)i, args[i] );
+								}
+							} else
 							{
-								StackSet( (uint)i, ValueStack[arg_base - i] );
+								AddFrame( call_func.GetFunction(), ret_base, ret_count );
+
+								Log.Info( "CALL " + Func.prototype.DebugName );
+								for (int i=0;i<arg_count;i++ )
+								{
+									var arg_val = ValueStack[arg_base - i];
+									StackSet( (uint)i, arg_val );
+								}
 							}
 
 							return; // DO NOT INCREMENT PC
@@ -580,8 +644,14 @@ namespace Miku.Lua
 					{
 						int ret_base = GetRealStackIndex( A );
 						int ret_count = (int)D + MultiRes;
-
 						PopFrame(ret_base, ret_count);
+						break;
+					}
+				case OpCode.RET:
+					{
+						int ret_base = GetRealStackIndex( A );
+						int ret_count = (int)D - 1;
+						PopFrame( ret_base, ret_count );
 						break;
 					}
 				case OpCode.RET0:
