@@ -39,6 +39,17 @@ namespace Miku.Lua
 			return new ValueSlot() { kind = ValueKind.Number, number = x };
 		}
 
+		public static ValueSlot Bool( bool x )
+		{
+			if (x)
+			{
+				return new ValueSlot() { kind = ValueKind.True };
+			} else
+			{
+				return new ValueSlot() { kind = ValueKind.False };
+			}
+		}
+
 		public static ValueSlot Table( Table x )
 		{
 			return new ValueSlot() { kind = ValueKind.Table, reference = x };
@@ -128,6 +139,8 @@ namespace Miku.Lua
 			switch (this.kind)
 			{
 				case ValueKind.Nil:
+				case ValueKind.True:
+				case ValueKind.False:
 				case ValueKind.Number:
 				case ValueKind.String:
 					return this;

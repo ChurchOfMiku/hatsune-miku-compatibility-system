@@ -24,6 +24,7 @@ namespace Miku.Lua
 
 		private static readonly byte[] DUMP_HEADER = new byte[] { 27, 76, 74 };
 		private static readonly byte   DUMP_VERSION = 2;
+		private static readonly byte   DUMP_FLAGS = 0; // chunk must include debug info and be the correct endian-ness
 
 		public static ProtoFunction Read(byte[] dump)
 		{
@@ -32,8 +33,7 @@ namespace Miku.Lua
 
 			Assert.True( Enumerable.SequenceEqual( reader.ReadBytes(3), DUMP_HEADER ) );
 			Assert.True( reader.ReadByte() == DUMP_VERSION );
-
-			var chunkFlags = reader.Read7BitEncodedInt64();
+			Assert.True( reader.Read7BitEncodedInt64() == DUMP_FLAGS );
 			var chunkName = reader.ReadString();
 
 			var protos = new Stack<ProtoFunction>();
@@ -52,6 +52,8 @@ namespace Miku.Lua
 				var debugSize = reader.Read7BitEncodedInt();
 				var debugFirstLine = reader.Read7BitEncodedInt();
 				var debugLineCount = reader.Read7BitEncodedInt();
+
+				proto.DebugName = chunkName + ":" + debugFirstLine;
 
 				for (int i=0;i<proto.code.Length;i++)
 				{
@@ -146,6 +148,10 @@ namespace Miku.Lua
 			{
 				case 0:
 					return ValueSlot.Nil();
+				case 1:
+					return ValueSlot.Bool(false);
+				case 2:
+					return ValueSlot.Bool(true);
 				case 3:
 					return ValueSlot.Number(reader.Read7BitEncodedInt());
 				default:

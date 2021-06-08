@@ -50,6 +50,12 @@ namespace Miku.Lua
 			return result;
 		}
 
+		// For convenience.
+		public ValueSlot Get( string key )
+		{
+			return Get( ValueSlot.String( key ) );
+		}
+
 		public Table CloneProto()
 		{
 			var result = new Table();

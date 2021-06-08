@@ -10,6 +10,8 @@
 		public ValueSlot[] constGC;
 		public double[] constNum;
 
+		public string DebugName;
+
 		public ValueSlot GetConstGC(uint index)
 		{
 			return this.constGC[this.constGC.Length - 1 - index];

@@ -50,7 +50,7 @@ namespace Miku.Lua
 			throw new Exception( builder.ToString() );
 		}
 
-		public static void BootstrapRequire(Table env, string name)
+		public static ValueSlot BootstrapRequire(Table env, string name)
 		{
 			Log.Info("Require: "+name);
 			string filename;
@@ -71,8 +71,16 @@ namespace Miku.Lua
 
 			var proto = Dump.Read( bytes.ToArray() );
 			var func = new Function( env, proto, new Executor.UpValueBox[0] );
-			var exec = new Executor( func );
-			exec.Run();
+			var res = func.Call();
+			if (res.Length != 0)
+			{
+				if ( res.Length != 1)
+				{
+					throw new Exception( "Module returned multiple values." );
+				}
+				return res[0];
+			}
+			return ValueSlot.Nil();
 		}
 
 		public static void Run()
@@ -98,13 +106,17 @@ namespace Miku.Lua
 
 			env.Set( "_MIKU_BOOTSTRAP_REQUIRE", ValueSlot.UserFunction( (ValueSlot[] args, Table env) => {
 				string mod_name = args[0].GetString();
-				BootstrapRequire( env, mod_name );
-				return null;
+				var res = BootstrapRequire( env, mod_name );
+				return new ValueSlot[] {res};
 			}));
 
 			Stopwatch sw = Stopwatch.StartNew();
+
 			BootstrapRequire( env, "miku.core_lib" );
-			BootstrapRequire( env, "lang.compile" );
+			var compile = BootstrapRequire( env, "lang.compile" ).GetTable().Get( "string" ).GetFunction();
+
+			compile.Call( new ValueSlot[] { ValueSlot.String("print('lol')") } );
+
 			Log.Warning( $"TOOK: {sw.ElapsedMilliseconds}" );
 		}
 	}

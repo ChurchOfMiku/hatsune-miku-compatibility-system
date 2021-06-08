@@ -1,4 +1,6 @@
-﻿namespace Miku.Lua
+﻿using System;
+
+namespace Miku.Lua
 {
 	class Function
 	{
@@ -12,6 +14,17 @@
 			this.env = env;
 			this.prototype = prototype;
 			UpValues = upvals;
+		}
+
+		public ValueSlot[] Call(ValueSlot[]? args = null)
+		{
+			var exec = new Executor( this, args ?? new ValueSlot[0] );
+			exec.Run();
+			if ( exec.Results == null )
+			{
+				throw new Exception( "Executor did not return?" );
+			}
+			return exec.Results;
 		}
 	}
 }

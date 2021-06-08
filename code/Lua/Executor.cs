@@ -7,6 +7,15 @@ using Sandbox;
 
 namespace Miku.Lua
 {
+	class SilentExecException : Exception
+	{
+		private Exception Wrapped;
+		public SilentExecException(Exception wrapped)
+		{
+			Wrapped = wrapped;
+		}
+		public override string Message => Wrapped.Message;
+	}
 	class Executor
 	{
 		struct FrameInfo
@@ -34,6 +43,19 @@ namespace Miku.Lua
 					return Value;
 				}
 			}
+
+			public void Set(ValueSlot val)
+			{
+				if ( StackSlot != null )
+				{
+					var ss = StackSlot.Value;
+					ss.Item1.ValueStack[ss.Item2] = val;
+				}
+				else
+				{
+					Value = val;
+				}
+			}
 		}
 
 		private int pc = 0;
@@ -45,9 +67,15 @@ namespace Miku.Lua
 		private Stack<FrameInfo> CallStack = new Stack<FrameInfo>();
 		private SortedDictionary<int, UpValueBox> OpenUpValues = new SortedDictionary<int, UpValueBox>();
 
-		public Executor( Function func )
+		public ValueSlot[]? Results;
+
+		public Executor( Function func, ValueSlot[] args )
 		{
 			AddFrame( func, 0, 0 );
+			for (int i=0;i<args.Length;i++ )
+			{
+				ValueStack[i] = args[i];
+			}
 		}
 
 		private void AddFrame( Function new_func, int ret_base, int ret_count )
@@ -78,9 +106,10 @@ namespace Miku.Lua
 		{
 			if (CallStack.Count == 0)
 			{
-				if ( ret_slots_available != 0)
+				Results = new ValueSlot[ret_slots_available];
+				for ( int i = 0; i < ret_slots_available; i++ )
 				{
-					throw new Exception( "return values to C#" );
+					Results[i] = ValueStack[ret_source_base - i];
 				}
 			} else
 			{
@@ -138,8 +167,11 @@ namespace Miku.Lua
 					Step();
 				} catch (Exception e)
 				{
-					LogState();
-					throw;
+					if (!(e is SilentExecException))
+					{
+						LogState();
+					}
+					throw new SilentExecException(e);
 				}
 				safety++;
 				if (safety >= LIMIT )
@@ -160,7 +192,7 @@ namespace Miku.Lua
 					Log.Info( $"> {slot_count - j - 1}: {ValueStack[slot_i]}" );
 					slot_i++;
 				}
-				Log.Info( "----------" );
+				Log.Info( "^^^--- " + level.Func.prototype.DebugName );
 			}
 			{
 				var slot_count = Func.prototype.numSlots;
@@ -169,6 +201,7 @@ namespace Miku.Lua
 					Log.Info( $"> {slot_count - j - 1}: {ValueStack[slot_i]}" );
 					slot_i++;
 				}
+				Log.Info( "^^^--- " + Func.prototype.DebugName );
 			}
 			Log.Info( "======= CODE =======" );
 			for (int i=0;i<Func.prototype.code.Length;i++ )
@@ -317,6 +350,7 @@ namespace Miku.Lua
 						StackSet( A,  str );
 						break;
 					}
+				// KCDATA
 				case OpCode.KSHORT:
 					{
 						var num = (short)D; // TODO signed?
@@ -329,11 +363,41 @@ namespace Miku.Lua
 						StackSet( A, ValueSlot.Number( num ) );
 						break;
 					}
+				case OpCode.KPRI:
+					{
+						ValueSlot val;
+						if (D == 1)
+						{
+							val = ValueSlot.Bool(false);
+						} else if (D == 2)
+						{
+							val = ValueSlot.Bool(true);
+						} else
+						{
+							val = ValueSlot.Nil();
+						}
+						StackSet( A, val );
+						break;
+					}
+				case OpCode.KNIL:
+					{
+						var nil = ValueSlot.Nil();
+						for (uint i=A;i<=D;i++)
+						{
+							StackSet( i, nil );
+						}
+						break;
+					}
 				// Upvalues and Function Init
 				case OpCode.UGET:
 					{
 						var val = Func.UpValues[D].Get();
 						StackSet( A, val );
+						break;
+					}
+				case OpCode.USETV:
+					{
+						Func.UpValues[A].Set(StackGet(D));
 						break;
 					}
 				case OpCode.UCLO:
@@ -347,7 +411,6 @@ namespace Miku.Lua
 								uv.Value = ValueStack[uv.StackSlot.Value.Item2];
 								OpenUpValues.Remove( i );
 								uv.StackSlot = null;
-								Log.Warning( $"Close Upvalue: {i} {uv.Value}" );
 							}
 						}
 						Jump( D );
@@ -362,16 +425,25 @@ namespace Miku.Lua
 							var uv_code = new_proto.UpValues[i];
 							if ( (uv_code & 0x8000) == 0 )
 							{
-								throw new Exception( "uv tree traversal" );
-							}
-							var uv_slot = uv_code & 0x3FFF;
-							int real_stack_index = GetRealStackIndex( (uint)uv_slot );
-							var uv_box = new UpValueBox()
+								var uv_slot = uv_code & 0x3FFF;
+								var uv_box = Func.UpValues[uv_slot];
+								Assert.NotNull(uv_box);
+								upvals[i] = uv_box;
+							} else
 							{
-								StackSlot = (this, real_stack_index)
-							};
-							upvals[i] = uv_box;
-							OpenUpValues.Add( real_stack_index , uv_box );
+								var uv_slot = uv_code & 0x3FFF;
+								int real_stack_index = GetRealStackIndex( (uint)uv_slot );
+								UpValueBox uv_box;
+								if (!OpenUpValues.TryGetValue( real_stack_index, out uv_box) )
+								{
+									uv_box = new UpValueBox()
+									{
+										StackSlot = (this, real_stack_index)
+									};
+									OpenUpValues.Add( real_stack_index, uv_box );
+								}
+								upvals[i] = uv_box;
+							}
 						}
 						var new_func = new Function( Func.env, new_proto, upvals );
 						StackSet( A, ValueSlot.Function( new_func ) );
@@ -434,6 +506,7 @@ namespace Miku.Lua
 					}
 				// Calls and Iterators
 				case OpCode.CALL:
+				case OpCode.CALLT:
 					{
 						int call_base = GetRealStackIndex(A);
 						
@@ -446,6 +519,10 @@ namespace Miku.Lua
 						var call_func = ValueStack[call_base]; // TODO, meta calls
 						if (call_func.IsFunction())
 						{
+							if (OP == OpCode.CALLT)
+							{
+								throw new Exception( "todo tailcall for lua funcs" );
+							}
 							AddFrame( call_func.GetFunction(), ret_base, ret_count );
 
 							for (int i=0;i<arg_count;i++ )
@@ -466,6 +543,12 @@ namespace Miku.Lua
 							var rets = user_func( args, Func.env );
 							var nil = ValueSlot.Nil();
 
+							// tail calls return everything
+							if (OP == OpCode.CALLT)
+							{
+								ret_count = -1;
+							}
+
 							// return all
 							if (ret_count == -1 && rets != null)
 							{
@@ -484,6 +567,10 @@ namespace Miku.Lua
 								}
 							}
 
+							if (OP == OpCode.CALLT)
+							{
+								PopFrame( ret_base, ret_count );
+							}
 							break;
 						}
 					}
@@ -500,6 +587,12 @@ namespace Miku.Lua
 				case OpCode.RET0:
 					{
 						PopFrame( 0, 0 );
+						break;
+					}
+				case OpCode.RET1:
+					{
+						int ret_base = GetRealStackIndex( A );
+						PopFrame( ret_base, 1 );
 						break;
 					}
 				// Loops and Branches
