@@ -297,7 +297,6 @@ namespace Miku.Lua
 						var vA = StackGet( A );
 						var vD = Func.prototype.GetConstGC( D );
 						bool skip = vA.Equals( vD );
-						Log.Warning( $">> {vA} {vD} eq = {skip}" );
 						if ( skip ) { pc++; }
 						break;
 					}

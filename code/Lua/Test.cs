@@ -174,6 +174,19 @@ namespace Miku.Lua
 				throw new Exception( "lol" );
 			} ) );
 
+			env.Set( "type", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
+				string result;
+				switch (args[0].Kind)
+				{
+					case ValueKind.String:
+						result = "string";
+						break;
+					default:
+						throw new Exception( "typeof " + args[0].Kind );
+				}
+				return new ValueSlot[] { ValueSlot.String(result) };
+			} ));
+
 			env.Set( "_MIKU_BOOTSTRAP_REQUIRE", ValueSlot.UserFunction( (ValueSlot[] args, Table env) => {
 				string mod_name = args[0].GetString();
 				var res = BootstrapRequire( env, mod_name );

@@ -1,6 +1,9 @@
 local ffi = {}
 ffi.typeof = function(x) return "typeof("..x..")" end
 
+string.byte = function() error("string.byte") end
+string.char = function() error("string.char") end
+
 local module_cache = {}
 module_cache.ffi = ffi
 module_cache.bit = bit
