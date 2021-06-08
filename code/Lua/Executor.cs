@@ -24,6 +24,7 @@ namespace Miku.Lua
 			public int PC;
 			public int RetBase;
 			public int RetCount;
+			public ValueSlot[]? VarArgs;
 		}
 
 		public class UpValueBox
@@ -72,6 +73,8 @@ namespace Miku.Lua
 		private Stack<FrameInfo> CallStack = new Stack<FrameInfo>();
 		private SortedDictionary<int, UpValueBox> OpenUpValues = new SortedDictionary<int, UpValueBox>();
 
+		private ValueSlot[]? VarArgs;
+
 		public ValueSlot[]? Results;
 
 		public Executor( Function func, ValueSlot[] args )
@@ -81,6 +84,7 @@ namespace Miku.Lua
 			{
 				StackSet(i, args[i]);
 			}
+			StoreVarArgs( args.Length );
 		}
 
 		private void AddFrame( Function new_func, int ret_base, int ret_count )
@@ -91,6 +95,7 @@ namespace Miku.Lua
 				CallStack.Push( new FrameInfo{
 					Func = Func,
 					PC = pc,
+					VarArgs = VarArgs,
 					RetBase = ret_base,
 					RetCount = ret_count
 				} );
@@ -143,6 +148,30 @@ namespace Miku.Lua
 				StackTop -= Func.prototype.numSlots;
 				Func = frame_info.Func;
 				pc = frame_info.PC;
+				VarArgs = frame_info.VarArgs;
+			}
+		}
+
+		private void StoreVarArgs(int args_in)
+		{
+			if (Func.prototype.IsVarArg())
+			{
+				if ( args_in > Func.prototype.numArgs )
+				{
+					uint varg_base = (uint)Func.prototype.numArgs;
+					int varg_count = args_in - Func.prototype.numArgs;
+					VarArgs = new ValueSlot[varg_count];
+					for (uint i=0;i<varg_count;i++ )
+					{
+						VarArgs[i] = StackGet(varg_base + i);
+					}
+				} else
+				{
+					VarArgs = new ValueSlot[0];
+				}
+			} else
+			{
+				VarArgs = null;
 			}
 		}
 
@@ -305,6 +334,12 @@ namespace Miku.Lua
 						}
 						break;
 					}
+				case OpCode.IST:
+					if ( !StackGet( D ).IsTruthy() )
+					{
+						pc++;
+					}
+					break;
 				case OpCode.ISF:
 					if ( StackGet( D ).IsTruthy() )
 					{
@@ -321,9 +356,7 @@ namespace Miku.Lua
 					}
 				case OpCode.LEN:
 					{
-						var table = StackGet( D ).GetTable();
-						int len = table.GetLength();
-						StackSet( A, ValueSlot.Number(len) );
+						StackSet( A, ValueOperations.Len( StackGet( D ) ) );
 						break;
 					}
 				// Binary Ops
@@ -550,12 +583,21 @@ namespace Miku.Lua
 					}
 				// Calls and Iterators
 				case OpCode.CALL:
+				case OpCode.CALLM:
 				case OpCode.CALLT:
+				case OpCode.CALLMT:
 					{
+						bool is_tailcall = (OP == OpCode.CALLT || OP == OpCode.CALLMT);
+						bool is_multires = (OP == OpCode.CALLM || OP == OpCode.CALLMT);
+
 						int call_base = GetRealStackIndex(A);
 						
 						int arg_base = call_base - 1;
 						int arg_count = (int)C - 1;
+						if (is_multires)
+						{
+							arg_count += 1 + MultiRes;
+						}
 
 						int ret_base = call_base;
 						int ret_count = (int)B - 1;
@@ -563,7 +605,7 @@ namespace Miku.Lua
 						var call_func = ValueStack[call_base]; // TODO, meta calls
 						if (call_func.IsFunction())
 						{
-							if (OP == OpCode.CALLT)
+							if ( is_tailcall )
 							{
 								// Save arguments.
 								var args = new ValueSlot[arg_count];
@@ -582,6 +624,8 @@ namespace Miku.Lua
 								{
 									StackSet( (uint)i, args[i] );
 								}
+
+								StoreVarArgs( arg_count );
 							} else
 							{
 								AddFrame( call_func.GetFunction(), ret_base, ret_count );
@@ -592,6 +636,8 @@ namespace Miku.Lua
 									var arg_val = ValueStack[arg_base - i];
 									StackSet( (uint)i, arg_val );
 								}
+
+								StoreVarArgs( arg_count );
 							}
 
 							return; // DO NOT INCREMENT PC
@@ -608,7 +654,7 @@ namespace Miku.Lua
 							var nil = ValueSlot.Nil();
 
 							// tail calls return everything
-							if (OP == OpCode.CALLT)
+							if ( is_tailcall )
 							{
 								ret_count = -1;
 							}
@@ -631,14 +677,43 @@ namespace Miku.Lua
 								}
 							}
 
-							if (OP == OpCode.CALLT)
+							if (is_tailcall)
 							{
 								PopFrame( ret_base, ret_count );
 							}
 							break;
 						}
 					}
+				case OpCode.VARG:
+					{
+						if (VarArgs == null)
+						{
+							throw new Exception( "Attempt to use varargs in non-vararg function." );
+						}
 
+						// Same as call result handling:
+						int ret_base = GetRealStackIndex( A );
+						int ret_count = (int)B - 1;
+						if ( ret_count == -1 )
+						{
+							ret_count = VarArgs.Length;
+							MultiRes = ret_count;
+						}
+
+						var nil = ValueSlot.Nil();
+						for ( int i = 0; i < ret_count; i++ )
+						{
+							if ( i < VarArgs.Length )
+							{
+								ValueStack[ret_base - i] = VarArgs[i];
+							}
+							else
+							{
+								ValueStack[ret_base - i] = nil;
+							}
+						}
+						break;
+					}
 				// Returns
 				case OpCode.RETM:
 					{

@@ -1,10 +1,5 @@
-string = {}
-string.sub = function() error("string.sub") end
-string.byte = function() error("string.byte") end
-string.char = function() error("string.char") end
-
 local ffi = {}
-ffi.typeof = function(x) return "typeof["..x.."]" end
+ffi.typeof = function(x) return "typeof("..x..")" end
 
 local module_cache = {}
 module_cache.ffi = ffi

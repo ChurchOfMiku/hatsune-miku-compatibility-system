@@ -21,5 +21,10 @@
 		{
 			return this.constNum[index];
 		}
+
+		public bool IsVarArg()
+		{
+			return (flags & 2) != 0;
+		}
 	}
 }

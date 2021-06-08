@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System;
 
 namespace Miku.Lua
 {
@@ -7,6 +8,8 @@ namespace Miku.Lua
 		//private List<ValueSlot> array = new List<ValueSlot>();
 		private int next_int_slot = 1;
 		private Dictionary<ValueSlot, ValueSlot> dict = new Dictionary<ValueSlot, ValueSlot>();
+
+		public Table? MetaTable = null;
 
 		public int GetLength()
 		{
@@ -42,9 +45,16 @@ namespace Miku.Lua
 
 		public ValueSlot Get( ValueSlot key )
 		{
+			// TODO: Move "metaget" into it's own file.
 			ValueSlot result;
 			if (!dict.TryGetValue( key, out result ))
 			{
+				if (MetaTable != null)
+				{
+					var index = MetaTable.RawGet( "__index" );
+					var index_tab = index.GetTable(); // index metamethod NYI
+					return index_tab.Get(key); // use metaget here!
+				}
 				result = ValueSlot.Nil();
 			}
 			return result;
@@ -54,6 +64,16 @@ namespace Miku.Lua
 		public ValueSlot Get( string key )
 		{
 			return Get( ValueSlot.String( key ) );
+		}
+
+		public ValueSlot RawGet( string key )
+		{
+			ValueSlot result;
+			if ( !dict.TryGetValue( ValueSlot.String( key ), out result ) )
+			{
+				result = ValueSlot.Nil();
+			}
+			return result;
 		}
 
 		// Special case for integer keys: Try using the array section first.
@@ -74,6 +94,21 @@ namespace Miku.Lua
 				result.Set( pair.Key.CloneCheck(), pair.Value.CloneCheck() );
 			}
 			return result;
+		}
+
+		public void CheckMetaTableMembers()
+		{
+			foreach (var key in dict)
+			{
+				string str = key.Key.GetString();
+				switch (str)
+				{
+					case "__index":
+						break;
+					default:
+						throw new Exception("NYI meta member = "+str);
+				}
+			}
 		}
 
 		public void Log()

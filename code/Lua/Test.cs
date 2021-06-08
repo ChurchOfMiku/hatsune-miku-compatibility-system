@@ -8,6 +8,13 @@ using Sandbox;
 
 namespace Miku.Lua
 {
+	class LuaException : Exception
+	{
+		public LuaException(string msg) : base(msg)
+		{
+
+		}
+	}
 	class Test
 	{
 		private static ValueSlot[]? TableInsert( ValueSlot[] args )
@@ -25,6 +32,18 @@ namespace Miku.Lua
 			return new ValueSlot[] { ValueSlot.Number( result ) };
 		}
 
+		private static string Concat( ValueSlot[] args )
+		{
+			var builder = new StringBuilder();
+			foreach ( var arg in args )
+			{
+				// incompatible: glua fails to concat nil, possibly others for whatever reason
+				builder.Append( arg.ToString() );
+				builder.Append( "\t" );
+			}
+			return builder.ToString();
+		}
+
 		private static ValueSlot[]? Print( ValueSlot[] args, Table env )
 		{
 			var builder = new StringBuilder("LUA: ");
@@ -40,14 +59,7 @@ namespace Miku.Lua
 
 		private static ValueSlot[]? Error( ValueSlot[] args, Table env )
 		{
-			var builder = new StringBuilder( "LUA: " );
-			foreach ( var arg in args )
-			{
-				// incompatible: glua fails to concat nil, possibly others for whatever reason
-				builder.Append( arg.ToString() );
-				builder.Append( "\t" );
-			}
-			throw new Exception( builder.ToString() );
+			throw new LuaException( args[0].ToString() );
 		}
 
 		public static ValueSlot BootstrapRequire(Table env, string name)
@@ -100,6 +112,39 @@ namespace Miku.Lua
 				return new ValueSlot[] { ValueSlot.Number( ~x ) };
 			}));
 
+			var string_lib = new Table();
+			env.Set( "string", ValueSlot.Table( string_lib ) );
+
+			string_lib.Set( "sub", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
+				var str = args[0].GetString();
+				int start = (int)args[1].GetNumber() - 1;
+				int length = str.Length;
+				if (args.Length > 2)
+				{
+					length = (int)args[2].GetNumber() - start;
+				}
+				length = Math.Max( length, 0 );
+				length = Math.Min(length, str.Length - start);
+				return new ValueSlot[] { ValueSlot.String(str.Substring(start,length)) };
+			}));
+
+			string_lib.Set( "match", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
+				var str = args[0].GetString();
+				var pattern = args[1].GetString();
+				bool result = false;
+				switch ( pattern )
+				{
+					case "^TK_": result = str.StartsWith( "TK_" ); break;
+					default: throw new Exception( "match " + pattern );
+				}
+				return new ValueSlot[] { ValueSlot.Bool( result ) };
+			}));
+
+			string_lib.Set( "format", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
+				string joined = Concat( args );
+				return new ValueSlot[] { ValueSlot.String( "["+joined+"]" ) };
+			}));
+
 			/*var table_lib = new Table();
 			env.Set( "table", ValueSlot.Table(table_lib) );
 			table_lib.Set( "insert", ValueSlot.UserFunction( TableInsert ) );
@@ -110,6 +155,25 @@ namespace Miku.Lua
 
 			env.Set( "print", ValueSlot.UserFunction( Print ) );
 			env.Set( "error", ValueSlot.UserFunction( Error ) );
+
+			env.Set( "setmetatable", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
+				var table = args[0].GetTable();
+				var metatable = args[1].GetTable();
+				metatable.CheckMetaTableMembers();
+				table.MetaTable = metatable;
+				return new ValueSlot[] { ValueSlot.Table( table ) };
+			} ));
+
+			env.Set( "pcall", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
+				var func = args[0].GetFunction(); // assume this is a lua function
+				var func_args = new ValueSlot[args.Length - 1];
+				for (int i=0;i<func_args.Length;i++ )
+				{
+					func_args[i] = args[i + 1];
+				}
+				func.Call( func_args );
+				throw new Exception( "lol" );
+			} ) );
 
 			env.Set( "_MIKU_BOOTSTRAP_REQUIRE", ValueSlot.UserFunction( (ValueSlot[] args, Table env) => {
 				string mod_name = args[0].GetString();
@@ -122,7 +186,7 @@ namespace Miku.Lua
 			BootstrapRequire( env, "miku.core_lib" );
 			var compile = BootstrapRequire( env, "lang.compile" ).GetTable().Get( "string" ).GetFunction();
 
-			compile.Call( new ValueSlot[] { ValueSlot.String("print('lol')") } );
+			compile.Call( new ValueSlot[] { ValueSlot.String("print('lol') print('x')") } );
 
 			Log.Warning( $"TOOK: {sw.ElapsedMilliseconds}" );
 		}
