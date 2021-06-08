@@ -630,7 +630,6 @@ namespace Miku.Lua
 							{
 								AddFrame( call_func.GetFunction(), ret_base, ret_count );
 
-								Log.Info( "CALL " + Func.prototype.DebugName );
 								for (int i=0;i<arg_count;i++ )
 								{
 									var arg_val = ValueStack[arg_base - i];

@@ -64,7 +64,6 @@ namespace Miku.Lua
 
 		public static ValueSlot BootstrapRequire(Table env, string name)
 		{
-			Log.Info("Require: "+name);
 			string filename;
 			if ( name == "core" )
 			{
@@ -183,7 +182,7 @@ namespace Miku.Lua
 
 			Stopwatch sw = Stopwatch.StartNew();
 
-			BootstrapRequire( env, "miku.core_lib" );
+			BootstrapRequire( env, "core" );
 			var compile = BootstrapRequire( env, "lang.compile" ).GetTable().Get( "string" ).GetFunction();
 
 			compile.Call( new ValueSlot[] { ValueSlot.String("print('lol') print('x')") } );
