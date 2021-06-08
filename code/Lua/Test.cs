@@ -66,14 +66,14 @@ namespace Miku.Lua
 		{
 			Log.Info("Require: "+name);
 			string filename;
-			if ( name == "miku.core_lib" )
+			if ( name == "core" )
 			{
-				filename = "core_lib";
+				filename = "core";
 			}
 			else if ( name.StartsWith( "lang." ) )
 			{
 				var mod_name = name.Substring( 5 );
-				filename = $"front_end/{mod_name}";
+				filename = $"lang/{mod_name}";
 			} else
 			{
 				throw new Exception( "can't require: " + name );
