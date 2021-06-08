@@ -285,26 +285,27 @@ namespace Miku.Lua
 					}
 				case OpCode.ISEQS:
 					{
-						var vB = StackGet( B );
-						var vC = Func.prototype.GetConstGC( C );
-						bool skip = !vB.Equals(vC);
+						var vA = StackGet( A );
+						var vD = Func.prototype.GetConstGC( D );
+						bool skip = !vA.Equals(vD);
 						if ( skip ) { pc++; }
 						break;
 					}
 				// ISEQS
 				case OpCode.ISNES:
 					{
-						var vB = StackGet( B );
-						var vC = Func.prototype.GetConstGC( C );
-						bool skip = vB.Equals( vC );
+						var vA = StackGet( A );
+						var vD = Func.prototype.GetConstGC( D );
+						bool skip = vA.Equals( vD );
+						Log.Warning( $">> {vA} {vD} eq = {skip}" );
 						if ( skip ) { pc++; }
 						break;
 					}
 				case OpCode.ISNEP:
 					{
-						var vB = StackGet( B );
-						var vC = ValueSlot.Prim( C );
-						bool skip = vB.Equals( vC );
+						var vA = StackGet( A );
+						var vD = ValueSlot.Prim( D );
+						bool skip = vA.Equals( vD );
 						if ( skip ) { pc++; }
 						break;
 					}
