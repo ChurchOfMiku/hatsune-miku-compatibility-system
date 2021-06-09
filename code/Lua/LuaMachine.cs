@@ -15,7 +15,7 @@ namespace Miku.Lua
 
 		}
 	}
-	class Test
+	class LuaMachine
 	{
 		private static ValueSlot[]? TableInsert( ValueSlot[] args, Table env )
 		{
@@ -97,7 +97,7 @@ namespace Miku.Lua
 			return ValueSlot.Nil();
 		}
 
-		public static void Run()
+		public LuaMachine()
 		{
 			var env = new Table();
 
@@ -147,7 +147,6 @@ namespace Miku.Lua
 					{
 						throw new Exception( "string.byte got non-byte result, this could be a problem" );
 					}
-					Log.Warning( "byte " + str[index] + " " + result );
 					return new ValueSlot[] { ValueSlot.Number( result ) };
 				}
 			}));
@@ -158,7 +157,14 @@ namespace Miku.Lua
 				int length = str.Length;
 				if (args.Length > 2)
 				{
-					length = (int)args[2].GetNumber() - start;
+					int arg2 = (int)args[2].GetNumber();
+					if (arg2 >= 0)
+					{
+						length = arg2 - start;
+					} else
+					{
+						length = (str.Length + arg2 + 1) - start;
+					}
 				}
 				length = Math.Max( length, 0 );
 				length = Math.Min(length, str.Length - start);
@@ -255,7 +261,28 @@ namespace Miku.Lua
 			BootstrapRequire( env, "core" );
 			var compile = BootstrapRequire( env, "lang.compile" ).GetTable().Get( "string" ).GetFunction();
 
-			compile.Call( new ValueSlot[] { ValueSlot.String("print('lol') print('x')") } );
+			var results = compile.Call( new ValueSlot[] { ValueSlot.String("print('lol') print('x')") } );
+			if (results[0].Kind == ValueKind.True)
+			{
+				var dump = results[1].GetTable();
+				byte[] dump_bytes = new byte[dump.GetLength()];
+				for (int i=0;i< dump_bytes.Length; i++ )
+				{
+					int n = (int)dump.Get( i + 1 ).GetNumber();
+					if (n > 255 || n < 0)
+					{
+						throw new Exception( "dump contained non-byte!" );
+					}
+					dump_bytes[i] = (byte)n;
+					//Log.Info( $"{i}: {n}" );
+				}
+				var new_proto = Dump.Read( dump_bytes );
+				var new_func = new Function( env, new_proto, new Executor.UpValueBox[0] );
+				new_func.Call();
+			} else
+			{
+				throw new Exception( "compile failed" );
+			}
 
 			Log.Warning( $"TOOK: {sw.ElapsedMilliseconds}" );
 		}

@@ -324,7 +324,7 @@ namespace Miku.Lua
 				case OpCode.ISEQN:
 					{
 						var vA = StackGet( A );
-						var vD = Func.prototype.GetConstNum( D );
+						var vD = ValueSlot.Number( Func.prototype.GetConstNum( D ) );
 						bool skip = !vA.Equals( vD );
 						if ( skip ) { pc++; }
 						break;
@@ -332,7 +332,7 @@ namespace Miku.Lua
 				case OpCode.ISNEN:
 					{
 						var vA = StackGet( A );
-						var vD = Func.prototype.GetConstNum( D );
+						var vD = ValueSlot.Number( Func.prototype.GetConstNum( D ) );
 						bool skip = vA.Equals( vD );
 						if ( skip ) { pc++; }
 						break;
@@ -402,7 +402,7 @@ namespace Miku.Lua
 				case OpCode.UNM:
 					{
 						double num = StackGet( D ).GetNumber();
-						StackSet( A, ValueSlot.Number(num) );
+						StackSet( A, ValueSlot.Number(-num) );
 						break;
 					}
 				case OpCode.LEN:
@@ -656,7 +656,6 @@ namespace Miku.Lua
 						var call_func = ValueStack[call_base]; // TODO, meta calls
 						if (call_func.IsFunction())
 						{
-							Log.Warning( "CALL " + call_func.GetFunction().prototype.DebugName );
 							if ( is_tailcall )
 							{
 								// Save arguments.

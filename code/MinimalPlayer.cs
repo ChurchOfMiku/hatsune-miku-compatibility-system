@@ -53,7 +53,7 @@ namespace Miku
 			//
 			if ( IsServer && Input.Pressed( InputButton.Attack1 ) )
 			{
-				Test.Run();
+				var machine = new LuaMachine();
 			}
 		}
 
