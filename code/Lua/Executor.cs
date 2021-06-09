@@ -18,6 +18,8 @@ namespace Miku.Lua
 	}
 	class Executor
 	{
+		public bool Debug = false;
+
 		struct FrameInfo
 		{
 			public Function Func;
@@ -203,7 +205,11 @@ namespace Miku.Lua
 		public void Run()
 		{
 			int safety = 0;
-			const int LIMIT = 1_000_000;
+			int LIMIT = 1_000_000;
+			if (Debug)
+			{
+				//LIMIT = 1000;
+			}
 			while (pc < Func.prototype.code.Length)
 			{
 				try
@@ -220,6 +226,7 @@ namespace Miku.Lua
 				safety++;
 				if (safety >= LIMIT )
 				{
+					this.LogState();
 					throw new Exception( "hit safety" );
 				}
 			}
@@ -399,6 +406,12 @@ namespace Miku.Lua
 						StackSet( A, StackGet( D ) );
 						break;
 					}
+				case OpCode.NOT:
+					{
+						bool result = !StackGet( D ).IsTruthy();
+						StackSet( A, ValueSlot.Bool( result ) );
+						break;
+					}
 				case OpCode.UNM:
 					{
 						double num = StackGet( D ).GetNumber();
@@ -482,7 +495,7 @@ namespace Miku.Lua
 				// KCDATA: don't care
 				case OpCode.KSHORT:
 					{
-						var num = (short)D; // TODO signed?
+						var num = ((int)D << 16) >> 16; // TODO check!
 						StackSet( A, ValueSlot.Number( num ) );
 						break;
 					}

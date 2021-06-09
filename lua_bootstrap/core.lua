@@ -8,6 +8,21 @@ module_cache.ffi = ffi
 module_cache.bit = bit
 module_cache.jit = {version_num = 20100}
 
+function assert(x)
+    if not x then
+        error("assert failed")
+    end
+    return x
+end
+
+function math.max(x,y)
+    if x > y then
+        return x
+    else
+        return y
+    end
+end
+
 require = function(name)
     if module_cache[name] then
         return module_cache[name]

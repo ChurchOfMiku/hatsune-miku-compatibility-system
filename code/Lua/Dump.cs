@@ -126,7 +126,7 @@ namespace Miku.Lua
 						proto.constNum[i] = d;
 					} else
 					{
-						proto.constNum[i] = n;
+						proto.constNum[i] = (int)n;
 					}
 				}
 

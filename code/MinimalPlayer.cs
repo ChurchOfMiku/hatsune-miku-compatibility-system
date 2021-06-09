@@ -54,6 +54,7 @@ namespace Miku
 			if ( IsServer && Input.Pressed( InputButton.Attack1 ) )
 			{
 				var machine = new LuaMachine();
+				machine.RunFile("mandelbrot.lua");
 			}
 		}
 

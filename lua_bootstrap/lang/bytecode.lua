@@ -275,14 +275,10 @@ Buf.__index.pack = function(self)
     return self
 end
 
+local double_new = bit.get_double_parts
+
 local function dword_get_u32(cdata_new, v)
-    error("dword_get_u32")
-    --[[local p = cdata_new(v)
-    local char = ffi.cast('uint8_t*', p)
-    local lo, hi = uint32_new(0), uint32_new(0)
-    ffi.copy(lo, char, 4)
-    ffi.copy(hi, char + 4, 4)
-    return lo[0], hi[0] ]]
+    return cdata_new(v)
 end
 
 Buf.__index.put_number = function(self, v)
