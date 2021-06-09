@@ -100,13 +100,19 @@ namespace Miku.Lua
 		{
 			foreach (var key in dict)
 			{
-				string str = key.Key.GetString();
-				switch (str)
+				if (key.Key.Kind == ValueKind.String)
 				{
-					case "__index":
-						break;
-					default:
-						throw new Exception("NYI meta member = "+str);
+					string str = key.Key.GetString();
+					if (str.StartsWith("__"))
+					{
+						switch (str)
+						{
+							case "__index":
+								break;
+							default:
+								throw new Exception("NYI meta member = "+str);
+						}
+					}
 				}
 			}
 		}

@@ -17,7 +17,7 @@ namespace Miku.Lua
 	}
 	class Test
 	{
-		private static ValueSlot[]? TableInsert( ValueSlot[] args )
+		private static ValueSlot[]? TableInsert( ValueSlot[] args, Table env )
 		{
 			Assert.True(args.Length == 2);
 			var table = args[0].GetTable();
@@ -49,9 +49,12 @@ namespace Miku.Lua
 			var builder = new StringBuilder("LUA: ");
 			foreach ( var arg in args )
 			{
-				// incompatible: glua fails to concat nil, possibly others for whatever reason
 				builder.Append( arg.ToString() );
 				builder.Append( "\t" );
+				if (arg.Kind == ValueKind.Table)
+				{
+					arg.GetTable().Log();
+				}
 			}
 			Log.Info( builder.ToString() );
 			return null;
@@ -106,6 +109,18 @@ namespace Miku.Lua
 				return new ValueSlot[] { ValueSlot.Number(x & y) };
 			}));
 
+			lib_bit.Set( "bor", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
+				int x = (int)args[0].GetNumber();
+				int y = (int)args[1].GetNumber();
+				return new ValueSlot[] { ValueSlot.Number( x | y ) };
+			} ) );
+
+			lib_bit.Set( "rshift", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
+				uint x = (uint)args[0].GetNumber(); // LOGICAL SHIFT = uint !!!
+				int y = (int)args[1].GetNumber();
+				return new ValueSlot[] { ValueSlot.Number( x >> y ) };
+			}));
+
 			lib_bit.Set( "bnot", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
 				int x = (int)args[0].GetNumber();
 				return new ValueSlot[] { ValueSlot.Number( ~x ) };
@@ -113,6 +128,29 @@ namespace Miku.Lua
 
 			var string_lib = new Table();
 			env.Set( "string", ValueSlot.Table( string_lib ) );
+
+			string_lib.Set( "byte", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
+				var str = args[0].GetString();
+				int index = 0;
+				if (args.Length>1)
+				{
+					index = (int)args[1].GetNumber() - 1;
+				}
+
+				{
+					if (index < 0 || index >= str.Length)
+					{
+						throw new Exception( "string.byte oob" );
+					}
+					int result = (byte)str[index];
+					if (result > 255)
+					{
+						throw new Exception( "string.byte got non-byte result, this could be a problem" );
+					}
+					Log.Warning( "byte " + str[index] + " " + result );
+					return new ValueSlot[] { ValueSlot.Number( result ) };
+				}
+			}));
 
 			string_lib.Set( "sub", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
 				var str = args[0].GetString();
@@ -144,13 +182,9 @@ namespace Miku.Lua
 				return new ValueSlot[] { ValueSlot.String( "["+joined+"]" ) };
 			}));
 
-			/*var table_lib = new Table();
+			var table_lib = new Table();
 			env.Set( "table", ValueSlot.Table(table_lib) );
 			table_lib.Set( "insert", ValueSlot.UserFunction( TableInsert ) );
-
-			var math_lib = new Table();
-			env.Set( "math", ValueSlot.Table( math_lib ) );
-			math_lib.Set( "abs", ValueSlot.UserFunction( MathAbs ) );*/
 
 			env.Set( "print", ValueSlot.UserFunction( Print ) );
 			env.Set( "error", ValueSlot.UserFunction( Error ) );
@@ -163,6 +197,12 @@ namespace Miku.Lua
 				return new ValueSlot[] { ValueSlot.Table( table ) };
 			} ));
 
+			env.Set( "getmetatable", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
+				var table = args[0].GetTable();
+				var result = table.MetaTable != null ? ValueSlot.Table( table ) : ValueSlot.Nil();
+				return new ValueSlot[] { result };
+			}));
+
 			env.Set( "pcall", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
 				var func = args[0].GetFunction(); // assume this is a lua function
 				var func_args = new ValueSlot[args.Length - 1];
@@ -170,17 +210,34 @@ namespace Miku.Lua
 				{
 					func_args[i] = args[i + 1];
 				}
-				func.Call( func_args );
-				throw new Exception( "lol" );
-			} ) );
+				ValueSlot[] call_results;
+				try
+				{
+					call_results = func.Call( func_args );
+				} catch (Exception e)
+				{
+					Log.Warning( e.Message );
+					throw new Exception( "TODO pcall error handling!" );
+				}
+
+				ValueSlot[] pcall_results = new ValueSlot[call_results.Length + 1];
+				pcall_results[0] = ValueSlot.Bool( true );
+				for (int i=0;i<call_results.Length;i++ )
+				{
+					pcall_results[i + 1] = call_results[i];
+				}
+
+				return pcall_results;
+			}));
 
 			env.Set( "type", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
 				string result;
 				switch (args[0].Kind)
 				{
-					case ValueKind.String:
-						result = "string";
-						break;
+					case ValueKind.String: result = "string"; break;
+					case ValueKind.Number: result = "number"; break;
+					case ValueKind.Table: result = "table"; break;
+					case ValueKind.Function: result = "function"; break;
 					default:
 						throw new Exception( "typeof " + args[0].Kind );
 				}

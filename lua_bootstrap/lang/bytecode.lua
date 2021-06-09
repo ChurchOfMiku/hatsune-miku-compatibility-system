@@ -193,67 +193,36 @@ end
 
 Buf = {}
 Buf.new = function(size)
-    size = size or 2048
-    local self = {
-        data = ffi.new('char[?]', size),
-        size = size,
-        offs = 0,
-    }
+    local self = {}
     return setmetatable(self, Buf)
 end
 
 Buf.__index = {}
 Buf.__index.need = function(self, size)
-    local need_size = self.offs + size
-    if self.size <= need_size then
-        local prev_size = self.size
-        while self.size <= need_size do
-            self.size = self.size * 2
-        end
-        local new_data = ffi.new('char[?]', self.size)
-        ffi.copy(new_data, self.data, prev_size)
-        self.data = new_data
-    end
+    -- no-op
 end
 Buf.__index.put = function(self, v)
-    self:need(1)
-    local offs = self.offs
-    self.data[offs] = v
-    self.offs = offs + 1
-    return offs
+    v = band(v,0xFF)
+    table.insert(self,v)
 end
 Buf.__index.put_uint8 = Buf.__index.put
 
 Buf.__index.put_uint16 = function(self, v)
-    self:need(2)
-    local offs = self.offs
-    local dptr = self.data + offs
-    dptr[0] = v
-    v = shr(v, 8)
-    dptr[1] = v
-    self.offs = offs + 2
-    return offs
+    self:put(v)
+    self:put(shr(v, 8))
 end
 
 Buf.__index.put_uint32 = function(self, v)
-    self:need(4)
-    local offs = self.offs
-    local dptr = self.data + offs
-
-    dptr[0] = v
+    self:put(v)
     v = shr(v, 8)
-    dptr[1] = v
+    self:put(v)
     v = shr(v, 8)
-    dptr[2] = v
+    self:put(v)
     v = shr(v, 8)
-    dptr[3] = v
-
-    self.offs = offs + 4
-    return offs
+    self:put(v)
 end
 
 Buf.__index.put_uleb128 = function(self,  v)
-    local offs = self.offs
     local b = band(v, 0x7f)
     v = shr(v, 7)
     if v ~= 0 then b = bor(b, 0x80) end
@@ -264,13 +233,11 @@ Buf.__index.put_uleb128 = function(self,  v)
         if v ~= 0 then b = bor(b, 0x80) end
         self:put(b)
     end
-    return offs
 end
 
 -- Write a 32 bit unsigned integer + 1 bit given by "numbit".
 -- This last argument should be either 0 or 1.
 Buf.__index.put_uleb128_33 = function(self,  v, numbit)
-    local offs = self.offs
     local b = bor(shl(band(v, 0x3f), 1), numbit)
     v = shr(v, 6)
     if v ~= 0 then b = bor(b, 0x80) end
@@ -281,32 +248,41 @@ Buf.__index.put_uleb128_33 = function(self,  v, numbit)
         if v ~= 0 then b = bor(b, 0x80) end
         self:put(b)
     end
-    return offs
 end
 
 Buf.__index.put_bytes = function(self, v)
-    local offs = self.offs
+    local v_type = type(v)
+    if v_type == "table" then
+        for i = 1,#v do
+            local b = v[i]
+            self:put(b)
+        end
+    elseif v_type == "string" then
+        for i = 1,#v do
+            local b = string.byte(v,i)
+            self:put(b)
+        end
+    else
+        error("put bytes: "..v_type)
+    end
+    --[[local offs = self.offs
     self:need(#v)
     ffi.copy(self.data + offs, v)
     self.offs = offs + #v
-    return offs
+    return offs]]
 end
 Buf.__index.pack = function(self)
-    return ffi.string(self.data, self.offs)
+    return self
 end
 
-local double_new = ffi.typeof('double[1]')
-local uint32_new = ffi.typeof('uint32_t[1]')
-local int64_new  = ffi.typeof('int64_t[1]')
-local uint64_new = ffi.typeof('uint64_t[1]')
-
 local function dword_get_u32(cdata_new, v)
-    local p = cdata_new(v)
+    error("dword_get_u32")
+    --[[local p = cdata_new(v)
     local char = ffi.cast('uint8_t*', p)
     local lo, hi = uint32_new(0), uint32_new(0)
     ffi.copy(lo, char, 4)
     ffi.copy(hi, char + 4, 4)
-    return lo[0], hi[0]
+    return lo[0], hi[0] ]]
 end
 
 Buf.__index.put_number = function(self, v)
@@ -707,19 +683,16 @@ function Proto.__index:write(buf)
     local body = Buf.new()
     self:write_body(body)
 
-    local offs = body.offs
+    local body_len_no_dbg = #body
     self:write_debug(body)
 
     local head = Buf.new()
-    self:write_head(head, body.offs - offs)
+    self:write_head(head, #body - body_len_no_dbg)
 
-    buf:put_uleb128(head.offs + body.offs) -- length of the proto
+    buf:put_uleb128(#head + #body) -- length of the proto
 
-    local head_pack = ffi.string(head.data, head.offs)
-    local body_pack = ffi.string(body.data, body.offs)
-
-    buf:put_bytes(head_pack)
-    buf:put_bytes(body_pack)
+    buf:put_bytes(head)
+    buf:put_bytes(body)
 end
 function Proto.__index:write_head(buf, size_debug)
     buf:put(self.flags)

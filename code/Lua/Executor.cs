@@ -154,6 +154,16 @@ namespace Miku.Lua
 
 		private void StoreVarArgs(int args_in)
 		{
+			if ( args_in < Func.prototype.numArgs )
+			{
+				// we need to clear arguments we're not using
+				var nil = ValueSlot.Nil();
+				for (uint i=(uint)args_in;i<Func.prototype.numArgs;i++ )
+				{
+					StackSet( i, nil );
+				}
+			}
+
 			if (Func.prototype.IsVarArg())
 			{
 				if ( args_in > Func.prototype.numArgs )
@@ -265,8 +275,6 @@ namespace Miku.Lua
 				case OpCode.ISGE:
 				case OpCode.ISLE:
 				case OpCode.ISGT:
-				case OpCode.ISEQV:
-				case OpCode.ISNEV:
 					{
 						double nA = StackGet( A ).GetNumber();
 						double nD = StackGet( D ).GetNumber();
@@ -277,10 +285,24 @@ namespace Miku.Lua
 							case OpCode.ISGE: skip = !(nA >= nD); break;
 							case OpCode.ISLE: skip = !(nA <= nD); break;
 							case OpCode.ISGT: skip = !(nA > nD); break;
-							case OpCode.ISEQV: skip = !(nA == nD); break; // TODO BAD
-							case OpCode.ISNEV: skip = !(nA != nD); break; // TODO BAD
 						}
 						if (skip) { pc++; }
+						break;
+					}
+				case OpCode.ISEQV:
+					{
+						var vA = StackGet( A );
+						var vD = StackGet( D );
+						bool skip = !vA.Equals( vD );
+						if ( skip ) { pc++; }
+						break;
+					}
+				case OpCode.ISNEV:
+					{
+						var vA = StackGet( A );
+						var vD = StackGet( D );
+						bool skip = vA.Equals( vD );
+						if ( skip ) { pc++; }
 						break;
 					}
 				case OpCode.ISEQS:
@@ -291,12 +313,35 @@ namespace Miku.Lua
 						if ( skip ) { pc++; }
 						break;
 					}
-				// ISEQS
 				case OpCode.ISNES:
 					{
 						var vA = StackGet( A );
 						var vD = Func.prototype.GetConstGC( D );
 						bool skip = vA.Equals( vD );
+						if ( skip ) { pc++; }
+						break;
+					}
+				case OpCode.ISEQN:
+					{
+						var vA = StackGet( A );
+						var vD = Func.prototype.GetConstNum( D );
+						bool skip = !vA.Equals( vD );
+						if ( skip ) { pc++; }
+						break;
+					}
+				case OpCode.ISNEN:
+					{
+						var vA = StackGet( A );
+						var vD = Func.prototype.GetConstNum( D );
+						bool skip = vA.Equals( vD );
+						if ( skip ) { pc++; }
+						break;
+					}
+				case OpCode.ISEQP:
+					{
+						var vA = StackGet( A );
+						var vD = ValueSlot.Prim( D );
+						bool skip = !vA.Equals( vD );
 						if ( skip ) { pc++; }
 						break;
 					}
@@ -352,6 +397,12 @@ namespace Miku.Lua
 				case OpCode.MOV:
 					{
 						StackSet( A, StackGet( D ) );
+						break;
+					}
+				case OpCode.UNM:
+					{
+						double num = StackGet( D ).GetNumber();
+						StackSet( A, ValueSlot.Number(num) );
 						break;
 					}
 				case OpCode.LEN:
@@ -605,6 +656,7 @@ namespace Miku.Lua
 						var call_func = ValueStack[call_base]; // TODO, meta calls
 						if (call_func.IsFunction())
 						{
+							Log.Warning( "CALL " + call_func.GetFunction().prototype.DebugName );
 							if ( is_tailcall )
 							{
 								// Save arguments.
