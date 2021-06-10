@@ -261,7 +261,7 @@ namespace Miku.Lua
 
 			Env.Set( "getmetatable", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
 				var table = args[0].CheckTable();
-				var result = table.MetaTable != null ? ValueSlot.Table( table ) : ValueSlot.NIL;
+				var result = table.MetaTable != null ? ValueSlot.Table( table.MetaTable ) : ValueSlot.NIL;
 				return new ValueSlot[] { result };
 			}));
 
