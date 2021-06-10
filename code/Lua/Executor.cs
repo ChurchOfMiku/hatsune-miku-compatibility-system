@@ -27,6 +27,7 @@ namespace Miku.Lua
 			public int PC;
 			public int RetBase;
 			public int RetCount;
+			public int FrameSize;
 			public ValueSlot[]? VarArgs;
 		}
 
@@ -70,6 +71,7 @@ namespace Miku.Lua
 		private int pc = 0;
 		private int MultiRes = 0;
 		private int StackTop = 0; // last entry in the stack + 1
+		private int FrameSize = 0;
 		private Function Func;
 
 		private List<ValueSlot> ValueStack = new List<ValueSlot>();
@@ -82,7 +84,7 @@ namespace Miku.Lua
 
 		public Executor( Function func, ValueSlot[] args )
 		{
-			AddFrame( func, 0, 0 );
+			AddFrame( func, 0, 0, args.Length );
 			Func = func; // used to suppress null warning
 			for (uint i=0;i<args.Length;i++ )
 			{
@@ -91,7 +93,7 @@ namespace Miku.Lua
 			StoreVarArgs( args.Length );
 		}
 
-		private void AddFrame( Function new_func, int ret_base, int ret_count )
+		private void AddFrame( Function new_func, int ret_base, int ret_count, int arg_count )
 		{
 			// Push old function + PC to stack.
 			if (Func != null)
@@ -100,6 +102,7 @@ namespace Miku.Lua
 					Func = Func,
 					PC = pc,
 					VarArgs = VarArgs,
+					FrameSize = FrameSize,
 					RetBase = ret_base,
 					RetCount = ret_count
 				} );
@@ -108,7 +111,8 @@ namespace Miku.Lua
 			this.Func = new_func;
 
 			// Grow value stack.
-			StackTop += Func.Prototype.numSlots;
+			FrameSize = Math.Max( Func.Prototype.numSlots , arg_count);
+			StackTop += FrameSize;
 			while ( ValueStack.Count < StackTop )
 			{
 				ValueStack.Add( ValueSlot.NIL );
@@ -147,10 +151,11 @@ namespace Miku.Lua
 					}
 				}
 
-				StackTop -= Func.Prototype.numSlots;
+				StackTop -= FrameSize;
 				Func = frame_info.Func;
 				pc = frame_info.PC;
 				VarArgs = frame_info.VarArgs;
+				FrameSize = frame_info.FrameSize;
 			}
 		}
 
@@ -193,6 +198,10 @@ namespace Miku.Lua
 
 		private void StackSet(uint index, ValueSlot x)
 		{
+			if (index >= FrameSize)
+			{
+				throw new Exception( "stack oob" );
+			}
 			ValueStack[GetRealStackIndex(index)] = x;
 		}
 
@@ -218,7 +227,7 @@ namespace Miku.Lua
 				{
 					if (!(e is SilentExecException))
 					{
-						LogState();
+						//LogState();
 						Log.Error( e.StackTrace );
 					}
 					throw new SilentExecException(e);
@@ -238,7 +247,7 @@ namespace Miku.Lua
 			int slot_i = 0;
 			foreach (var level in CallStack.Reverse() )
 			{
-				var slot_count = level.Func.Prototype.numSlots;
+				var slot_count = level.FrameSize;
 				for (int j = 0; j < slot_count; j++ )
 				{
 					Log.Info( $"({slot_i}) {slot_count - j - 1}: {ValueStack[slot_i]}" );
@@ -247,7 +256,7 @@ namespace Miku.Lua
 				Log.Info( "^^^--- " + level.Func.Prototype.DebugName );
 			}
 			{
-				var slot_count = Func.Prototype.numSlots;
+				var slot_count = FrameSize;
 				for ( int j = 0; j < slot_count; j++ )
 				{
 					Log.Info( $"({slot_i}) {slot_count - j - 1}: {ValueStack[slot_i]}" );
@@ -538,7 +547,7 @@ namespace Miku.Lua
 				case OpCode.UCLO:
 					{
 						int upval_close_base = GetRealStackIndex( A );
-						int frame_top = GetRealStackIndex((uint)(Func.Prototype.numSlots - 1));
+						int frame_top = GetRealStackIndex((uint)(FrameSize - 1));
 						for (int i= upval_close_base; i>= frame_top; i--)
 						{
 							UpValueBox uv;
@@ -680,10 +689,10 @@ namespace Miku.Lua
 								}
 
 								// Clear current function and reset stack.
-								StackTop -= Func.Prototype.numSlots;
+								StackTop -= FrameSize;
 								Func = null!;
 
-								AddFrame( call_func.CheckFunction(), 0, 0 );
+								AddFrame( call_func.CheckFunction(), 0, 0, arg_count );
 
 								for ( int i = 0; i < arg_count; i++ )
 								{
@@ -693,7 +702,7 @@ namespace Miku.Lua
 								StoreVarArgs( arg_count );
 							} else
 							{
-								AddFrame( call_func.CheckFunction(), ret_base, ret_count );
+								AddFrame( call_func.CheckFunction(), ret_base, ret_count, arg_count );
 
 								for (int i=0;i<arg_count;i++ )
 								{
