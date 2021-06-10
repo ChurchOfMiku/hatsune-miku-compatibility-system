@@ -101,7 +101,7 @@ namespace Miku.Lua
 			return !(Kind == ValueKind.Nil || Kind == ValueKind.False);
 		}
 
-		public Table GetTable()
+		public Table CheckTable()
 		{
 			if ( this.Kind == ValueKind.Table )
 			{

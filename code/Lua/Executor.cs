@@ -220,8 +220,10 @@ namespace Miku.Lua
 					if (!(e is SilentExecException))
 					{
 						LogState();
+						Log.Error( e.StackTrace );
 					}
 					throw new SilentExecException(e);
+					//throw;
 				}
 				safety++;
 				if (safety >= LIMIT )
@@ -590,7 +592,7 @@ namespace Miku.Lua
 					}
 				case OpCode.TDUP:
 					{
-						var table_proto = Func.prototype.GetConstGC( D ).GetTable();
+						var table_proto = Func.prototype.GetConstGC( D ).CheckTable();
 						var table = table_proto.CloneProto();
 						StackSet( A, ValueSlot.Table( table ) );
 						break;
@@ -598,7 +600,7 @@ namespace Miku.Lua
 				case OpCode.GGET:
 					{
 						var str = Func.prototype.GetConstGC( D );
-						StackSet( A, Func.env.Get( str ) );
+						StackSet( A, ValueOperations.Get( ValueSlot.Table(Func.env), str ) );
 						break;
 					}
 				case OpCode.GSET:
@@ -609,39 +611,36 @@ namespace Miku.Lua
 					}
 				case OpCode.TGETV:
 					{
-						var table = StackGet( B ).GetTable();
-						StackSet( A, table.Get(StackGet(C)) );
+						StackSet( A, ValueOperations.Get( StackGet( B ), StackGet( C ) ) );
 						break;
 					}
 				case OpCode.TGETS:
 					{
-						var table = StackGet( B ).GetTable();
 						var str = Func.prototype.GetConstGC( C );
-						StackSet( A, table.Get( str ) );
+						StackSet( A, ValueOperations.Get( StackGet( B ), str ) );
 						break;
 					}
 				case OpCode.TGETB:
 					{
-						var table = StackGet( B ).GetTable();
-						StackSet( A, table.Get( (int)C ) );
+						StackSet( A, ValueOperations.Get( StackGet( B ), ValueSlot.Number(C) ) );
 						break;
 					}
 				case OpCode.TSETV:
 					{
-						var table = StackGet( B ).GetTable();
+						var table = StackGet( B ).CheckTable();
 						table.Set( StackGet(C), StackGet( A ) );
 						break;
 					}
 				case OpCode.TSETS:
 					{
-						var table = StackGet( B ).GetTable();
+						var table = StackGet( B ).CheckTable();
 						var str = Func.prototype.GetConstGC( C );
 						table.Set( str, StackGet( A ) );
 						break;
 					}
 				case OpCode.TSETB:
 					{
-						var table = StackGet( B ).GetTable();
+						var table = StackGet( B ).CheckTable();
 						table.Set( (int)C, StackGet( A ) );
 						break;
 					}

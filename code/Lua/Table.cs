@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿#nullable enable
+
+using System.Collections.Generic;
 using System;
 
 namespace Miku.Lua
@@ -6,111 +8,177 @@ namespace Miku.Lua
 	class Table
 	{
 		//private List<ValueSlot> array = new List<ValueSlot>();
-		private int next_int_slot = 1;
-		private Dictionary<ValueSlot, ValueSlot> dict = new Dictionary<ValueSlot, ValueSlot>();
+		private Dictionary<ValueSlot, ValueSlot>? Dict = null;
+		private List<ValueSlot>? Array = null;
 
 		public Table? MetaTable = null;
 
 		public int GetLength()
 		{
-			return next_int_slot - 1;
+			if (Array != null)
+			{
+				int len;
+				for ( len = Array.Count;len>0;len--)
+				{
+					if (ArrayGet( len ).Kind != ValueKind.Nil)
+					{
+						break;
+					}
+				}
+				return len;
+			}
+			return 0;
+		}
+
+		private ValueSlot ArrayGet(int i) { return Array![i - 1]; }
+		private void ArraySet( int i, ValueSlot val ) { Array![i - 1] = val; }
+
+		private void MigrateSubsequentKeys(int i)
+		{
+			if (Dict == null)
+			{
+				// Nothing to migrate.
+				return;
+			}
+
+			while (true)
+			{
+				i++;
+
+				ValueSlot result;
+				if ( !Dict.TryGetValue( ValueSlot.Number(i), out result ) )
+				{
+					return;
+				}
+				Array!.Add(result);
+			}
 		}
 
 		public void PushVal( ValueSlot val )
 		{
-			Set( ValueSlot.Number( next_int_slot ), val );
+			Set( ValueSlot.Number( GetLength() + 1 ), val );
 		}
 
 		public void Set( ValueSlot key, ValueSlot val )
 		{
-			dict[key] = val;
-			// Increment our array length.
-			// TODO actually migrate values to array portion.
-			while (dict.ContainsKey( ValueSlot.Number(next_int_slot) )) {
-				next_int_slot++;
+			if (val.Kind == ValueKind.Nil)
+			{
+				return;
 			}
+
+			if (key.Kind == ValueKind.Number)
+			{
+				var i_dbl = key.GetNumber();
+				int i = (int)i_dbl;
+				if (i_dbl == i && i >= 1)
+				{
+					if (Array == null)
+					{
+						if (i == 1)
+						{
+							Array = new List<ValueSlot>();
+							Array.Add(val);
+							MigrateSubsequentKeys(i);
+							return;
+						}
+					} else
+					{
+						if (i == Array.Count + 1)
+						{
+							Array.Add( val );
+							MigrateSubsequentKeys( i );
+							return;
+						} else if (i <= Array.Count)
+						{
+							ArraySet( i, val );
+							// no need to migrate keys here, we're not touching the end
+							return;
+						}
+					}
+				}
+			}
+
+			if (Dict == null)
+			{
+				Dict = new Dictionary<ValueSlot, ValueSlot>();
+			}
+			Dict[key] = val;
 		}
 
-		// For convenience.
-		public void Set( string key, ValueSlot val )
-		{
-			Set( ValueSlot.String( key ), val );
-		}
-
-		// Special case for integer keys: Try using the array section first.
-		public void Set( int key, ValueSlot val )
-		{
-			Set( ValueSlot.Number( key ), val );
-		}
+		public void Set( string key, ValueSlot val ) { Set( ValueSlot.String( key ), val ); }
+		public void Set( int key, ValueSlot val ) { Set( ValueSlot.Number( key ), val ); }
 
 		public ValueSlot Get( ValueSlot key )
 		{
-			// TODO: Move "metaget" into it's own file.
-			ValueSlot result;
-			if (!dict.TryGetValue( key, out result ))
+			if (Array != null)
 			{
-				if (MetaTable != null)
+				if ( key.Kind == ValueKind.Number )
 				{
-					var index = MetaTable.RawGet( "__index" );
-					var index_tab = index.GetTable(); // index metamethod NYI
-					return index_tab.Get(key); // use metaget here!
+					var i_dbl = key.GetNumber();
+					int i = (int)i_dbl;
+					if ( i_dbl == i && i >= 1 && i <= Array.Count )
+					{
+						return ArrayGet( i );
+					}
 				}
-				result = ValueSlot.Nil();
 			}
-			return result;
-		}
 
-		// For convenience.
-		public ValueSlot Get( string key )
-		{
-			return Get( ValueSlot.String( key ) );
-		}
-
-		public ValueSlot RawGet( string key )
-		{
-			ValueSlot result;
-			if ( !dict.TryGetValue( ValueSlot.String( key ), out result ) )
+			if (Dict != null)
 			{
-				result = ValueSlot.Nil();
+				ValueSlot result;
+				if (!Dict.TryGetValue( key, out result ))
+				{
+					result = ValueSlot.Nil();
+				}
+				return result;
 			}
-			return result;
+			return ValueSlot.Nil();
 		}
 
-		// Special case for integer keys: Try using the array section first.
-		public ValueSlot Get( int key )
-		{
-			return Get( ValueSlot.Number( key ) );
-		}
+		public ValueSlot Get( string key ) { return Get( ValueSlot.String( key ) ); }
+		public ValueSlot Get( int key ) { return Get( ValueSlot.Number( key ) ); }
 
 		public Table CloneProto()
 		{
 			var result = new Table();
-			/*for (int i=0;i<this.array.Count;i++ )
+			if (Array != null)
 			{
-				result.PushVal(this.array[i].CloneCheck());
-			}*/
-			foreach (var pair in this.dict)
+				result.Array = new List<ValueSlot>();
+				foreach (var slot in Array)
+				{
+					result.Array.Add(slot);
+				}
+			}
+
+			if (Dict != null)
 			{
-				result.Set( pair.Key.CloneCheck(), pair.Value.CloneCheck() );
+				result.Dict = new Dictionary<ValueSlot, ValueSlot>();
+				foreach (var pair in Dict)
+				{
+					result.Dict[pair.Key.CloneCheck()] = pair.Value.CloneCheck();
+				}
 			}
 			return result;
 		}
 
 		public void CheckMetaTableMembers()
 		{
-			foreach (var key in dict)
+			if (Dict != null)
 			{
-				if (key.Key.Kind == ValueKind.String)
+				foreach (var key in Dict)
 				{
-					string str = key.Key.GetString();
-					if (str.StartsWith("__"))
+					if (key.Key.Kind == ValueKind.String)
 					{
-						switch (str)
+						string str = key.Key.GetString();
+						if (str.StartsWith("__"))
 						{
-							case "__index":
-								break;
-							default:
-								throw new Exception("NYI meta member = "+str);
+							switch (str)
+							{
+								case "__index":
+									break;
+								default:
+									throw new Exception("NYI meta member = "+str);
+							}
 						}
 					}
 				}
@@ -120,9 +188,13 @@ namespace Miku.Lua
 		public void Log()
 		{
 			Sandbox.Log.Info( $"LEN = {GetLength()}" );
-			foreach ( var pair in this.dict )
+			Sandbox.Log.Info( $"TODO LOG ARRAY!" );
+			if (Dict != null)
 			{
-				Sandbox.Log.Info( $"[{pair.Key}] = {pair.Value}" );
+				foreach ( var pair in Dict )
+				{
+					Sandbox.Log.Info( $"[{pair.Key}] = {pair.Value}" );
+				}
 			}
 		}
 	}

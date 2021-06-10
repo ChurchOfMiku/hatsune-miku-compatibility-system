@@ -12,12 +12,36 @@ namespace Miku.Lua
 		{
 			if (val.Kind == ValueKind.Table)
 			{
-				return ValueSlot.Number( val.GetTable().GetLength() );
+				return ValueSlot.Number( val.CheckTable().GetLength() );
 			} else if (val.Kind == ValueKind.String)
 			{
 				return ValueSlot.Number( val.GetString().Length );
 			}
-			throw new Exception( "Attemtp to get length of " + val );
+			throw new Exception( $"Attempt to get length of {val.Kind}." );
+		}
+
+		public static ValueSlot Get(ValueSlot arg, ValueSlot key)
+		{
+			if ( arg.Kind == ValueKind.Table )
+			{
+				var tab = arg.CheckTable();
+				var result = tab.Get(key);
+				if (result.Kind == ValueKind.Nil && tab.MetaTable != null )
+				{
+					var mt_index = tab.MetaTable.Get( "__index" );
+					if (mt_index.Kind == ValueKind.Table)
+					{
+						return mt_index.CheckTable().Get( key );
+					} else
+					{
+						throw new Exception( $"Attempt to use {mt_index.Kind} as __index." );
+					}
+				}
+				return result;
+			} else
+			{
+				throw new Exception( $"Attempt to index {arg.Kind}." );
+			}
 		}
 	}
 }

@@ -20,7 +20,7 @@ namespace Miku.Lua
 		private static ValueSlot[]? TableInsert( ValueSlot[] args, Table env )
 		{
 			Assert.True(args.Length == 2);
-			var table = args[0].GetTable();
+			var table = args[0].CheckTable();
 			var new_val = args[1];
 			table.PushVal(new_val);
 			return null;
@@ -53,7 +53,7 @@ namespace Miku.Lua
 				builder.Append( "\t" );
 				if (arg.Kind == ValueKind.Table)
 				{
-					arg.GetTable().Log();
+					arg.CheckTable().Log();
 				}
 			}
 			Log.Info( builder.ToString() );
@@ -253,15 +253,15 @@ namespace Miku.Lua
 			}));
 
 			Env.Set( "setmetatable", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
-				var table = args[0].GetTable();
-				var metatable = args[1].GetTable();
+				var table = args[0].CheckTable();
+				var metatable = args[1].CheckTable();
 				metatable.CheckMetaTableMembers();
 				table.MetaTable = metatable;
 				return new ValueSlot[] { ValueSlot.Table( table ) };
 			} ));
 
 			Env.Set( "getmetatable", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
-				var table = args[0].GetTable();
+				var table = args[0].CheckTable();
 				var result = table.MetaTable != null ? ValueSlot.Table( table ) : ValueSlot.Nil();
 				return new ValueSlot[] { result };
 			}));
@@ -317,7 +317,7 @@ namespace Miku.Lua
 			}));
 
 			BootstrapRequire( Env, "core" );
-			CompileFunction = BootstrapRequire( Env, "lang.compile" ).GetTable().Get( "string" ).GetFunction();
+			CompileFunction = BootstrapRequire( Env, "lang.compile" ).CheckTable().Get( "string" ).GetFunction();
 
 			Log.Warning( $"Machine loaded in {sw.ElapsedMilliseconds}ms" );
 		}
@@ -326,10 +326,10 @@ namespace Miku.Lua
 		{
 			Stopwatch sw = Stopwatch.StartNew();
 			var results = CompileFunction.Call( new ValueSlot[] { ValueSlot.String(code) } );
-			Log.Warning( $"Compile took {sw.ElapsedMilliseconds}ms" );
+			Log.Warning( $"Compile took {sw.Elapsed.TotalMilliseconds} ms" );
 			if (results[0].Kind == ValueKind.True)
 			{
-				var dump = results[1].GetTable();
+				var dump = results[1].CheckTable();
 				byte[] dump_bytes = new byte[dump.GetLength()];
 				for (int i=0;i< dump_bytes.Length; i++ )
 				{
