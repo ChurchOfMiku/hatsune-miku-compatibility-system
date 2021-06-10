@@ -106,11 +106,10 @@ namespace Miku.Lua
 			this.Func = new_func;
 
 			// Grow value stack.
-			var nil = ValueSlot.Nil();
 			StackTop += Func.prototype.numSlots;
 			while ( ValueStack.Count < StackTop )
 			{
-				ValueStack.Add( nil );
+				ValueStack.Add( ValueSlot.NIL );
 			}
 		}
 
@@ -134,7 +133,6 @@ namespace Miku.Lua
 					MultiRes = ret_slots_available;
 				}
 
-				var nil = ValueSlot.Nil();
 				for ( int i = 0; i < ret_slots_to_fill; i++ )
 				{
 					if ( i < ret_slots_available )
@@ -143,7 +141,7 @@ namespace Miku.Lua
 					}
 					else
 					{
-						ValueStack[ret_dest_base - i] = nil;
+						ValueStack[ret_dest_base - i] = ValueSlot.NIL;
 					}
 				}
 
@@ -159,10 +157,9 @@ namespace Miku.Lua
 			if ( args_in < Func.prototype.numArgs )
 			{
 				// we need to clear arguments we're not using
-				var nil = ValueSlot.Nil();
 				for (uint i=(uint)args_in;i<Func.prototype.numArgs;i++ )
 				{
-					StackSet( i, nil );
+					StackSet( i, ValueSlot.NIL );
 				}
 			}
 
@@ -285,8 +282,8 @@ namespace Miku.Lua
 				case OpCode.ISLE:
 				case OpCode.ISGT:
 					{
-						double nA = StackGet( A ).GetNumber();
-						double nD = StackGet( D ).GetNumber();
+						double nA = StackGet( A ).CheckNumber();
+						double nD = StackGet( D ).CheckNumber();
 						bool skip = false;
 						switch (OP)
 						{
@@ -416,7 +413,7 @@ namespace Miku.Lua
 					}
 				case OpCode.UNM:
 					{
-						double num = StackGet( D ).GetNumber();
+						double num = StackGet( D ).CheckNumber();
 						StackSet( A, ValueSlot.Number(-num) );
 						break;
 					}
@@ -432,7 +429,7 @@ namespace Miku.Lua
 				case OpCode.DIVVN:
 				case OpCode.MODVN:
 					{
-						double nB = StackGet( B ).GetNumber();
+						double nB = StackGet( B ).CheckNumber();
 						double nC = Func.prototype.GetConstNum( C );
 						double result = 0;
 						switch (OP)
@@ -449,7 +446,7 @@ namespace Miku.Lua
 				case OpCode.SUBNV:
 				case OpCode.MULNV:
 					{
-						double nB = StackGet( B ).GetNumber();
+						double nB = StackGet( B ).CheckNumber();
 						double nC = Func.prototype.GetConstNum( C );
 						double result = 0;
 						switch ( OP )
@@ -464,8 +461,8 @@ namespace Miku.Lua
 				case OpCode.SUBVV:
 				case OpCode.MULVV:
 					{
-						double nB = StackGet( B ).GetNumber();
-						double nC = StackGet( C ).GetNumber();
+						double nB = StackGet( B ).CheckNumber();
+						double nC = StackGet( C ).CheckNumber();
 						double result = 0;
 						switch (OP)
 						{
@@ -514,10 +511,9 @@ namespace Miku.Lua
 					}
 				case OpCode.KNIL:
 					{
-						var nil = ValueSlot.Nil();
 						for (uint i=A;i<=D;i++)
 						{
-							StackSet( i, nil );
+							StackSet( i, ValueSlot.NIL );
 						}
 						break;
 					}
@@ -552,7 +548,7 @@ namespace Miku.Lua
 					}
 				case OpCode.FNEW:
 					{
-						var new_proto = Func.prototype.GetConstGC(D).GetProtoFunction();
+						var new_proto = Func.prototype.GetConstGC(D).CheckProtoFunction();
 						var upvals = new UpValueBox[new_proto.UpValues.Length];
 						for (int i=0;i< upvals.Length; i++ )
 						{
@@ -666,7 +662,7 @@ namespace Miku.Lua
 						int ret_count = (int)B - 1;
 
 						var call_func = ValueStack[call_base]; // TODO, meta calls
-						if (call_func.IsFunction())
+						if (call_func.Kind == ValueKind.Function)
 						{
 							if ( is_tailcall )
 							{
@@ -681,7 +677,7 @@ namespace Miku.Lua
 								StackTop -= Func.prototype.numSlots;
 								Func = null;
 
-								AddFrame( call_func.GetFunction(), 0, 0 );
+								AddFrame( call_func.CheckFunction(), 0, 0 );
 
 								for ( int i = 0; i < arg_count; i++ )
 								{
@@ -691,7 +687,7 @@ namespace Miku.Lua
 								StoreVarArgs( arg_count );
 							} else
 							{
-								AddFrame( call_func.GetFunction(), ret_base, ret_count );
+								AddFrame( call_func.CheckFunction(), ret_base, ret_count );
 
 								for (int i=0;i<arg_count;i++ )
 								{
@@ -705,7 +701,7 @@ namespace Miku.Lua
 							return; // DO NOT INCREMENT PC
 						} else
 						{
-							var user_func = call_func.GetUserFunction();
+							var user_func = call_func.CheckUserFunction();
 							var args = new ValueSlot[arg_count];
 
 							for ( int i = 0; i < arg_count; i++ )
@@ -713,7 +709,6 @@ namespace Miku.Lua
 								args[i] = ValueStack[arg_base - i];
 							}
 							var rets = user_func( args, Func.env );
-							var nil = ValueSlot.Nil();
 
 							// tail calls return everything
 							if ( is_tailcall )
@@ -735,7 +730,7 @@ namespace Miku.Lua
 									ValueStack[ret_base - i] = rets[i];
 								} else
 								{
-									ValueStack[ret_base - i] = nil;
+									ValueStack[ret_base - i] = ValueSlot.NIL;
 								}
 							}
 
@@ -762,7 +757,6 @@ namespace Miku.Lua
 							MultiRes = ret_count;
 						}
 
-						var nil = ValueSlot.Nil();
 						for ( int i = 0; i < ret_count; i++ )
 						{
 							if ( i < VarArgs.Length )
@@ -771,7 +765,7 @@ namespace Miku.Lua
 							}
 							else
 							{
-								ValueStack[ret_base - i] = nil;
+								ValueStack[ret_base - i] = ValueSlot.NIL;
 							}
 						}
 						break;
@@ -810,11 +804,11 @@ namespace Miku.Lua
 					}
 				case OpCode.FORI:
 					{
-						double stop = StackGet( A + 1 ).GetNumber();
-						double step = StackGet( A + 2 ).GetNumber();
+						double stop = StackGet( A + 1 ).CheckNumber();
+						double step = StackGet( A + 2 ).CheckNumber();
 
 						// for loop init
-						double counter = StackGet( A ).GetNumber();
+						double counter = StackGet( A ).CheckNumber();
 						StackSet( A + 3, ValueSlot.Number( counter ) );
 
 						if ( (step > 0 && counter > stop) || (step < 0 && counter < stop) )
@@ -826,11 +820,11 @@ namespace Miku.Lua
 					}
 				case OpCode.FORL:
 					{
-						double stop = StackGet( A + 1 ).GetNumber();
-						double step = StackGet( A + 2 ).GetNumber();
+						double stop = StackGet( A + 1 ).CheckNumber();
+						double step = StackGet( A + 2 ).CheckNumber();
 
 						// for loop step
-						double counter = StackGet( A + 3 ).GetNumber();
+						double counter = StackGet( A + 3 ).CheckNumber();
 						counter += step;
 						StackSet( A + 3, ValueSlot.Number( counter ) );
 

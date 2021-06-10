@@ -68,7 +68,7 @@ namespace Miku.Lua
 
 			if (key.Kind == ValueKind.Number)
 			{
-				var i_dbl = key.GetNumber();
+				var i_dbl = key.CheckNumber();
 				int i = (int)i_dbl;
 				if (i_dbl == i && i >= 1)
 				{
@@ -114,7 +114,7 @@ namespace Miku.Lua
 			{
 				if ( key.Kind == ValueKind.Number )
 				{
-					var i_dbl = key.GetNumber();
+					var i_dbl = key.CheckNumber();
 					int i = (int)i_dbl;
 					if ( i_dbl == i && i >= 1 && i <= Array.Count )
 					{
@@ -128,11 +128,11 @@ namespace Miku.Lua
 				ValueSlot result;
 				if (!Dict.TryGetValue( key, out result ))
 				{
-					result = ValueSlot.Nil();
+					result = ValueSlot.NIL;
 				}
 				return result;
 			}
-			return ValueSlot.Nil();
+			return ValueSlot.NIL;
 		}
 
 		public ValueSlot Get( string key ) { return Get( ValueSlot.String( key ) ); }
@@ -146,7 +146,7 @@ namespace Miku.Lua
 				result.Array = new List<ValueSlot>();
 				foreach (var slot in Array)
 				{
-					result.Array.Add(slot);
+					result.Array.Add(slot.CloneCheck());
 				}
 			}
 
@@ -169,7 +169,7 @@ namespace Miku.Lua
 				{
 					if (key.Key.Kind == ValueKind.String)
 					{
-						string str = key.Key.GetString();
+						string str = key.Key.CheckString();
 						if (str.StartsWith("__"))
 						{
 							switch (str)

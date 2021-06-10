@@ -28,7 +28,7 @@ namespace Miku.Lua
 
 		private static ValueSlot[]? MathAbs( ValueSlot[] args )
 		{
-			double result = Math.Abs( args[0].GetNumber() );
+			double result = Math.Abs( args[0].CheckNumber() );
 			return new ValueSlot[] { ValueSlot.Number( result ) };
 		}
 
@@ -94,7 +94,7 @@ namespace Miku.Lua
 				}
 				return res[0];
 			}
-			return ValueSlot.Nil();
+			return ValueSlot.NIL;
 		}
 
 		public Table Env = new Table();
@@ -107,36 +107,36 @@ namespace Miku.Lua
 			var lib_bit = new Table();
 			Env.Set( "bit", ValueSlot.Table( lib_bit ) );
 			lib_bit.Set( "band", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
-				int x = (int)args[0].GetNumber();
-				int y = (int)args[1].GetNumber();
+				int x = (int)args[0].CheckNumber();
+				int y = (int)args[1].CheckNumber();
 				return new ValueSlot[] { ValueSlot.Number(x & y) };
 			}));
 
 			lib_bit.Set( "bor", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
-				int x = (int)args[0].GetNumber();
-				int y = (int)args[1].GetNumber();
+				int x = (int)args[0].CheckNumber();
+				int y = (int)args[1].CheckNumber();
 				return new ValueSlot[] { ValueSlot.Number( x | y ) };
 			} ) );
 
 			lib_bit.Set( "rshift", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
-				uint x = (uint)args[0].GetNumber(); // LOGICAL SHIFT = uint !!!
-				int y = (int)args[1].GetNumber();
+				uint x = (uint)args[0].CheckNumber(); // LOGICAL SHIFT = uint !!!
+				int y = (int)args[1].CheckNumber();
 				return new ValueSlot[] { ValueSlot.Number( x >> y ) };
 			}));
 
 			lib_bit.Set( "lshift", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
-				int x = (int)args[0].GetNumber();
-				int y = (int)args[1].GetNumber();
+				int x = (int)args[0].CheckNumber();
+				int y = (int)args[1].CheckNumber();
 				return new ValueSlot[] { ValueSlot.Number( x << y ) };
 			} ) );
 
 			lib_bit.Set( "bnot", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
-				int x = (int)args[0].GetNumber();
+				int x = (int)args[0].CheckNumber();
 				return new ValueSlot[] { ValueSlot.Number( ~x ) };
 			}));
 
 			lib_bit.Set( "get_double_parts", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
-				double x = args[0].GetNumber();
+				double x = args[0].CheckNumber();
 				long bits = BitConverter.DoubleToInt64Bits(x);
 				int high = (int)(bits >> 32);
 				int low = (int)bits;
@@ -147,11 +147,11 @@ namespace Miku.Lua
 			Env.Set( "string", ValueSlot.Table( string_lib ) );
 
 			string_lib.Set( "byte", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
-				var str = args[0].GetString();
+				var str = args[0].CheckString();
 				int index = 0;
 				if (args.Length>1)
 				{
-					index = (int)args[1].GetNumber() - 1;
+					index = (int)args[1].CheckNumber() - 1;
 				}
 
 				{
@@ -169,14 +169,14 @@ namespace Miku.Lua
 			}));
 
 			string_lib.Set( "lower", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
-				var str = args[0].GetString();
+				var str = args[0].CheckString();
 				return new ValueSlot[] { ValueSlot.String( str.ToLower() ) };
 			}));
 
 			string_lib.Set( "sub", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
 				// TODO: see how this is actually implemented in lua, there is no way this is totally consistent
-				var str = args[0].GetString();
-				int start = (int)args[1].GetNumber() - 1;
+				var str = args[0].CheckString();
+				int start = (int)args[1].CheckNumber() - 1;
 				int length = str.Length;
 				if (start < 0)
 				{
@@ -184,7 +184,7 @@ namespace Miku.Lua
 				}
 				if (args.Length > 2)
 				{
-					int arg2 = (int)args[2].GetNumber();
+					int arg2 = (int)args[2].CheckNumber();
 					if (arg2 >= 0)
 					{
 						length = arg2 - start;
@@ -200,8 +200,8 @@ namespace Miku.Lua
 			}));
 
 			string_lib.Set( "match", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
-				var str = args[0].GetString();
-				var pattern = args[1].GetString();
+				var str = args[0].CheckString();
+				var pattern = args[1].CheckString();
 				bool result = false;
 				switch ( pattern )
 				{
@@ -232,7 +232,7 @@ namespace Miku.Lua
 			var math_lib = new Table();
 			Env.Set( "math", ValueSlot.Table( math_lib ) );
 			math_lib.Set( "floor", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
-				double n = args[0].GetNumber();
+				double n = args[0].CheckNumber();
 				return new ValueSlot[] { ValueSlot.Number( Math.Floor(n) ) };
 			} ) );
 
@@ -244,7 +244,7 @@ namespace Miku.Lua
 				if (x.Kind == ValueKind.String)
 				{
 					double result = 0;
-					if (double.TryParse(x.GetString(),out result))
+					if (double.TryParse(x.CheckString(),out result))
 					{
 						return new ValueSlot[] { ValueSlot.Number(result) };
 					}
@@ -262,12 +262,12 @@ namespace Miku.Lua
 
 			Env.Set( "getmetatable", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
 				var table = args[0].CheckTable();
-				var result = table.MetaTable != null ? ValueSlot.Table( table ) : ValueSlot.Nil();
+				var result = table.MetaTable != null ? ValueSlot.Table( table ) : ValueSlot.NIL;
 				return new ValueSlot[] { result };
 			}));
 
 			Env.Set( "pcall", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
-				var func = args[0].GetFunction(); // assume this is a lua function
+				var func = args[0].CheckFunction(); // assume this is a lua function
 				var func_args = new ValueSlot[args.Length - 1];
 				for (int i=0;i<func_args.Length;i++ )
 				{
@@ -311,13 +311,13 @@ namespace Miku.Lua
 			} ));
 
 			Env.Set( "_MIKU_BOOTSTRAP_REQUIRE", ValueSlot.UserFunction( (ValueSlot[] args, Table env) => {
-				string mod_name = args[0].GetString();
+				string mod_name = args[0].CheckString();
 				var res = BootstrapRequire( env, mod_name );
 				return new ValueSlot[] {res};
 			}));
 
 			BootstrapRequire( Env, "core" );
-			CompileFunction = BootstrapRequire( Env, "lang.compile" ).CheckTable().Get( "string" ).GetFunction();
+			CompileFunction = BootstrapRequire( Env, "lang.compile" ).CheckTable().Get( "string" ).CheckFunction();
 
 			Log.Warning( $"Machine loaded in {sw.ElapsedMilliseconds}ms" );
 		}
@@ -333,7 +333,7 @@ namespace Miku.Lua
 				byte[] dump_bytes = new byte[dump.GetLength()];
 				for (int i=0;i< dump_bytes.Length; i++ )
 				{
-					int n = (int)dump.Get( i + 1 ).GetNumber();
+					int n = (int)dump.Get( i + 1 ).CheckNumber();
 					if (n > 255 || n < 0)
 					{
 						throw new Exception( "dump contained non-byte!" );

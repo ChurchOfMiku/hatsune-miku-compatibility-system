@@ -15,7 +15,7 @@ namespace Miku.Lua
 				return ValueSlot.Number( val.CheckTable().GetLength() );
 			} else if (val.Kind == ValueKind.String)
 			{
-				return ValueSlot.Number( val.GetString().Length );
+				return ValueSlot.Number( val.CheckString().Length );
 			}
 			throw new Exception( $"Attempt to get length of {val.Kind}." );
 		}

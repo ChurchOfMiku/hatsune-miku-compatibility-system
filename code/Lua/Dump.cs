@@ -83,7 +83,7 @@ namespace Miku.Lua
 								if (j == 0)
 								{
 									// Skip the zeroth entry unless it is actually provided
-									if ( !entry.IsNil() )
+									if ( entry.Kind != ValueKind.Nil )
 									{
 										table.Set( 0, entry );
 									}
@@ -147,11 +147,11 @@ namespace Miku.Lua
 			switch ( entry_type )
 			{
 				case 0:
-					return ValueSlot.Nil();
+					return ValueSlot.NIL;
 				case 1:
-					return ValueSlot.Bool(false);
+					return ValueSlot.FALSE;
 				case 2:
-					return ValueSlot.Bool(true);
+					return ValueSlot.TRUE;
 				case 3:
 					return ValueSlot.Number(reader.Read7BitEncodedInt());
 				default:
