@@ -301,6 +301,9 @@ namespace Miku.Lua
 					case ValueKind.Number: result = "number"; break;
 					case ValueKind.Table: result = "table"; break;
 					case ValueKind.Function: result = "function"; break;
+					case ValueKind.True:
+					case ValueKind.False:
+						result = "boolean"; break;
 					default:
 						throw new Exception( "typeof " + args[0].Kind );
 				}
@@ -339,7 +342,10 @@ namespace Miku.Lua
 				}
 				var new_proto = Dump.Read( dump_bytes );
 				var new_func = new Function( Env, new_proto, new Executor.UpValueBox[0] );
+
+				Stopwatch sw2 = Stopwatch.StartNew();
 				new_func.Call(null,true);
+				Log.Warning( $"Run took {sw2.ElapsedMilliseconds}ms" );
 			} else
 			{
 				throw new Exception( "compile failed" );

@@ -411,6 +411,18 @@ local function llex(ls)
             else
                 skip_line(ls)
             end
+        -- GLua comment handling
+        elseif current == '/' then
+            nextchar(ls)
+            if ls.current == '/'  then
+                nextchar(ls)
+                spaceadd(ls, '//')
+                skip_line(ls)
+            elseif ls.current == '*' then
+                error("multiline comment")
+            else
+                return '/'
+            end
         elseif current == '[' then
             local sep = skip_sep(ls)
             if sep >= 0 then
@@ -433,6 +445,10 @@ local function llex(ls)
         elseif current == '~' then
             nextchar(ls)
             if ls.current ~= '=' then return '~' else nextchar(ls); return 'TK_ne' end
+        -- Glua != and ! operators
+        elseif current == '!' then
+            nextchar(ls)
+            if ls.current ~= '=' then return '!' else nextchar(ls); return 'TK_ne' end
         elseif current == ':' then
             nextchar(ls)
             if ls.current ~= ':' then return ':' else nextchar(ls); return 'TK_label' end

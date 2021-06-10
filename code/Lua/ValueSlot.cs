@@ -21,8 +21,8 @@ namespace Miku.Lua
 	struct ValueSlot
 	{
 		public ValueKind Kind { get; private set; }
-		object reference;
-		double number;
+		private object Reference;
+		private double NumberValue;
 
 		public static ValueSlot Nil()
 		{
@@ -31,12 +31,12 @@ namespace Miku.Lua
 
 		public static ValueSlot String(string x)
 		{
-			return new ValueSlot() { Kind = ValueKind.String, reference = x };
+			return new ValueSlot() { Kind = ValueKind.String, Reference = x };
 		}
 
 		public static ValueSlot Number( double x )
 		{
-			return new ValueSlot() { Kind = ValueKind.Number, number = x };
+			return new ValueSlot() { Kind = ValueKind.Number, NumberValue = x };
 		}
 
 		public static ValueSlot Bool( bool x )
@@ -68,22 +68,22 @@ namespace Miku.Lua
 
 		public static ValueSlot Table( Table x )
 		{
-			return new ValueSlot() { Kind = ValueKind.Table, reference = x };
+			return new ValueSlot() { Kind = ValueKind.Table, Reference = x };
 		}
 
 		public static ValueSlot ProtoFunction( ProtoFunction x )
 		{
-			return new ValueSlot() { Kind = ValueKind.ProtoFunction, reference = x };
+			return new ValueSlot() { Kind = ValueKind.ProtoFunction, Reference = x };
 		}
 
 		public static ValueSlot Function( Function x )
 		{
-			return new ValueSlot() { Kind = ValueKind.Function, reference = x };
+			return new ValueSlot() { Kind = ValueKind.Function, Reference = x };
 		}
 
 		public static ValueSlot UserFunction( UserFunction x )
 		{
-			return new ValueSlot() { Kind = ValueKind.UserFunction, reference = x };
+			return new ValueSlot() { Kind = ValueKind.UserFunction, Reference = x };
 		}
 
 		public bool IsNil()
@@ -105,7 +105,7 @@ namespace Miku.Lua
 		{
 			if ( this.Kind == ValueKind.Table )
 			{
-				return (Table)this.reference;
+				return (Table)this.Reference;
 			}
 			throw new Exception( $"{this} is not a table." );
 		}
@@ -114,7 +114,7 @@ namespace Miku.Lua
 		{
 			if ( this.Kind == ValueKind.Number )
 			{
-				return this.number;
+				return this.NumberValue;
 			}
 			throw new Exception( $"{this} is not a number." );
 		}
@@ -123,7 +123,7 @@ namespace Miku.Lua
 		{
 			if (this.Kind == ValueKind.ProtoFunction)
 			{
-				return (ProtoFunction)this.reference;
+				return (ProtoFunction)this.Reference;
 			}
 			throw new System.Exception("wrong kind");
 		}
@@ -132,7 +132,7 @@ namespace Miku.Lua
 		{
 			if ( this.Kind == ValueKind.String )
 			{
-				return (string)this.reference;
+				return (string)this.Reference;
 			}
 			throw new System.Exception( "wrong kind" );
 		}
@@ -141,7 +141,7 @@ namespace Miku.Lua
 		{
 			if ( this.Kind == ValueKind.Function )
 			{
-				return (Function)this.reference;
+				return (Function)this.Reference;
 			}
 			throw new System.Exception( $"{this} is not a function." );
 		}
@@ -150,7 +150,7 @@ namespace Miku.Lua
 		{
 			if ( this.Kind == ValueKind.UserFunction )
 			{
-				return (UserFunction)this.reference;
+				return (UserFunction)this.Reference;
 			}
 			throw new System.Exception( $"{this} is not a user function." );
 		}
@@ -174,13 +174,46 @@ namespace Miku.Lua
 		{
 			if (this.Kind == ValueKind.String)
 			{
-				return this.reference.ToString();
+				return this.Reference.ToString();
 			}
 			if (this.Kind == ValueKind.Number)
 			{
-				return this.number.ToString();
+				return this.NumberValue.ToString();
 			}
 			return this.Kind.ToString();
+		}
+
+		public override int GetHashCode()
+		{
+			int hash = Kind.GetHashCode();
+			if (Kind == ValueKind.Number)
+			{
+				hash ^= NumberValue.GetHashCode();
+			}
+			if (Reference != null)
+			{
+				hash ^= Reference.GetHashCode();
+			}
+			return hash;
+		}
+
+		public override bool Equals( object obj )
+		{
+			if (obj is ValueSlot)
+			{
+				var val = (ValueSlot)obj;
+				if (this.Kind == val.Kind)
+				{
+					if (this.Kind == ValueKind.Number)
+					{
+						return this.NumberValue == val.NumberValue;
+					} else
+					{
+						return this.Reference.Equals( val.Reference );
+					}
+				}
+			}
+			return false;
 		}
 	}
 }
