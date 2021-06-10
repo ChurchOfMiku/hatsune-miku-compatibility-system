@@ -7,7 +7,6 @@ namespace Miku.Lua
 {
 	class Table
 	{
-		//private List<ValueSlot> array = new List<ValueSlot>();
 		private Dictionary<ValueSlot, ValueSlot>? Dict = null;
 		private List<ValueSlot>? Array = null;
 

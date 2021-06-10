@@ -181,7 +181,7 @@ namespace Miku.Lua
 			return hash;
 		}
 
-		public override bool Equals( object obj )
+		public override bool Equals( object? obj )
 		{
 			if (obj is ValueSlot)
 			{
@@ -193,6 +193,10 @@ namespace Miku.Lua
 						return this.NumberValue == val.NumberValue;
 					} else
 					{
+						if (this.Reference == null)
+						{
+							return val.Reference == null;
+						}
 						return this.Reference.Equals( val.Reference ); 
 					}
 				}

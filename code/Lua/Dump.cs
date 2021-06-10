@@ -1,8 +1,9 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 using Sandbox;
 
@@ -20,8 +21,6 @@ namespace Miku.Lua
 
 	class Dump
 	{
-		uint[] code;
-
 		private static readonly byte[] DUMP_HEADER = new byte[] { 27, 76, 74 };
 		private static readonly byte   DUMP_VERSION = 2;
 		private static readonly byte   DUMP_FLAGS = 0; // chunk must include debug info and be the correct endian-ness

@@ -1,8 +1,9 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Sandbox;
 
 namespace Miku.Lua
@@ -82,6 +83,7 @@ namespace Miku.Lua
 		public Executor( Function func, ValueSlot[] args )
 		{
 			AddFrame( func, 0, 0 );
+			Func = func; // used to suppress null warning
 			for (uint i=0;i<args.Length;i++ )
 			{
 				StackSet(i, args[i]);
@@ -106,7 +108,7 @@ namespace Miku.Lua
 			this.Func = new_func;
 
 			// Grow value stack.
-			StackTop += Func.prototype.numSlots;
+			StackTop += Func.Prototype.numSlots;
 			while ( ValueStack.Count < StackTop )
 			{
 				ValueStack.Add( ValueSlot.NIL );
@@ -145,7 +147,7 @@ namespace Miku.Lua
 					}
 				}
 
-				StackTop -= Func.prototype.numSlots;
+				StackTop -= Func.Prototype.numSlots;
 				Func = frame_info.Func;
 				pc = frame_info.PC;
 				VarArgs = frame_info.VarArgs;
@@ -154,21 +156,21 @@ namespace Miku.Lua
 
 		private void StoreVarArgs(int args_in)
 		{
-			if ( args_in < Func.prototype.numArgs )
+			if ( args_in < Func.Prototype.numArgs )
 			{
 				// we need to clear arguments we're not using
-				for (uint i=(uint)args_in;i<Func.prototype.numArgs;i++ )
+				for (uint i=(uint)args_in;i<Func.Prototype.numArgs;i++ )
 				{
 					StackSet( i, ValueSlot.NIL );
 				}
 			}
 
-			if (Func.prototype.IsVarArg())
+			if (Func.Prototype.IsVarArg())
 			{
-				if ( args_in > Func.prototype.numArgs )
+				if ( args_in > Func.Prototype.numArgs )
 				{
-					uint varg_base = (uint)Func.prototype.numArgs;
-					int varg_count = args_in - Func.prototype.numArgs;
+					uint varg_base = (uint)Func.Prototype.numArgs;
+					int varg_count = args_in - Func.Prototype.numArgs;
 					VarArgs = new ValueSlot[varg_count];
 					for (uint i=0;i<varg_count;i++ )
 					{
@@ -207,7 +209,7 @@ namespace Miku.Lua
 			{
 				//LIMIT = 1000;
 			}
-			while (pc < Func.prototype.code.Length)
+			while (pc < Func.Prototype.code.Length)
 			{
 				try
 				{
@@ -236,27 +238,27 @@ namespace Miku.Lua
 			int slot_i = 0;
 			foreach (var level in CallStack.Reverse() )
 			{
-				var slot_count = level.Func.prototype.numSlots;
+				var slot_count = level.Func.Prototype.numSlots;
 				for (int j = 0; j < slot_count; j++ )
 				{
 					Log.Info( $"({slot_i}) {slot_count - j - 1}: {ValueStack[slot_i]}" );
 					slot_i++;
 				}
-				Log.Info( "^^^--- " + level.Func.prototype.DebugName );
+				Log.Info( "^^^--- " + level.Func.Prototype.DebugName );
 			}
 			{
-				var slot_count = Func.prototype.numSlots;
+				var slot_count = Func.Prototype.numSlots;
 				for ( int j = 0; j < slot_count; j++ )
 				{
 					Log.Info( $"({slot_i}) {slot_count - j - 1}: {ValueStack[slot_i]}" );
 					slot_i++;
 				}
-				Log.Info( "^^^--- " + Func.prototype.DebugName );
+				Log.Info( "^^^--- " + Func.Prototype.DebugName );
 			}
 			Log.Info( "======= CODE =======" );
-			for (int i=0;i<Func.prototype.code.Length;i++ )
+			for (int i=0;i<Func.Prototype.code.Length;i++ )
 			{
-				uint instr = Func.prototype.code[i];
+				uint instr = Func.Prototype.code[i];
 				var OP = (OpCode)(instr & 0xFF);
 				if (pc == i)
 				{
@@ -268,7 +270,7 @@ namespace Miku.Lua
 
 		public void Step()
 		{
-			uint instr = Func.prototype.code[pc];
+			uint instr = Func.Prototype.code[pc];
 			var OP = (OpCode)(instr & 0xFF);
 			var A = (instr >> 8) & 0xFF;
 			var B = (instr >> 24) & 0xFF;
@@ -314,7 +316,7 @@ namespace Miku.Lua
 				case OpCode.ISEQS:
 					{
 						var vA = StackGet( A );
-						var vD = Func.prototype.GetConstGC( D );
+						var vD = Func.Prototype.GetConstGC( D );
 						bool skip = !vA.Equals(vD);
 						if ( skip ) { pc++; }
 						break;
@@ -322,7 +324,7 @@ namespace Miku.Lua
 				case OpCode.ISNES:
 					{
 						var vA = StackGet( A );
-						var vD = Func.prototype.GetConstGC( D );
+						var vD = Func.Prototype.GetConstGC( D );
 						bool skip = vA.Equals( vD );
 						if ( skip ) { pc++; }
 						break;
@@ -330,7 +332,7 @@ namespace Miku.Lua
 				case OpCode.ISEQN:
 					{
 						var vA = StackGet( A );
-						var vD = ValueSlot.Number( Func.prototype.GetConstNum( D ) );
+						var vD = ValueSlot.Number( Func.Prototype.GetConstNum( D ) );
 						bool skip = !vA.Equals( vD );
 						if ( skip ) { pc++; }
 						break;
@@ -338,7 +340,7 @@ namespace Miku.Lua
 				case OpCode.ISNEN:
 					{
 						var vA = StackGet( A );
-						var vD = ValueSlot.Number( Func.prototype.GetConstNum( D ) );
+						var vD = ValueSlot.Number( Func.Prototype.GetConstNum( D ) );
 						bool skip = vA.Equals( vD );
 						if ( skip ) { pc++; }
 						break;
@@ -430,7 +432,7 @@ namespace Miku.Lua
 				case OpCode.MODVN:
 					{
 						double nB = StackGet( B ).CheckNumber();
-						double nC = Func.prototype.GetConstNum( C );
+						double nC = Func.Prototype.GetConstNum( C );
 						double result = 0;
 						switch (OP)
 						{
@@ -447,7 +449,7 @@ namespace Miku.Lua
 				case OpCode.MULNV:
 					{
 						double nB = StackGet( B ).CheckNumber();
-						double nC = Func.prototype.GetConstNum( C );
+						double nC = Func.Prototype.GetConstNum( C );
 						double result = 0;
 						switch ( OP )
 						{
@@ -487,7 +489,7 @@ namespace Miku.Lua
 				// Constants
 				case OpCode.KSTR:
 					{
-						var str = Func.prototype.GetConstGC( D );
+						var str = Func.Prototype.GetConstGC( D );
 						StackSet( A,  str );
 						break;
 					}
@@ -500,7 +502,7 @@ namespace Miku.Lua
 					}
 				case OpCode.KNUM:
 					{
-						var num = Func.prototype.GetConstNum( D );
+						var num = Func.Prototype.GetConstNum( D );
 						StackSet( A, ValueSlot.Number( num ) );
 						break;
 					}
@@ -532,11 +534,11 @@ namespace Miku.Lua
 				case OpCode.UCLO:
 					{
 						int upval_close_base = GetRealStackIndex( A );
-						int frame_top = GetRealStackIndex((uint)(Func.prototype.numSlots - 1));
+						int frame_top = GetRealStackIndex((uint)(Func.Prototype.numSlots - 1));
 						for (int i= upval_close_base; i>= frame_top; i--)
 						{
 							UpValueBox uv;
-							if (OpenUpValues.TryGetValue( i, out uv ))
+							if (OpenUpValues.TryGetValue( i, out uv! ))
 							{
 								uv.Value = ValueStack[i];
 								OpenUpValues.Remove( i );
@@ -548,7 +550,7 @@ namespace Miku.Lua
 					}
 				case OpCode.FNEW:
 					{
-						var new_proto = Func.prototype.GetConstGC(D).CheckProtoFunction();
+						var new_proto = Func.Prototype.GetConstGC(D).CheckProtoFunction();
 						var upvals = new UpValueBox[new_proto.UpValues.Length];
 						for (int i=0;i< upvals.Length; i++ )
 						{
@@ -564,7 +566,7 @@ namespace Miku.Lua
 								var uv_slot = uv_code & 0x3FFF;
 								int real_stack_index = GetRealStackIndex( (uint)uv_slot );
 								UpValueBox uv_box;
-								if (!OpenUpValues.TryGetValue( real_stack_index, out uv_box) )
+								if (!OpenUpValues.TryGetValue( real_stack_index, out uv_box!) )
 								{
 									uv_box = new UpValueBox()
 									{
@@ -575,7 +577,7 @@ namespace Miku.Lua
 								upvals[i] = uv_box;
 							}
 						}
-						var new_func = new Function( Func.env, new_proto, upvals );
+						var new_func = new Function( Func.Env, new_proto, upvals );
 						StackSet( A, ValueSlot.Function( new_func ) );
 						break;
 					}
@@ -588,21 +590,21 @@ namespace Miku.Lua
 					}
 				case OpCode.TDUP:
 					{
-						var table_proto = Func.prototype.GetConstGC( D ).CheckTable();
+						var table_proto = Func.Prototype.GetConstGC( D ).CheckTable();
 						var table = table_proto.CloneProto();
 						StackSet( A, ValueSlot.Table( table ) );
 						break;
 					}
 				case OpCode.GGET:
 					{
-						var str = Func.prototype.GetConstGC( D );
-						StackSet( A, ValueOperations.Get( ValueSlot.Table(Func.env), str ) );
+						var str = Func.Prototype.GetConstGC( D );
+						StackSet( A, ValueOperations.Get( ValueSlot.Table(Func.Env), str ) );
 						break;
 					}
 				case OpCode.GSET:
 					{
-						var str = Func.prototype.GetConstGC( D );
-						Func.env.Set(str, StackGet(A));
+						var str = Func.Prototype.GetConstGC( D );
+						Func.Env.Set(str, StackGet(A));
 						break;
 					}
 				case OpCode.TGETV:
@@ -612,7 +614,7 @@ namespace Miku.Lua
 					}
 				case OpCode.TGETS:
 					{
-						var str = Func.prototype.GetConstGC( C );
+						var str = Func.Prototype.GetConstGC( C );
 						StackSet( A, ValueOperations.Get( StackGet( B ), str ) );
 						break;
 					}
@@ -630,7 +632,7 @@ namespace Miku.Lua
 				case OpCode.TSETS:
 					{
 						var table = StackGet( B ).CheckTable();
-						var str = Func.prototype.GetConstGC( C );
+						var str = Func.Prototype.GetConstGC( C );
 						table.Set( str, StackGet( A ) );
 						break;
 					}
@@ -674,8 +676,8 @@ namespace Miku.Lua
 								}
 
 								// Clear current function and reset stack.
-								StackTop -= Func.prototype.numSlots;
-								Func = null;
+								StackTop -= Func.Prototype.numSlots;
+								Func = null!;
 
 								AddFrame( call_func.CheckFunction(), 0, 0 );
 
@@ -708,7 +710,7 @@ namespace Miku.Lua
 							{
 								args[i] = ValueStack[arg_base - i];
 							}
-							var rets = user_func( args, Func.env );
+							var rets = user_func( args, Func.Env );
 
 							// tail calls return everything
 							if ( is_tailcall )
