@@ -11,6 +11,7 @@ namespace Miku.Lua
 		private List<ValueSlot>? Array = null;
 
 		public Table? MetaTable = null;
+		public string? DebugLibName = null;
 
 		public int GetLength()
 		{
@@ -125,12 +126,17 @@ namespace Miku.Lua
 			if (Dict != null)
 			{
 				ValueSlot result;
-				if (!Dict.TryGetValue( key, out result ))
+				if (Dict.TryGetValue( key, out result ))
 				{
-					result = ValueSlot.NIL;
+					return result;
 				}
-				return result;
 			}
+
+			if (DebugLibName != null)
+			{
+				Sandbox.Log.Info( "GET " + DebugLibName + "." + key );
+			}
+
 			return ValueSlot.NIL;
 		}
 

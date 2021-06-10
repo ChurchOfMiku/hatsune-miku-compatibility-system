@@ -2,7 +2,7 @@
 using System;
 using System.Linq;
 
-using Miku.Lua;
+using Miku.GWART;
 
 namespace Miku
 {
@@ -53,9 +53,6 @@ namespace Miku
 			//
 			if ( IsServer && Input.Pressed( InputButton.Attack1 ) )
 			{
-				var machine = new LuaMachine();
-				//machine.RunFile("mandelbrot.lua");
-				machine.RunFile( "gmodbluehud.lua" );
 			}
 		}
 

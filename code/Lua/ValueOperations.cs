@@ -32,7 +32,7 @@ namespace Miku.Lua
 					if (mt_index.Kind == ValueKind.Table)
 					{
 						return mt_index.CheckTable().Get( key );
-					} else
+					} else if (mt_index.Kind != ValueKind.Nil)
 					{
 						throw new Exception( $"Attempt to use {mt_index.Kind} as __index." );
 					}
@@ -40,7 +40,7 @@ namespace Miku.Lua
 				return result;
 			} else
 			{
-				throw new Exception( $"Attempt to index {arg.Kind}." );
+				throw new Exception( $"Attempt to index {arg.Kind} {arg} with {key}." );
 			}
 		}
 	}

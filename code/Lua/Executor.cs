@@ -227,7 +227,7 @@ namespace Miku.Lua
 				safety++;
 				if (safety >= LIMIT )
 				{
-					this.LogState();
+					//this.LogState();
 					throw new Exception( "hit safety" );
 				}
 			}
@@ -260,11 +260,15 @@ namespace Miku.Lua
 			{
 				uint instr = Func.Prototype.code[i];
 				var OP = (OpCode)(instr & 0xFF);
+				var A = (instr >> 8) & 0xFF;
+				var B = (instr >> 24) & 0xFF;
+				var C = (instr >> 16) & 0xFF;
+				var D = (instr >> 16) & 0xFFFF;
 				if (pc == i)
 				{
 					Log.Info( "vvvvvvvvvvvvvvvvvvvvvvv" );
 				}
-				Log.Info( $"> {i}: {OP}" );
+				Log.Info( $"> {i}: {OP} {A} {B} {C} {D}" ); 
 			}
 		}
 

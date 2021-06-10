@@ -16,22 +16,7 @@ namespace Miku.Lua
 	}
 	class LuaMachine
 	{
-		private static ValueSlot[]? TableInsert( ValueSlot[] args, Table env )
-		{
-			Assert.True(args.Length == 2);
-			var table = args[0].CheckTable();
-			var new_val = args[1];
-			table.PushVal(new_val);
-			return null;
-		}
-
-		private static ValueSlot[]? MathAbs( ValueSlot[] args )
-		{
-			double result = Math.Abs( args[0].CheckNumber() );
-			return new ValueSlot[] { ValueSlot.Number( result ) };
-		}
-
-		private static string Concat( ValueSlot[] args )
+		public static string Concat( ValueSlot[] args )
 		{
 			var builder = new StringBuilder();
 			foreach ( var arg in args )
@@ -43,44 +28,11 @@ namespace Miku.Lua
 			return builder.ToString();
 		}
 
-		private static ValueSlot[]? Print( ValueSlot[] args, Table env )
-		{
-			var builder = new StringBuilder("LUA: ");
-			foreach ( var arg in args )
-			{
-				builder.Append( arg.ToString() );
-				builder.Append( "\t" );
-				if (arg.Kind == ValueKind.Table)
-				{
-					arg.CheckTable().Log();
-				}
-			}
-			Log.Info( builder.ToString() );
-			return null;
-		}
-
-		private static ValueSlot[]? Error( ValueSlot[] args, Table env )
-		{
-			throw new LuaException( args[0].ToString() );
-		}
-
 		public static ValueSlot BootstrapRequire(Table env, string name)
 		{
-			string filename;
-			if ( name == "core" )
-			{
-				filename = "core";
-			}
-			else if ( name.StartsWith( "lang." ) )
-			{
-				var mod_name = name.Substring( 5 );
-				filename = $"lang/{mod_name}";
-			} else
-			{
-				throw new Exception( "can't require: " + name );
-			}
+			string filename = name.Replace('.','/');
 
-			var bytes = FileSystem.Mounted.ReadAllBytes( $"lua_bootstrap/{filename}.bc" );
+			var bytes = FileSystem.Mounted.ReadAllBytes( $"lua/core/{filename}.bc" );
 
 			var proto = Dump.Read( bytes.ToArray() );
 			var func = new Function( env, proto, new Executor.UpValueBox[0] );
@@ -101,213 +53,14 @@ namespace Miku.Lua
 
 		public LuaMachine()
 		{
-			Stopwatch sw = Stopwatch.StartNew();
+			Env.DebugLibName = "_G";
 
-			var lib_bit = new Table();
-			Env.Set( "bit", ValueSlot.Table( lib_bit ) );
-			lib_bit.Set( "band", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
-				int x = (int)args[0].CheckNumber();
-				int y = (int)args[1].CheckNumber();
-				return new ValueSlot[] { ValueSlot.Number(x & y) };
-			}));
+			CoreLib.Bit.Init(Env);
+			CoreLib.String.Init(Env);
 
-			lib_bit.Set( "bor", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
-				int x = (int)args[0].CheckNumber();
-				int y = (int)args[1].CheckNumber();
-				return new ValueSlot[] { ValueSlot.Number( x | y ) };
-			} ) );
+			CoreLib.Misc.Init(Env);
 
-			lib_bit.Set( "rshift", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
-				uint x = (uint)args[0].CheckNumber(); // LOGICAL SHIFT = uint !!!
-				int y = (int)args[1].CheckNumber();
-				return new ValueSlot[] { ValueSlot.Number( x >> y ) };
-			}));
-
-			lib_bit.Set( "lshift", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
-				int x = (int)args[0].CheckNumber();
-				int y = (int)args[1].CheckNumber();
-				return new ValueSlot[] { ValueSlot.Number( x << y ) };
-			} ) );
-
-			lib_bit.Set( "bnot", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
-				int x = (int)args[0].CheckNumber();
-				return new ValueSlot[] { ValueSlot.Number( ~x ) };
-			}));
-
-			lib_bit.Set( "get_double_parts", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
-				double x = args[0].CheckNumber();
-				long bits = BitConverter.DoubleToInt64Bits(x);
-				int high = (int)(bits >> 32);
-				int low = (int)bits;
-				return new ValueSlot[] { ValueSlot.Number( low ), ValueSlot.Number( high ) };
-			} ));
-
-			var string_lib = new Table();
-			Env.Set( "string", ValueSlot.Table( string_lib ) );
-
-			string_lib.Set( "byte", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
-				var str = args[0].CheckString();
-				int index = 0;
-				if (args.Length>1)
-				{
-					index = (int)args[1].CheckNumber() - 1;
-				}
-
-				{
-					if (index < 0 || index >= str.Length)
-					{
-						throw new Exception( "string.byte oob" );
-					}
-					int result = (byte)str[index];
-					if (result > 255)
-					{
-						throw new Exception( "string.byte got non-byte result, this could be a problem" );
-					}
-					return new ValueSlot[] { ValueSlot.Number( result ) };
-				}
-			}));
-
-			string_lib.Set( "lower", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
-				var str = args[0].CheckString();
-				return new ValueSlot[] { ValueSlot.String( str.ToLower() ) };
-			}));
-
-			string_lib.Set( "sub", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
-				// TODO: see how this is actually implemented in lua, there is no way this is totally consistent
-				var str = args[0].CheckString();
-				int start = (int)args[1].CheckNumber() - 1;
-				int length = str.Length;
-				if (start < 0)
-				{
-					start = str.Length + start + 1;
-				}
-				if (args.Length > 2)
-				{
-					int arg2 = (int)args[2].CheckNumber();
-					if (arg2 >= 0)
-					{
-						length = arg2 - start;
-					} else
-					{
-						length = (str.Length + arg2 + 1) - start;
-					}
-				}
-				start = Math.Max( start, 0 );
-				length = Math.Max( length, 0 );
-				length = Math.Min(length, str.Length - start);
-				return new ValueSlot[] { ValueSlot.String(str.Substring(start,length)) };
-			}));
-
-			string_lib.Set( "match", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
-				var str = args[0].CheckString();
-				var pattern = args[1].CheckString();
-				bool result = false;
-				switch ( pattern )
-				{
-					case "^TK_": result = str.StartsWith( "TK_" ); break;
-					case "^@(.+)$":
-						{
-							if (str.StartsWith("@"))
-							{
-								return new ValueSlot[] { ValueSlot.String( str.Substring( 1 ) ) };
-							}
-							result = false;
-							break;
-						}
-					default: throw new Exception( "match " + pattern );
-				}
-				return new ValueSlot[] { ValueSlot.Bool( result ) };
-			}));
-
-			string_lib.Set( "format", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
-				string joined = Concat( args );
-				return new ValueSlot[] { ValueSlot.String( "["+joined+"]" ) };
-			}));
-
-			var table_lib = new Table();
-			Env.Set( "table", ValueSlot.Table(table_lib) );
-			table_lib.Set( "insert", ValueSlot.UserFunction( TableInsert ) );
-
-			var math_lib = new Table();
-			Env.Set( "math", ValueSlot.Table( math_lib ) );
-			math_lib.Set( "floor", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
-				double n = args[0].CheckNumber();
-				return new ValueSlot[] { ValueSlot.Number( Math.Floor(n) ) };
-			} ) );
-
-			Env.Set( "print", ValueSlot.UserFunction( Print ) );
-			Env.Set( "error", ValueSlot.UserFunction( Error ) );
-
-			Env.Set( "tonumber", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
-				var x = args[0];
-				if (x.Kind == ValueKind.String)
-				{
-					double result = 0;
-					if (double.TryParse(x.CheckString(),out result))
-					{
-						return new ValueSlot[] { ValueSlot.Number(result) };
-					}
-				}
-				throw new Exception( "can't convert to number: " + x );
-			}));
-
-			Env.Set( "setmetatable", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
-				var table = args[0].CheckTable();
-				var metatable = args[1].CheckTable();
-				metatable.CheckMetaTableMembers();
-				table.MetaTable = metatable;
-				return new ValueSlot[] { ValueSlot.Table( table ) };
-			} ));
-
-			Env.Set( "getmetatable", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
-				var table = args[0].CheckTable();
-				var result = table.MetaTable != null ? ValueSlot.Table( table.MetaTable ) : ValueSlot.NIL;
-				return new ValueSlot[] { result };
-			}));
-
-			Env.Set( "pcall", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
-				var func = args[0].CheckFunction(); // assume this is a lua function
-				var func_args = new ValueSlot[args.Length - 1];
-				for (int i=0;i<func_args.Length;i++ )
-				{
-					func_args[i] = args[i + 1];
-				}
-				ValueSlot[] call_results;
-				try
-				{
-					call_results = func.Call( func_args );
-				} catch (Exception e)
-				{
-					Log.Warning( e.Message );
-					throw new Exception( "TODO pcall error handling!" );
-				}
-
-				ValueSlot[] pcall_results = new ValueSlot[call_results.Length + 1];
-				pcall_results[0] = ValueSlot.Bool( true );
-				for (int i=0;i<call_results.Length;i++ )
-				{
-					pcall_results[i + 1] = call_results[i];
-				}
-
-				return pcall_results;
-			}));
-
-			Env.Set( "type", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
-				string result;
-				switch (args[0].Kind)
-				{
-					case ValueKind.String: result = "string"; break;
-					case ValueKind.Number: result = "number"; break;
-					case ValueKind.Table: result = "table"; break;
-					case ValueKind.Function: result = "function"; break;
-					case ValueKind.True:
-					case ValueKind.False:
-						result = "boolean"; break;
-					default:
-						throw new Exception( "typeof " + args[0].Kind );
-				}
-				return new ValueSlot[] { ValueSlot.String(result) };
-			} ));
+			CoreLib.Globals.Init( Env );
 
 			Env.Set( "_MIKU_BOOTSTRAP_REQUIRE", ValueSlot.UserFunction( (ValueSlot[] args, Table env) => {
 				string mod_name = args[0].CheckString();
@@ -315,17 +68,22 @@ namespace Miku.Lua
 				return new ValueSlot[] {res};
 			}));
 
+			Env.Set( "_MIKU_DEBUG_LIB", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
+				var tab = args[0].CheckTable();
+				var name = args[1].CheckString();
+				tab.DebugLibName = name;
+				return null;
+			}));
+
 			BootstrapRequire( Env, "core" );
 			CompileFunction = BootstrapRequire( Env, "lang.compile" ).CheckTable().Get( "string" ).CheckFunction();
-
-			Log.Warning( $"Machine loaded in {sw.ElapsedMilliseconds}ms" );
 		}
 
-		public void RunString(string code)
+		public void RunString(string code,string name)
 		{
 			Stopwatch sw = Stopwatch.StartNew();
 			var results = CompileFunction.Call( new ValueSlot[] { ValueSlot.String(code) } );
-			Log.Warning( $"Compile took {sw.Elapsed.TotalMilliseconds} ms" );
+			double compile_time = sw.Elapsed.TotalMilliseconds;
 			if (results[0].Kind == ValueKind.True)
 			{
 				var dump = results[1].CheckTable();
@@ -344,7 +102,7 @@ namespace Miku.Lua
 
 				Stopwatch sw2 = Stopwatch.StartNew();
 				new_func.Call(null,true);
-				Log.Warning( $"Run took {sw2.ElapsedMilliseconds}ms" );
+				Log.Warning( $"Finished {name}; C = {compile_time} ms; E = {sw2.Elapsed.TotalMilliseconds} ms" );
 			} else
 			{
 				throw new Exception( "compile failed" );
@@ -354,7 +112,7 @@ namespace Miku.Lua
 		public void RunFile(string filename )
 		{
 			var code = FileSystem.Mounted.ReadAllText( $"lua/{filename}" );
-			RunString( code );
+			RunString( code, filename );
 		}
 	}
 }
