@@ -540,10 +540,11 @@ namespace Miku.Lua
 						break;
 					}
 				case OpCode.USETV:
-					{
-						Func.UpValues[A].Set(StackGet(D));
-						break;
-					}
+					Func.UpValues[A].Set(StackGet(D));
+					break;
+				case OpCode.USETN:
+					Func.UpValues[A].Set( ValueSlot.Number(Func.Prototype.GetConstNum(D)) );
+					break;
 				case OpCode.UCLO:
 					{
 						int upval_close_base = GetRealStackIndex( A );

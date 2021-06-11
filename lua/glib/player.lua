@@ -1,50 +1,41 @@
 -- Stub functions for players.
+_CLASS_WEAPON = {}
+_CLASS_WEAPON.__index = _CLASS_WEAPON
+_MIKU_DEBUG_LIB(_CLASS_WEAPON,"Weapon")
 
-local WEAPON_CLASS = {__index = {}}
-_MIKU_DEBUG_LIB(WEAPON_CLASS.__index,"Weapon")
-
-function WEAPON_CLASS.__index.Clip1()
-    return 2
+function _CLASS_WEAPON.Clip1()
+    return 0
 end
 
-function WEAPON_CLASS.__index.GetPrimaryAmmoType()
-    return "dicks"
+function _CLASS_WEAPON.GetPrimaryAmmoType()
+    return "a"
 end
 
-function WEAPON_CLASS.__index.GetSecondaryAmmoType()
-    return "cocks"
+function _CLASS_WEAPON.GetSecondaryAmmoType()
+    return "b"
 end
 
-function WEAPON_CLASS.__index.GetPrintName()
+function _CLASS_WEAPON.GetPrintName()
     return "A Weapon"
 end
 
-local LOCAL_WEAPON = setmetatable({},WEAPON_CLASS)
+local LOCAL_WEAPON = setmetatable({},_CLASS_WEAPON)
 
 ---------------------------------------------------------
 
-local PLAYER_CLASS = {__index = {}}
-_MIKU_DEBUG_LIB(PLAYER_CLASS.__index,"Player")
+_CLASS_PLAYER = {}
+_CLASS_PLAYER.__index = _CLASS_PLAYER
+_MIKU_DEBUG_LIB(_CLASS_PLAYER,"Player")
 
-function PLAYER_CLASS.__index.Health()
-    return 85
+function _CLASS_PLAYER.Armor()
+    -- No Armor
+    return 0
 end
 
-function PLAYER_CLASS.__index.Armor()
-    return 15
+function _CLASS_PLAYER.GetAmmoCount()
+    return 0
 end
 
-function PLAYER_CLASS.__index.GetAmmoCount()
-    return 7
-end
-
-function PLAYER_CLASS.__index.GetActiveWeapon()
+function _CLASS_PLAYER.GetActiveWeapon()
     return LOCAL_WEAPON
-end
-
--- TODO only create this for clients
-local LOCAL_PLAYER = setmetatable({},PLAYER_CLASS)
-
-function LocalPlayer()
-    return LOCAL_PLAYER
 end

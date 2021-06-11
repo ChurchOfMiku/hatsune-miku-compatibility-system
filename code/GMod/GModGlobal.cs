@@ -11,6 +11,13 @@ using Sandbox.UI;
 
 namespace Miku.GMod
 {
+	class RootPanelNoScaling : RootPanel
+	{
+		protected override void UpdateScale( Rect screenSize )
+		{
+			Scale = 1.0f;
+		}
+	}
 
 	class GModGlobal
 	{
@@ -26,7 +33,7 @@ namespace Miku.GMod
 				{
 					Local.Hud.Delete();
 				}
-				Local.Hud = new RootPanel();
+				Local.Hud = new RootPanelNoScaling();
 
 				GModClient = new GmodMachineClient();
 				GModClient.RunFile( "test/gmodbluehud.lua" );

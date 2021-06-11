@@ -39,11 +39,14 @@ namespace Miku.GMod.Lib
 			if (FontRegistry.TryGetValue(name, out Font font ) )
 			{
 				style.FontSize = Length.Pixels( (float)font.Size );
-				//style.FontFamily = font.Family+"wwww";
+				//style.FontFamily = font.Family;
 				style.FontWeight = (int)(font.Weight * 1.0);
 			} else
 			{
-				Log.Warning( "Can't find font: " + name );
+				float font_size = 12;
+				style.FontSize = Length.Pixels( font_size );
+				//Log.Warning( "Can't find font: " + name );
+				//style.BackgroundColor = Color.Red;
 			}
 		}
 
@@ -56,11 +59,11 @@ namespace Miku.GMod.Lib
 
 			// Console still breaks these but they're mostly accurate now.
 			env.Set( "ScrW", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
-				return new ValueSlot[] { ValueSlot.Number( Screen.Width / Local.Hud.Scale ) };
+				return new ValueSlot[] { ValueSlot.Number( Screen.Width ) };
 			} ) );
 
 			env.Set( "ScrH", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
-				return new ValueSlot[] { ValueSlot.Number( Screen.Height / Local.Hud.Scale ) };
+				return new ValueSlot[] { ValueSlot.Number( Screen.Height ) };
 			} ) );
 
 			var draw_lib = new Table();

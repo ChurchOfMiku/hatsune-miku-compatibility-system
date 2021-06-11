@@ -5,15 +5,18 @@ using Sandbox;
 
 namespace Miku.GMod
 {
-	class GModMachineBase : Lua.LuaMachine
+	abstract class GModMachineBase : Lua.LuaMachine
 	{
 		Function RunHookFunction;
-		EntityMapper Ents = new EntityMapper();
+		public EntityMapper Ents = new EntityMapper();
+
+		public abstract bool IsClient { get; }
+		public bool IsServer { get => !IsClient; }
 
 		public GModMachineBase()
 		{
 			RunFile( "glib/hook.lua" );
-			RunFile( "glib/player.lua" );
+			new Lib.Player( this );
 
 			RunHookFunction = Env.Get( "hook" ).CheckTable().Get( "Run" ).CheckFunction();
 		}
@@ -33,6 +36,8 @@ namespace Miku.GMod
 
 	class GmodMachineClient : GModMachineBase
 	{
+		public override bool IsClient => true;
+
 		public GmodMachineClient()
 		{
 			new Lib.Draw2D( this );
