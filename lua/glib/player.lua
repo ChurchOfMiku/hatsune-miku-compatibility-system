@@ -27,11 +27,11 @@ local PLAYER_CLASS = {__index = {}}
 _MIKU_DEBUG_LIB(PLAYER_CLASS.__index,"Player")
 
 function PLAYER_CLASS.__index.Health()
-    return 69
+    return 85
 end
 
 function PLAYER_CLASS.__index.Armor()
-    return 420
+    return 15
 end
 
 function PLAYER_CLASS.__index.GetAmmoCount()

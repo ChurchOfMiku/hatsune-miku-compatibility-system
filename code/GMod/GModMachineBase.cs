@@ -1,19 +1,17 @@
 ﻿
-// GLua whatever abstraction runtime
-
 using Miku.Lua;
+using Miku.GMod.Entities;
+using Sandbox;
 
-namespace Miku.GWART
+namespace Miku.GMod
 {
 	class GModMachineBase : Lua.LuaMachine
 	{
 		Function RunHookFunction;
+		EntityMapper Ents = new EntityMapper();
 
 		public GModMachineBase()
 		{
-			Lib.Draw2D.Init( Env );
-			RunFile( "glib/draw2d.lua" );
-
 			RunFile( "glib/hook.lua" );
 			RunFile( "glib/player.lua" );
 
@@ -30,6 +28,22 @@ namespace Miku.GWART
 			}
 
 			return RunHookFunction.Call( full_args );
+		}
+	}
+
+	class GmodMachineClient : GModMachineBase
+	{
+		public GmodMachineClient()
+		{
+			new Lib.Draw2D( this );
+		}
+
+		public void Frame()
+		{
+			Host.AssertClient();
+			Local.Hud.DeleteChildren( true );
+
+			RunHook( "HUDPaint", new ValueSlot[0] );
 		}
 	}
 }

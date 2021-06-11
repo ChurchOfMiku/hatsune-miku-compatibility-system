@@ -8,7 +8,12 @@ using Miku.Lua;
 using Sandbox;
 using Sandbox.UI;
 
-namespace Miku.GWART.Lib
+// Contains:
+// - surface.*
+// - draw.*
+// - ScrW / ScrH
+
+namespace Miku.GMod.Lib
 {
 	class Draw2D
 	{
@@ -29,23 +34,24 @@ namespace Miku.GWART.Lib
 			return Color.FromBytes( R, G, B, A );
 		}
 
-		private static void ApplyFont(string name, PanelStyle style)
+		private void ApplyFont(string name, PanelStyle style)
 		{
 			if (FontRegistry.TryGetValue(name, out Font font ) )
 			{
 				style.FontSize = Length.Pixels( (float)font.Size );
-				//style.FontFamily = font.Family;
-				style.FontWeight = (int)(font.Weight * 1.5);
+				//style.FontFamily = font.Family+"wwww";
+				style.FontWeight = (int)(font.Weight * 1.0);
 			} else
 			{
 				Log.Warning( "Can't find font: " + name );
 			}
 		}
 
-		private static Dictionary<string, Font> FontRegistry = new Dictionary<string, Font>();
+		private Dictionary<string, Font> FontRegistry = new Dictionary<string, Font>();
 
-		public static void Init( Table env )
+		public Draw2D(GmodMachineClient machine)
 		{
+			var env = machine.Env;
 			FontRegistry.Clear();
 
 			// Console still breaks these but they're mostly accurate now.
@@ -121,10 +127,10 @@ namespace Miku.GWART.Lib
 					Weight = args[2].CheckNumber()
 				};
 
-				Log.Warning( "font registered: " + name );
-
 				return null;
 			} ) );
+
+			machine.RunFile( "glib/draw2d.lua" );
 		}
 	}
 }

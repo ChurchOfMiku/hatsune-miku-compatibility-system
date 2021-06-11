@@ -2,8 +2,6 @@
 using System;
 using System.Linq;
 
-using Miku.GWART;
-
 namespace Miku
 {
 	partial class MinimalPlayer : Player
@@ -26,6 +24,8 @@ namespace Miku
 			// Use ThirdPersonCamera (you can make your own Camera for 100% control)
 			//
 			Camera = new ThirdPersonCamera();
+
+			Inventory = new BaseInventory(this);
 
 			EnableAllCollisions = true;
 			EnableDrawing = true;

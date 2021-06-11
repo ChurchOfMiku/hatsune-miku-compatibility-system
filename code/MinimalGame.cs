@@ -1,6 +1,6 @@
 ﻿
 using Sandbox;
-
+using System;
 //
 // You don't need to put things in a namespace, but it doesn't hurt.
 //
@@ -22,13 +22,13 @@ namespace Miku
 	{
 		public MinimalGame()
 		{
-			GWART.GModGlobal.Init();
+			GMod.GModGlobal.Init();
 		}
 
 		public override void FrameSimulate( Client cl )
 		{
 			base.FrameSimulate( cl );
-			GWART.GModGlobal.Frame();
+			GMod.GModGlobal.GModClient.Frame();
 		}
 
 		/// <summary>
@@ -42,6 +42,7 @@ namespace Miku
 			client.Pawn = player;
 
 			player.Respawn();
+			player.Inventory.Add(new GMod.Entities.GmodWeapon(), true);
 		}
 	}
 }

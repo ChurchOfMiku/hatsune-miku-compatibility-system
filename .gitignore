@@ -3,3 +3,5 @@ code/obj
 code/Properties/launchSettings.json
 .intermediate
 tools_asset_info.bin
+
+lua/test/
