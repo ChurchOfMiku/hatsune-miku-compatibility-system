@@ -11,6 +11,7 @@ using Sandbox.UI;
 
 namespace Miku.GWART
 {
+
 	class GModGlobal
 	{
 		static GModMachineBase GModClient;
@@ -20,6 +21,11 @@ namespace Miku.GWART
 		{
 			if (Host.IsClient)
 			{
+				if (Local.Hud != null)
+				{
+					Local.Hud.Delete();
+				}
+				Local.Hud = new RootPanel();
 				RenderBroke = false;
 				GModClient = new GModMachineBase();
 				GModClient.RunFile( "gmodbluehud.lua" );
@@ -46,12 +52,6 @@ namespace Miku.GWART
 				RenderBroke = true;
 				throw;
 			}
-
-			//var label = Local.Hud.AddChild<Sandbox.UI.Label>();
-			//label.Text = "BUTTHOLE!!!!";
-			//label.Style.Left = Length.Pixels( 100 );
-			//label.Style.Top = Length.Pixels( 100 );
-			//label.SetProperty( "left", "100px" );
 		}
 	}
 }

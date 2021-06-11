@@ -11,6 +11,14 @@ function WEAPON_CLASS.__index.GetPrimaryAmmoType()
     return "dicks"
 end
 
+function WEAPON_CLASS.__index.GetSecondaryAmmoType()
+    return "cocks"
+end
+
+function WEAPON_CLASS.__index.GetPrintName()
+    return "A Weapon"
+end
+
 local LOCAL_WEAPON = setmetatable({},WEAPON_CLASS)
 
 ---------------------------------------------------------

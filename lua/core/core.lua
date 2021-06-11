@@ -23,6 +23,12 @@ function math.max(x,y)
     end
 end
 
+function math.Clamp(x,low,high)
+    if x < low then return low end
+    if x > high then return high end
+    return x
+end
+
 require = function(name)
     if module_cache[name] then
         return module_cache[name]

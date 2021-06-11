@@ -11,6 +11,9 @@ namespace Miku.GWART
 
 		public GModMachineBase()
 		{
+			Lib.Draw2D.Init( Env );
+			RunFile( "glib/draw2d.lua" );
+
 			RunFile( "glib/hook.lua" );
 			RunFile( "glib/player.lua" );
 
