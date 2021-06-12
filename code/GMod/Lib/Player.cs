@@ -22,7 +22,13 @@ namespace Miku.GMod.Lib
 				var ply = args[0].CheckTable().UserData as Sandbox.Player;
 				return new ValueSlot[] { ValueSlot.Number( ply.Health ) };
 			} ));
-			
+
+			class_player.Set( "Nick", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
+				var ply = args[0].CheckTable().UserData as Sandbox.Player;
+				var client = ply.GetClientOwner();
+				return new ValueSlot[] { ValueSlot.String( client.Name ) };
+			} ) );
+
 			if (machine.IsClient)
 			{
 				machine.Env.Set( "LocalPlayer", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {

@@ -36,7 +36,7 @@ namespace Miku.GMod
 				Local.Hud = new RootPanelNoScaling();
 
 				GModClient = new GmodMachineClient();
-				GModClient.RunFile( "test/gmodbluehud.lua" );
+				GModClient.RunFile( "test/free_darkrp_hud.lua" );
 			}
 		}
 	}

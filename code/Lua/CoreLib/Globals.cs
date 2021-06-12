@@ -83,6 +83,8 @@ namespace Miku.Lua.CoreLib
 					case ValueKind.True:
 					case ValueKind.False:
 						result = "boolean"; break;
+					case ValueKind.Nil:
+						result = "nil"; break;
 					default:
 						throw new Exception( "typeof " + args[0].Kind );
 				}

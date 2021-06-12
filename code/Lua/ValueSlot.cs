@@ -122,6 +122,24 @@ namespace Miku.Lua
 			throw new Exception( $"{this} is not a string." );
 		}
 
+		public string? TryGetString()
+		{
+			if ( Kind == ValueKind.String )
+			{
+				return (string)Reference!;
+			}
+			return null;
+		}
+
+		public double? TryGetNumber()
+		{
+			if ( Kind == ValueKind.Number )
+			{
+				return NumberValue;
+			}
+			return null;
+		}
+
 		public Function CheckFunction()
 		{
 			if ( Kind == ValueKind.Function ) {

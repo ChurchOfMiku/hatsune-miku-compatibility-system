@@ -17,6 +17,15 @@ namespace Miku.GMod.Lib
 {
 	class Draw2D
 	{
+		const string DEFAULT_FONT = "sans-serif";
+		const float DEFAULT_SIZE = 16;
+
+		const int TEXT_ALIGN_LEFT = 0;
+		const int TEXT_ALIGN_CENTER = 1;
+		const int TEXT_ALIGN_RIGHT = 2;
+		const int TEXT_ALIGN_TOP = 3;
+		const int TEXT_ALIGN_BOTTOM = 4;
+
 		private record Font
 		{
 			public string Family;
@@ -43,19 +52,19 @@ namespace Miku.GMod.Lib
 				style.FontWeight = (int)(font.Weight * 1.0);
 			} else
 			{
-				float font_size = 12;
-				style.FontSize = Length.Pixels( font_size );
+				style.FontSize = Length.Pixels( DEFAULT_SIZE );
 				//Log.Warning( "Can't find font: " + name );
 				//style.BackgroundColor = Color.Red;
 			}
 		}
 
 		private Dictionary<string, Font> FontRegistry = new Dictionary<string, Font>();
+		private Color CurrentSurfaceColor = Color.Green;
+		private string CurrentSurfaceMaterial = "";
 
 		public Draw2D(GmodMachineClient machine)
 		{
 			var env = machine.Env;
-			FontRegistry.Clear();
 
 			// Console still breaks these but they're mostly accurate now.
 			env.Set( "ScrW", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
@@ -81,8 +90,6 @@ namespace Miku.GMod.Lib
 
 				var panel = Local.Hud.AddChild<Sandbox.UI.Panel>();
 				panel.Style.Position = PositionMode.Absolute;
-				//panel.Style.Padding = Length.Pixels( 0 );
-				//panel.Style.Margin = Length.Pixels( 0 );
 
 				panel.Style.Left = Length.Pixels( (float)x );
 				panel.Style.Top = Length.Pixels( (float)y );
@@ -104,14 +111,43 @@ namespace Miku.GMod.Lib
 				double x = args[2].CheckNumber();
 				double y = args[3].CheckNumber();
 				Color color = ColorFromTable( args[4].CheckTable() );
+				int align_x = args.Length >= 6 ? (int)args[5].CheckNumber() : TEXT_ALIGN_LEFT;
+				int align_y = args.Length >= 7 ? (int)args[6].CheckNumber() : TEXT_ALIGN_TOP;
 
 				var label = Local.Hud.AddChild<Sandbox.UI.Label>();
 				label.Style.Position = PositionMode.Absolute;
 
 				label.Text = text;
-				label.Style.Left = Length.Pixels( (float)x );
+				
 				label.Style.Top = Length.Pixels( (float)y );
+				label.Style.Left = Length.Pixels( (float)x );
 				label.Style.FontColor = color;
+
+				// I could not for the life of me figure out how to do alignment.
+				/*
+				 * const int ALIGN_HACK_WIDTH = 1000;
+				 * PanelTransform? xform = null;
+				switch (align_x)
+				{
+					case TEXT_ALIGN_LEFT:
+						break;
+					case TEXT_ALIGN_CENTER:
+						label.Style.Width = Length.Pixels( ALIGN_HACK_WIDTH );
+						xform = new PanelTransform();
+						xform.Value.AddTranslateX( Length.Percent( 1 ) );
+						label.Style.TextAlign = TextAlign.Center;
+						break;
+					case TEXT_ALIGN_RIGHT:
+						//label.Style.Width = Length.Pixels( ALIGN_HACK_WIDTH );
+						//label.Style.Left = Length.Pixels( (float)x - ALIGN_HACK_WIDTH );
+						//label.Style.TextAlign = TextAlign.Right;
+						break;
+				}
+				if (align_y != TEXT_ALIGN_TOP )
+				{
+					Log.Warning( "TODO VERTICAL ALIGN" );
+				}
+				label.Style.Transform = xform;*/
 				ApplyFont( font_name, label.Style );
 
 				return null;
@@ -121,14 +157,101 @@ namespace Miku.GMod.Lib
 			surface_lib.DebugLibName = "surface";
 			env.Set( "surface", ValueSlot.Table( surface_lib ) );
 
-			surface_lib.Set( "CreateFont", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
-				var name = args[5].CheckString();
+			surface_lib.Set( "SetDrawColor", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) =>
+			{
+				CurrentSurfaceColor = ColorFromTable( args[0].CheckTable() );
+				return null;
+			} ) );
 
-				FontRegistry[name] = new Font() {
-					Family = args[0].CheckString(),
-					Size = args[1].CheckNumber(),
-					Weight = args[2].CheckNumber()
-				};
+			surface_lib.Set( "SetMaterial", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) =>
+			{
+				CurrentSurfaceMaterial = args[0].CheckString();
+				return null;
+			} ) );
+
+			surface_lib.Set( "DrawRect", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) =>
+			{
+				double x = args[0].CheckNumber();
+				double y = args[1].CheckNumber();
+				double w = args[2].CheckNumber();
+				double h = args[3].CheckNumber();
+
+				var panel = Local.Hud.AddChild<Sandbox.UI.Panel>();
+				panel.Style.Position = PositionMode.Absolute;
+
+				panel.Style.Left = Length.Pixels( (float)x );
+				panel.Style.Top = Length.Pixels( (float)y );
+				panel.Style.Width = Length.Pixels( (float)w );
+				panel.Style.Height = Length.Pixels( (float)h );
+				panel.Style.BackgroundColor = CurrentSurfaceColor;
+
+				return null;
+			} ) );
+
+			surface_lib.Set( "DrawTexturedRect", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) =>
+			{
+				double x = args[0].CheckNumber();
+				double y = args[1].CheckNumber();
+				double w = args[2].CheckNumber();
+				double h = args[3].CheckNumber();
+
+				var panel = Local.Hud.AddChild<Sandbox.UI.Image>();
+				panel.Style.Position = PositionMode.Absolute;
+
+				panel.Style.Left = Length.Pixels( (float)x );
+				panel.Style.Top = Length.Pixels( (float)y );
+				panel.Style.Width = Length.Pixels( (float)w );
+				panel.Style.Height = Length.Pixels( (float)h );
+				panel.SetTexture("/img/"+CurrentSurfaceMaterial);
+
+				return null;
+			} ) );
+
+			surface_lib.Set( "DrawOutlinedRect", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) =>
+			{
+				double x = args[0].CheckNumber();
+				double y = args[1].CheckNumber();
+				double w = args[2].CheckNumber();
+				double h = args[3].CheckNumber();
+				double border_w = args.Length > 4 ? args[4].CheckNumber() : 1;
+
+				var panel = Local.Hud.AddChild<Sandbox.UI.Panel>();
+				panel.Style.Position = PositionMode.Absolute;
+
+				panel.Style.Left = Length.Pixels( (float)x );
+				panel.Style.Top = Length.Pixels( (float)y );
+				panel.Style.Width = Length.Pixels( (float)w );
+				panel.Style.Height = Length.Pixels( (float)h );
+				panel.Style.BorderColor = CurrentSurfaceColor;
+				panel.Style.BorderWidth = Length.Pixels( (float)border_w );
+
+				return null;
+			} ) );
+
+			surface_lib.Set( "CreateFont", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
+
+				if (args[1].Kind == ValueKind.Table)
+				{
+					var name = args[0].CheckString();
+					var settings = args[1].CheckTable();
+
+					FontRegistry[name] = new Font()
+					{
+						Family = settings.Get("font").TryGetString() ?? DEFAULT_FONT,
+						Size = settings.Get("size").TryGetNumber() ?? DEFAULT_SIZE,
+						Weight = settings.Get("weight").TryGetNumber() ?? 0
+					};
+				} else
+				{
+					var name = args[5].CheckString();
+
+					FontRegistry[name] = new Font() {
+						Family = args[0].CheckString(),
+						Size = args[1].CheckNumber(),
+						Weight = args[2].CheckNumber()
+					};
+				}
+
 
 				return null;
 			} ) );

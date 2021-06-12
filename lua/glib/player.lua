@@ -39,3 +39,30 @@ end
 function _CLASS_PLAYER.GetActiveWeapon()
     return LOCAL_WEAPON
 end
+
+function _CLASS_PLAYER.Team()
+    return 0
+end
+
+-- DARKRP LOL
+function _CLASS_PLAYER.isWanted()
+    return false
+end
+
+function _CLASS_PLAYER.getDarkRPVar()
+    return false
+end
+
+DarkRP = {}
+
+function DarkRP.formatMoney()
+    return "$100"
+end
+
+------------------------------------------------------------
+
+team = {}
+
+function team.GetName(team_id)
+    return "Some Team"
+end

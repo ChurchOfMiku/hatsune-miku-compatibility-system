@@ -40,6 +40,7 @@ namespace Miku.GMod
 
 		public GmodMachineClient()
 		{
+			Env.Set( "CLIENT", ValueSlot.TRUE );
 			new Lib.Draw2D( this );
 		}
 

@@ -448,7 +448,7 @@ local function llex(ls)
         -- Glua != and ! operators
         elseif current == '!' then
             nextchar(ls)
-            if ls.current ~= '=' then return '!' else nextchar(ls); return 'TK_ne' end
+            if ls.current ~= '=' then return 'TK_not' else nextchar(ls); return 'TK_ne' end
         elseif current == ':' then
             nextchar(ls)
             if ls.current ~= ':' then return ':' else nextchar(ls); return 'TK_label' end
