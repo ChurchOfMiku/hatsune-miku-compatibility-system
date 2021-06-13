@@ -17,10 +17,10 @@ namespace Miku.Lua
 			UpValues = upvals;
 		}
 
-		public ValueSlot[] Call(ValueSlot[]? args = null, bool debug = false)
+		public ValueSlot[] Call(LuaMachine machine, ValueSlot[]? args = null)
 		{
 			var exec = new Executor( this, args ?? new ValueSlot[0] );
-			exec.Debug = debug;
+			exec.Machine = machine;
 			exec.Run();
 			if ( exec.Results == null )
 			{

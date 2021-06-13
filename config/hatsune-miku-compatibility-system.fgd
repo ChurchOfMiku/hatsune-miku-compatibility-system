@@ -1,7 +1,7 @@
 // 
 // Miku.MinimalGame : Sandbox.Game 
 // 
-@PointClass = miku : ""
+@PointClass = hatsune-miku-compatibility-system : ""
 [
 	targetname(target_source) : "Name" : : "The name that other entities refer to this entity by."
 ]

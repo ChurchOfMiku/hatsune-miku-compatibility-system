@@ -36,7 +36,7 @@ namespace Miku.GMod
 				Local.Hud = new RootPanelNoScaling();
 
 				GModClient = new GmodMachineClient();
-				GModClient.RunFile( "test/free_darkrp_hud.lua" );
+				GModClient.LoadSWEP( "test/Best of Toybox/lua/weapons/weapon_base/cl_init.lua" );
 			}
 		}
 	}

@@ -419,7 +419,25 @@ local function llex(ls)
                 spaceadd(ls, '//')
                 skip_line(ls)
             elseif ls.current == '*' then
-                error("multiline comment")
+                nextchar(ls)
+                spaceadd(ls, '/*')
+
+                while true do
+                    if ls.current == '*' then
+                        savespace_and_next(ls)
+                        if ls.current == '/' then
+                            break
+                        end
+                    elseif ls.current == '\n' or ls.current == '\r' then
+                        inclinenumber(ls)
+                    elseif ls.current == -1 then
+                        error("STOP")
+                    else
+                        savespace_and_next(ls)
+                    end
+                end
+
+                savespace_and_next(ls)
             else
                 return '/'
             end
@@ -449,6 +467,10 @@ local function llex(ls)
         elseif current == '!' then
             nextchar(ls)
             if ls.current ~= '=' then return 'TK_not' else nextchar(ls); return 'TK_ne' end
+        -- Glua logical OR
+        elseif current == '|' then
+            nextchar(ls)
+            if ls.current == '|' then nextchar(ls); return 'TK_or' else lex_error(ls,'|',"Expected C-Style OR.")  end
         elseif current == ':' then
             nextchar(ls)
             if ls.current ~= ':' then return ':' else nextchar(ls); return 'TK_label' end

@@ -5,7 +5,7 @@ using System;
 namespace Miku.Lua
 {
 
-	using UserFunction = Func<ValueSlot[], Table, ValueSlot[]?>;
+	using UserFunction = Func<ValueSlot[], Executor, ValueSlot[]?>;
 
 	enum ValueKind
 	{

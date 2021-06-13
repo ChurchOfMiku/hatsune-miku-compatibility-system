@@ -15,10 +15,21 @@ namespace Miku.GMod
 
 		public GModMachineBase()
 		{
+			RunFile( "glib/globals.lua" );
 			RunFile( "glib/hook.lua" );
 			new Lib.Player( this );
 
 			RunHookFunction = Env.Get( "hook" ).CheckTable().Get( "Run" ).CheckFunction();
+		}
+
+		public void LoadSWEP(string filename)
+		{
+			// TODO use a dirname instead!
+			var swep_table = new Table();
+			Env.Set( "SWEP", ValueSlot.Table(swep_table) );
+			swep_table.Set( "Primary", ValueSlot.Table( new Table() ) );
+			swep_table.Set( "Secondary", ValueSlot.Table( new Table() ) );
+			RunFile( filename );
 		}
 
 		public ValueSlot[] RunHook(string name, ValueSlot[] args)
@@ -30,7 +41,7 @@ namespace Miku.GMod
 				full_args[i + 1] = args[i];
 			}
 
-			return RunHookFunction.Call( full_args );
+			return RunHookFunction.Call( this, full_args );
 		}
 	}
 

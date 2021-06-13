@@ -82,6 +82,8 @@ namespace Miku.Lua
 
 		public ValueSlot[]? Results;
 
+		public LuaMachine? Machine;
+
 		public Executor( Function func, ValueSlot[] args )
 		{
 			AddFrame( func, 0, 0, args.Length );
@@ -228,6 +230,7 @@ namespace Miku.Lua
 					if (!(e is SilentExecException))
 					{
 						//LogState();
+						Log.Error( e.Message );
 						Log.Error( e.StackTrace );
 					}
 					throw new SilentExecException(e);
@@ -724,7 +727,7 @@ namespace Miku.Lua
 							{
 								args[i] = ValueStack[arg_base - i];
 							}
-							var rets = user_func( args, Func.Env );
+							var rets = user_func( args, this );
 
 							// tail calls return everything
 							if ( is_tailcall )
@@ -866,6 +869,18 @@ namespace Miku.Lua
 		{
 			int jump_offset = (int)D - 0x8000;
 			pc += jump_offset;
+		}
+
+		public string? GetDirectory()
+		{
+			var debug_name = Func.Prototype.DebugName;
+			if (debug_name.StartsWith("@lua/"))
+			{
+				var no_prefix = debug_name.Substring( 5 );
+				var no_filename = no_prefix.Substring(0, no_prefix.LastIndexOf( '/' )+1);
+				return no_filename;
+			}
+			return null;
 		}
 	}
 }

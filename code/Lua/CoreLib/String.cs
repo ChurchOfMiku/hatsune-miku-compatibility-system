@@ -10,7 +10,7 @@ namespace Miku.Lua.CoreLib
 			lib.DebugLibName = "string";
 			env.Set( "string", ValueSlot.Table( lib ) );
 
-			lib.Set( "byte", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
+			lib.Set( "byte", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
 				var str = args[0].CheckString();
 				int index = 0;
 				if ( args.Length > 1 )
@@ -32,12 +32,12 @@ namespace Miku.Lua.CoreLib
 				}
 			} ) );
 
-			lib.Set( "lower", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
+			lib.Set( "lower", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
 				var str = args[0].CheckString();
 				return new ValueSlot[] { ValueSlot.String( str.ToLower() ) };
 			} ) );
 
-			lib.Set( "sub", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
+			lib.Set( "sub", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
 				// TODO: see how this is actually implemented in lua, there is no way this is totally consistent
 				var str = args[0].CheckString();
 				int start = (int)args[1].CheckNumber() - 1;
@@ -64,7 +64,7 @@ namespace Miku.Lua.CoreLib
 				return new ValueSlot[] { ValueSlot.String( str.Substring( start, length ) ) };
 			} ) );
 
-			lib.Set( "match", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
+			lib.Set( "match", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
 				var str = args[0].CheckString();
 				var pattern = args[1].CheckString();
 				bool result = false;
@@ -85,7 +85,7 @@ namespace Miku.Lua.CoreLib
 				return new ValueSlot[] { ValueSlot.Bool( result ) };
 			} ) );
 
-			lib.Set( "format", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
+			lib.Set( "format", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
 				string joined = LuaMachine.Concat( args );
 				return new ValueSlot[] { ValueSlot.String( "[" + joined + "]" ) };
 			} ) );

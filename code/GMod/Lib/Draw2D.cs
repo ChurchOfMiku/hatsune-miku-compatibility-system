@@ -67,11 +67,11 @@ namespace Miku.GMod.Lib
 			var env = machine.Env;
 
 			// Console still breaks these but they're mostly accurate now.
-			env.Set( "ScrW", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
+			env.Set( "ScrW", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
 				return new ValueSlot[] { ValueSlot.Number( Screen.Width ) };
 			} ) );
 
-			env.Set( "ScrH", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
+			env.Set( "ScrH", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
 				return new ValueSlot[] { ValueSlot.Number( Screen.Height ) };
 			} ) );
 
@@ -79,7 +79,7 @@ namespace Miku.GMod.Lib
 			draw_lib.DebugLibName = "draw";
 			env.Set( "draw", ValueSlot.Table( draw_lib ) );
 
-			draw_lib.Set( "RoundedBox", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) =>
+			draw_lib.Set( "RoundedBox", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) =>
 			{
 				double radius = args[0].CheckNumber();
 				double x = args[1].CheckNumber();
@@ -105,7 +105,7 @@ namespace Miku.GMod.Lib
 				return null;
 			} ) );
 
-			draw_lib.Set( "SimpleText", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
+			draw_lib.Set( "SimpleText", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
 				string text = args[0].ToString();
 				string font_name = args[1].CheckString();
 				double x = args[2].CheckNumber();
@@ -157,19 +157,19 @@ namespace Miku.GMod.Lib
 			surface_lib.DebugLibName = "surface";
 			env.Set( "surface", ValueSlot.Table( surface_lib ) );
 
-			surface_lib.Set( "SetDrawColor", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) =>
+			surface_lib.Set( "SetDrawColor", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) =>
 			{
 				CurrentSurfaceColor = ColorFromTable( args[0].CheckTable() );
 				return null;
 			} ) );
 
-			surface_lib.Set( "SetMaterial", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) =>
+			surface_lib.Set( "SetMaterial", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) =>
 			{
 				CurrentSurfaceMaterial = args[0].CheckString();
 				return null;
 			} ) );
 
-			surface_lib.Set( "DrawRect", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) =>
+			surface_lib.Set( "DrawRect", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) =>
 			{
 				double x = args[0].CheckNumber();
 				double y = args[1].CheckNumber();
@@ -188,7 +188,7 @@ namespace Miku.GMod.Lib
 				return null;
 			} ) );
 
-			surface_lib.Set( "DrawTexturedRect", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) =>
+			surface_lib.Set( "DrawTexturedRect", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) =>
 			{
 				double x = args[0].CheckNumber();
 				double y = args[1].CheckNumber();
@@ -207,7 +207,7 @@ namespace Miku.GMod.Lib
 				return null;
 			} ) );
 
-			surface_lib.Set( "DrawOutlinedRect", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) =>
+			surface_lib.Set( "DrawOutlinedRect", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) =>
 			{
 				double x = args[0].CheckNumber();
 				double y = args[1].CheckNumber();
@@ -228,7 +228,7 @@ namespace Miku.GMod.Lib
 				return null;
 			} ) );
 
-			surface_lib.Set( "CreateFont", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
+			surface_lib.Set( "CreateFont", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
 
 				if (args[1].Kind == ValueKind.Table)
 				{

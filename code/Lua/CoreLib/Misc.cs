@@ -10,7 +10,7 @@ namespace Miku.Lua.CoreLib
 			var table_lib = new Table();
 			table_lib.DebugLibName = "table";
 			env.Set( "table", ValueSlot.Table( table_lib ) );
-			table_lib.Set( "insert", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
+			table_lib.Set( "insert", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
 				Assert.True( args.Length == 2 );
 				var table = args[0].CheckTable();
 				var new_val = args[1];
@@ -21,7 +21,7 @@ namespace Miku.Lua.CoreLib
 			var math_lib = new Table();
 			math_lib.DebugLibName = "math";
 			env.Set( "math", ValueSlot.Table( math_lib ) );
-			math_lib.Set( "floor", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
+			math_lib.Set( "floor", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
 				double n = args[0].CheckNumber();
 				return new ValueSlot[] { ValueSlot.Number( Math.Floor( n ) ) };
 			} ) );

@@ -28,7 +28,7 @@ namespace Miku.Lua
 			return builder.ToString();
 		}
 
-		public static ValueSlot BootstrapRequire(Table env, string name)
+		public ValueSlot BootstrapRequire(Table env, string name)
 		{
 			string filename = name.Replace('.','/');
 
@@ -36,7 +36,7 @@ namespace Miku.Lua
 
 			var proto = Dump.Read( bytes.ToArray() );
 			var func = new Function( env, proto, new Executor.UpValueBox[0] );
-			var res = func.Call();
+			var res = func.Call(this);
 			if (res.Length != 0)
 			{
 				if ( res.Length != 1)
@@ -60,15 +60,16 @@ namespace Miku.Lua
 
 			CoreLib.Misc.Init(Env);
 
-			CoreLib.Globals.Init( Env );
+			new CoreLib.Globals( this );
 
-			Env.Set( "_MIKU_BOOTSTRAP_REQUIRE", ValueSlot.UserFunction( (ValueSlot[] args, Table env) => {
+			Env.Set( "_MIKU_BOOTSTRAP_REQUIRE", ValueSlot.UserFunction( (ValueSlot[] args, Executor ex ) => {
 				string mod_name = args[0].CheckString();
-				var res = BootstrapRequire( env, mod_name );
+				// NOTE: Uses original env, which I assume is what we want?
+				var res = BootstrapRequire( Env, mod_name );
 				return new ValueSlot[] {res};
 			}));
 
-			Env.Set( "_MIKU_DEBUG_LIB", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
+			Env.Set( "_MIKU_DEBUG_LIB", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
 				var tab = args[0].CheckTable();
 				var name = args[1].CheckString();
 				tab.DebugLibName = name;
@@ -82,7 +83,7 @@ namespace Miku.Lua
 		public void RunString(string code,string name)
 		{
 			Stopwatch sw = Stopwatch.StartNew();
-			var results = CompileFunction.Call( new ValueSlot[] { ValueSlot.String(code) } );
+			var results = CompileFunction.Call( this, new ValueSlot[] { ValueSlot.String(code), ValueSlot.String(name) } );
 			double compile_time = sw.Elapsed.TotalMilliseconds;
 			if (results[0].Kind == ValueKind.True)
 			{
@@ -101,7 +102,7 @@ namespace Miku.Lua
 				var new_func = new Function( Env, new_proto, new Executor.UpValueBox[0] );
 
 				Stopwatch sw2 = Stopwatch.StartNew();
-				new_func.Call(null,true);
+				new_func.Call(this);
 				Log.Warning( $"Finished {name}; C = {compile_time} ms; E = {sw2.Elapsed.TotalMilliseconds} ms" );
 			} else
 			{
@@ -111,8 +112,9 @@ namespace Miku.Lua
 
 		public void RunFile(string filename )
 		{
-			var code = FileSystem.Mounted.ReadAllText( $"lua/{filename}" );
-			RunString( code, filename );
+			string fullname = $"lua/{filename}".Replace("//","/");
+			var code = FileSystem.Mounted.ReadAllText( fullname );
+			RunString( code, fullname );
 		}
 	}
 }

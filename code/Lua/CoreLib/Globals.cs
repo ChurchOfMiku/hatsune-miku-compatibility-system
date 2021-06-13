@@ -1,23 +1,27 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using Sandbox;
 
 namespace Miku.Lua.CoreLib
 {
 	class Globals
 	{
-		public static void Init( Table env )
+		public Globals( LuaMachine machine )
 		{
-			env.Set( "print", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
+			var env = machine.Env;
+
+			env.Set( "print", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
 				string str = LuaMachine.Concat( args );
 				Log.Info( "LUA: " + str );
 				return null;
 			}));
 
-			env.Set( "error", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
+			env.Set( "error", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
 				throw new LuaException( args[0].ToString() );
 			} ));
 
-			env.Set( "tonumber", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
+			env.Set( "tonumber", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
 				var x = args[0];
 				if ( x.Kind == ValueKind.String )
 				{
@@ -30,7 +34,7 @@ namespace Miku.Lua.CoreLib
 				throw new Exception( "can't convert to number: " + x );
 			} ) );
 
-			env.Set( "setmetatable", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
+			env.Set( "setmetatable", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
 				var table = args[0].CheckTable();
 				var metatable = args[1].CheckTable();
 				metatable.CheckMetaTableMembers();
@@ -38,13 +42,13 @@ namespace Miku.Lua.CoreLib
 				return new ValueSlot[] { ValueSlot.Table( table ) };
 			} ) );
 
-			env.Set( "getmetatable", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
+			env.Set( "getmetatable", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
 				var table = args[0].CheckTable();
 				var result = table.MetaTable != null ? ValueSlot.Table( table.MetaTable ) : ValueSlot.NIL;
 				return new ValueSlot[] { result };
 			} ) );
 
-			env.Set( "pcall", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
+			env.Set( "pcall", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
 				var func = args[0].CheckFunction(); // assume this is a lua function
 				var func_args = new ValueSlot[args.Length - 1];
 				for ( int i = 0; i < func_args.Length; i++ )
@@ -54,7 +58,7 @@ namespace Miku.Lua.CoreLib
 				ValueSlot[] call_results;
 				try
 				{
-					call_results = func.Call( func_args );
+					call_results = func.Call( machine, func_args );
 				}
 				catch ( Exception e )
 				{
@@ -72,7 +76,7 @@ namespace Miku.Lua.CoreLib
 				return pcall_results;
 			} ) );
 
-			env.Set( "type", ValueSlot.UserFunction( ( ValueSlot[] args, Table env ) => {
+			env.Set( "type", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
 				string result;
 				switch ( args[0].Kind )
 				{
@@ -89,6 +93,18 @@ namespace Miku.Lua.CoreLib
 						throw new Exception( "typeof " + args[0].Kind );
 				}
 				return new ValueSlot[] { ValueSlot.String( result ) };
+			} ) );
+
+			env.Set( "include", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
+				string filename = args[0].CheckString();
+				string fullpath = ex.GetDirectory() + filename;
+
+				if (ex.Machine == null)
+				{
+					throw new Exception("Include: No LuaMachine?");
+				}
+				ex.Machine.RunFile(fullpath);
+				return null;
 			} ) );
 		}
 	}

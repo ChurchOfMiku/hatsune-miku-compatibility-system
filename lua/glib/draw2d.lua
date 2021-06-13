@@ -21,3 +21,7 @@ end
 function Material(name)
     return name
 end
+
+function surface.GetTextureID( name )
+    return 0
+end
