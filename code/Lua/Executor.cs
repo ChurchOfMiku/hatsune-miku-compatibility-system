@@ -215,7 +215,7 @@ namespace Miku.Lua
 		public void Run()
 		{
 			int safety = 0;
-			int LIMIT = 1_000_000;
+			int LIMIT = 5_000_000;
 			if (Debug)
 			{
 				//LIMIT = 1000;

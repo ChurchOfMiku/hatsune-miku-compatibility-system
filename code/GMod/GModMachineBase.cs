@@ -16,6 +16,7 @@ namespace Miku.GMod
 		public GModMachineBase()
 		{
 			RunFile( "glib/globals.lua" );
+			RunFile( "glib/enums_sh.lua" );
 			RunFile( "glib/hook.lua" );
 			new Lib.Player( this );
 
@@ -52,6 +53,7 @@ namespace Miku.GMod
 		public GmodMachineClient()
 		{
 			Env.Set( "CLIENT", ValueSlot.TRUE );
+			RunFile( "glib/enums_cl.lua" );
 			new Lib.Draw2D( this );
 		}
 
