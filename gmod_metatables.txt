@@ -1,0 +1,8 @@
+This information comes mainly from dinking around in Gmod. Take it with several grains of salt.
+
+Some metamathods can be found at:
+    https://github.com/Facepunch/garrysmod/tree/master/garrysmod/lua/includes/extensions
+
+Most userdata's keys are accessed by calling X:GetTable(). These tables seem to mostly be built by merging prototypes together rather than by using metamethods.
+
+At the moment Miku does NOT try to emulate this behavior perfectly, and uses alternative methods. A better effort might be made to emulate this behavior in the future, if and when it becomes a problem.
