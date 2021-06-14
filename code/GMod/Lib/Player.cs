@@ -29,6 +29,24 @@ namespace Miku.GMod.Lib
 				return new ValueSlot[] { ValueSlot.String( client.Name ) };
 			} ) );
 
+			class_player.Set( "GetShootPos", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
+				var ply = args[0].CheckTable().UserData as Sandbox.Player;
+				var pos = ply.EyePos; // PROBABLY EXTREMELY WRONG!
+				return new ValueSlot[] { machine.Vector(pos) };
+			} ) );
+
+			class_player.Set( "GetAimVector", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
+				var ply = args[0].CheckTable().UserData as Sandbox.Player;
+				var pos = ply.EyeRot.Forward; // PROBABLY EXTREMELY WRONG!
+				return new ValueSlot[] { machine.Vector( pos ) };
+			} ) );
+
+			class_player.Set( "FireBullets", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
+				var ply = args[0].CheckTable().UserData as Sandbox.Player;
+				Log.Info( "FireBullets" );
+				return null;
+			} ) );
+
 			if (machine.IsClient)
 			{
 				machine.Env.Set( "LocalPlayer", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {

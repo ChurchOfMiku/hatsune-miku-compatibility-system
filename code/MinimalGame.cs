@@ -42,7 +42,6 @@ namespace Miku
 			client.Pawn = player;
 
 			player.Respawn();
-			player.Inventory.Add(new GMod.Entities.GmodWeapon(), true);
 		}
 	}
 }

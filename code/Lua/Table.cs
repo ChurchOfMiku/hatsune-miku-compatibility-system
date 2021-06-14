@@ -62,11 +62,6 @@ namespace Miku.Lua
 
 		public void Set( ValueSlot key, ValueSlot val )
 		{
-			if (val.Kind == ValueKind.Nil)
-			{
-				return;
-			}
-
 			if (key.Kind == ValueKind.Number)
 			{
 				var i_dbl = key.CheckNumber();
@@ -77,6 +72,10 @@ namespace Miku.Lua
 					{
 						if (i == 1)
 						{
+							if (val.Kind == ValueKind.Nil)
+							{
+								return;
+							}
 							Array = new List<ValueSlot>();
 							Array.Add(val);
 							MigrateSubsequentKeys(i);
@@ -86,6 +85,10 @@ namespace Miku.Lua
 					{
 						if (i == Array.Count + 1)
 						{
+							if ( val.Kind == ValueKind.Nil )
+							{
+								return;
+							}
 							Array.Add( val );
 							MigrateSubsequentKeys( i );
 							return;
@@ -101,9 +104,19 @@ namespace Miku.Lua
 
 			if (Dict == null)
 			{
+				if ( val.Kind == ValueKind.Nil )
+				{
+					return;
+				}
 				Dict = new Dictionary<ValueSlot, ValueSlot>();
 			}
-			Dict[key] = val;
+			if ( val.Kind == ValueKind.Nil )
+			{
+				Dict.Remove( key );
+			} else
+			{
+				Dict[key] = val;
+			}
 		}
 
 		public void Set( string key, ValueSlot val ) { Set( ValueSlot.String( key ), val ); }

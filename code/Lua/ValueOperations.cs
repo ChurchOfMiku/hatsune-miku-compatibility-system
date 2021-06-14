@@ -31,7 +31,7 @@ namespace Miku.Lua
 					var mt_index = tab.MetaTable.Get( "__index" );
 					if (mt_index.Kind == ValueKind.Table)
 					{
-						return mt_index.CheckTable().Get( key );
+						return Get( mt_index, key ); // TODO this might result in an infinite loop!
 					} else if (mt_index.Kind != ValueKind.Nil)
 					{
 						throw new Exception( $"Attempt to use {mt_index.Kind} as __index." );

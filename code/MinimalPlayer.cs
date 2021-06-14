@@ -26,6 +26,15 @@ namespace Miku
 			Camera = new ThirdPersonCamera();
 
 			Inventory = new BaseInventory(this);
+			if (GMod.GModGlobal.GModServer == null)
+			{
+				throw new Exception( "lol" );
+			}
+			var swep = GMod.GModGlobal.GModServer.Ents.Create( "weapon_base" );
+			if (swep != null)
+			{
+				Inventory.Add( swep, true );
+			}
 
 			EnableAllCollisions = true;
 			EnableDrawing = true;
