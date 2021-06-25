@@ -1,6 +1,14 @@
 local ffi = {}
 ffi.typeof = function(x) return "typeof("..x..")" end
 
+-- DEBUG LIB: Probably going to be very annoying to actually implement.
+local REGISTRY = _R
+debug = {}
+_R.miku_debug_lib(debug,"debug")
+function debug.getregistry()
+    return REGISTRY
+end
+
 string.char = function() error("string.char") end
 
 local module_cache = {}

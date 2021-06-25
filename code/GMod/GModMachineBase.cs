@@ -16,7 +16,11 @@ namespace Miku.GMod
 
 		public GModMachineBase()
 		{
+			RunFile( "glib/types.lua" );
+			RunFile( "glib/stubs_sh.lua" );
 			RunFile( "glib/gamemode.lua" );
+
+			RunFile( "glib_official/garrysmod/lua/includes/util.lua" ); // also includes util/color.lua
 			RunFile( "glib_official/garrysmod/lua/includes/modules/hook.lua" );
 			//RunFile( "glib/globals.lua" );
 			//RunFile( "glib/enums_sh.lua" );
@@ -74,8 +78,11 @@ namespace Miku.GMod
 		public GmodMachineClient()
 		{
 			Env.Set( "CLIENT", ValueSlot.TRUE );
-			//RunFile( "glib/enums_cl.lua" );
-			//new Lib.Draw2D( this );
+
+			RunFile( "glib_official/garrysmod/lua/includes/extensions/client/globals.lua" );
+
+			new Lib.Draw2D( this );
+			RunFile( "glib/draw2d.lua" ); // stub file ATM
 		}
 
 		public void Frame()

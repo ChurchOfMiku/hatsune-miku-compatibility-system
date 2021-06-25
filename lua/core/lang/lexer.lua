@@ -9,7 +9,10 @@ local ASCII_A, ASCII_Z = 65, 90
 
 local END_OF_STREAM = -1
 
-local ReservedKeyword = {['and'] = 1, ['break'] = 2, ['do'] = 3, ['else'] = 4, ['elseif'] = 5, ['end'] = 6, ['false'] = 7, ['for'] = 8, ['function'] = 9, ['goto'] = 10, ['if'] = 11, ['in'] = 12, ['local'] = 13, ['nil'] = 14, ['not'] = 15, ['or'] = 16, ['repeat'] = 17, ['return'] = 18, ['then'] = 19, ['true'] = 20, ['until'] = 21, ['while'] = 22 }
+local ReservedKeyword = {
+    ['and'] = 1, ['break'] = 2, ['do'] = 3, ['else'] = 4, ['elseif'] = 5, ['end'] = 6, ['false'] = 7, ['for'] = 8, ['function'] = 9, ['goto'] = 10, ['if'] = 11, ['in'] = 12, ['local'] = 13, ['nil'] = 14, ['not'] = 15, ['or'] = 16, ['repeat'] = 17, ['return'] = 18, ['then'] = 19, ['true'] = 20, ['until'] = 21, ['while'] = 22,
+    ['continue'] = 23 -- added by glua
+}
 
 local uint64, int64 = ffi.typeof('uint64_t'), ffi.typeof('int64_t')
 local complex = ffi.typeof('complex')
@@ -467,10 +470,13 @@ local function llex(ls)
         elseif current == '!' then
             nextchar(ls)
             if ls.current ~= '=' then return 'TK_not' else nextchar(ls); return 'TK_ne' end
-        -- Glua logical OR
+        -- Glua logical operators
         elseif current == '|' then
             nextchar(ls)
             if ls.current == '|' then nextchar(ls); return 'TK_or' else lex_error(ls,'|',"Expected C-Style OR.")  end
+        elseif current == '&' then
+            nextchar(ls)
+            if ls.current == '&' then nextchar(ls); return 'TK_and' else lex_error(ls,'&',"Expected C-Style AND.")  end
         elseif current == ':' then
             nextchar(ls)
             if ls.current ~= ':' then return ':' else nextchar(ls); return 'TK_label' end

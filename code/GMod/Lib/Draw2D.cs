@@ -255,8 +255,6 @@ namespace Miku.GMod.Lib
 
 				return null;
 			} ) );
-
-			machine.RunFile( "glib/draw2d.lua" );
 		}
 	}
 }
