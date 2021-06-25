@@ -457,6 +457,10 @@ local function parse_stmt(ast, ls)
         ls:next()
         stmt = ast:break_stmt(line)
         return stmt, not LJ_52 -- Must be last in Lua 5.1.
+    elseif ls.token == 'TK_continue' then
+        ls:next()
+        stmt = ast:continue_stmt(line)
+        return stmt, not LJ_52 -- Assume it behaves the same as break.
     elseif LJ_52 and ls.token == ';' then
         ls:next()
         return parse_stmt(ast, ls)

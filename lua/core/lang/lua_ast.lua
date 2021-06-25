@@ -178,6 +178,10 @@ function AST.break_stmt(ast, line)
     return build("BreakStatement", { line = line })
 end
 
+function AST.continue_stmt(ast, line)
+    return build("ContinueStatement", { line = line })
+end
+
 function AST.label_stmt(ast, name, line)
     return build("LabelStatement", { label = name, line = line })
 end
