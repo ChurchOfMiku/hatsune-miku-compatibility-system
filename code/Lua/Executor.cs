@@ -907,6 +907,16 @@ namespace Miku.Lua
 						}
 					}
 					break;
+				case OpCode.ITERL:
+					{
+						var iter_res = StackGet( A );
+						if (iter_res.Kind != ValueKind.Nil)
+						{
+							StackSet( A - 1, iter_res );
+							Jump( D );
+						}
+						break;
+					}
 				case OpCode.JMP:
 					{
 						Jump( D );

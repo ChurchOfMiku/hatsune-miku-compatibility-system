@@ -38,6 +38,13 @@ namespace Miku.Lua.CoreLib
 				throw new Exception( "can't convert to number: " + x );
 			} ) );
 
+
+			env.Set( "next", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
+				var tab = args[0].CheckTable();
+				var prev_key = args[1];
+				return tab.Next(prev_key);
+			} ) );
+
 			env.Set( "setmetatable", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
 				var table = args[0].CheckTable();
 				var metatable = args[1].CheckTable();

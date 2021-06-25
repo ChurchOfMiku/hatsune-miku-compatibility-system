@@ -1,6 +1,6 @@
 _CLASS_PLAYER = {}
 _CLASS_PLAYER.__index = _CLASS_PLAYER
-_MIKU_DEBUG_LIB(_CLASS_PLAYER,"Player")
+_R.miku_debug_lib(_CLASS_PLAYER,"Player")
 
 function _CLASS_PLAYER.Armor()
     -- No Armor

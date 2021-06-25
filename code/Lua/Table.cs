@@ -157,6 +157,65 @@ namespace Miku.Lua
 		public ValueSlot Get( string key ) { return Get( ValueSlot.String( key ) ); }
 		public ValueSlot Get( int key ) { return Get( ValueSlot.Number( key ) ); }
 
+		// Looking at the reference source, it should be safe to not worry about disposing enumerators.
+		private Dictionary<ValueSlot,ValueSlot>.Enumerator CachedEnumerator;
+		private void SetupEnumerator( ValueSlot prev_key )
+		{
+
+		}
+		public ValueSlot[]? Next(ValueSlot prev_key)
+		{
+			// Start enumeration.
+			if (prev_key.Kind == ValueKind.Nil)
+			{
+				if (Array != null && Array.Count > 0)
+				{
+					return new[] { ValueSlot.Number( 1 ), ArrayGet(1) };
+				}
+				if (Dict != null && Dict.Count > 0)
+				{
+					CachedEnumerator = Dict.GetEnumerator();
+					CachedEnumerator.MoveNext();
+
+					var pair = CachedEnumerator.Current;
+					return new[] { pair.Key, pair.Value };
+				}
+			} else
+			{
+				// Try the next array slot.
+				if ( Array != null )
+				{
+					if ( prev_key.Kind == ValueKind.Number )
+					{
+						var i_dbl = prev_key.CheckNumber() + 1;
+						int i = (int)i_dbl;
+						if ( i_dbl == i && i >= 1 && i <= Array.Count )
+						{
+							return new[] { ValueSlot.Number( i ), ArrayGet( i ) };
+						}
+					}
+				}
+				if (Dict != null)
+				{
+					// TODO: the enumerator might be totally invalid, check for exceptions
+					if (CachedEnumerator.Current.Key.Equals(prev_key))
+					{
+						if (CachedEnumerator.MoveNext())
+						{
+							var pair = CachedEnumerator.Current;
+							return new[] { pair.Key, pair.Value };
+						} else
+						{
+							return null;
+						}
+					}
+					throw new Exception( "cached enumerator miss" );
+				}
+			}
+
+			return null;
+		}
+
 		public Table CloneProto()
 		{
 			var result = new Table();

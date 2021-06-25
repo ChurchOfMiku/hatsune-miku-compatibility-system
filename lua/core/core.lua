@@ -52,13 +52,6 @@ function assert(v,msg,...)
     return v, msg, ...
 end
 
-function next(tab,prev_key)
-    print("NEXT",tab,prev_key)
-    local k = "aaa"
-    local v = "bbb"
-    return k, v
-end
-
 function pairs(tab)
     return next, tab
 end
