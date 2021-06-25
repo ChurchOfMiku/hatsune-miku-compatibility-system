@@ -16,6 +16,16 @@ namespace Miku.GMod
 
 		public GModMachineBase()
 		{
+			// Setup glua-specific constants.
+			// SEE https://wiki.facepunch.com/gmod/Global_Variables
+			{
+				Env.Set( "CLIENT", ValueSlot.Bool( IsClient ) );
+				Env.Set( "SERVER", ValueSlot.Bool( IsServer ) );
+
+				Env.Set( "CLIENT_DLL", IsClient ? ValueSlot.TRUE : ValueSlot.NIL );
+				Env.Set( "GAME_DLL",   IsServer ? ValueSlot.TRUE : ValueSlot.NIL );
+			}
+
 			RunFile( "glib/types.lua" );
 			RunFile( "glib/stubs_sh.lua" );
 			RunFile( "glib/gamemode.lua" );
@@ -78,8 +88,6 @@ namespace Miku.GMod
 
 		public GmodMachineClient()
 		{
-			Env.Set( "CLIENT", ValueSlot.TRUE );
-
 			RunFile( "glib_official/garrysmod/lua/includes/extensions/client/globals.lua" );
 
 			new Lib.Draw2D( this );
@@ -101,7 +109,7 @@ namespace Miku.GMod
 
 		public GmodMachineServer()
 		{
-			Env.Set( "SERVER", ValueSlot.TRUE );
+
 		}
 	}
 }
