@@ -707,6 +707,7 @@ namespace Miku.Lua
 				case OpCode.CALLM:
 				case OpCode.CALLT:
 				case OpCode.CALLMT:
+				case OpCode.ITERC:
 					{
 						bool is_tailcall = (OP == OpCode.CALLT || OP == OpCode.CALLMT);
 						bool is_multires = (OP == OpCode.CALLM || OP == OpCode.CALLMT);
@@ -722,6 +723,15 @@ namespace Miku.Lua
 
 						int ret_base = call_base;
 						int ret_count = (int)B - 1;
+
+						if (OP == OpCode.ITERC)
+						{
+							// A, A+1, A+2 = A-3, A-2, A-1;
+							for (uint i=0;i<3;i++ )
+							{
+								StackSet( A + i, StackGet( A - 3 + i ) );
+							}
+						}
 
 						var call_func = ValueStack[call_base]; // TODO, meta calls
 						if (call_func.Kind == ValueKind.Function)

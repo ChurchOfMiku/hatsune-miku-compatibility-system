@@ -31,13 +31,16 @@ namespace Miku.Lua.CoreLib
 						return new ValueSlot[] { ValueSlot.Number( result ) };
 					}
 				}
+				if ( x.Kind == ValueKind.Number )
+				{
+					return new[] { x };
+				}
 				throw new Exception( "can't convert to number: " + x );
 			} ) );
 
 			env.Set( "setmetatable", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
 				var table = args[0].CheckTable();
 				var metatable = args[1].CheckTable();
-				metatable.CheckMetaTableMembers();
 				table.MetaTable = metatable;
 				return new ValueSlot[] { ValueSlot.Table( table ) };
 			} ) );

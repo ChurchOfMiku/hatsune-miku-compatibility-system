@@ -180,30 +180,6 @@ namespace Miku.Lua
 			return result;
 		}
 
-		public void CheckMetaTableMembers()
-		{
-			if (Dict != null)
-			{
-				foreach (var key in Dict)
-				{
-					if (key.Key.Kind == ValueKind.String)
-					{
-						string str = key.Key.CheckString();
-						if (str.StartsWith("__"))
-						{
-							switch (str)
-							{
-								case "__index":
-									break;
-								default:
-									throw new Exception("NYI meta member = "+str);
-							}
-						}
-					}
-				}
-			}
-		}
-
 		public void Log()
 		{
 			Sandbox.Log.Info( $"LEN = {GetLength()}" );

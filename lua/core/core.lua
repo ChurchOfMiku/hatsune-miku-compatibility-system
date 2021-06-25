@@ -9,6 +9,35 @@ function debug.getregistry()
     return REGISTRY
 end
 
+-- OS LIB: Only used for timing. Unstub at some point please.
+os = {}
+_R.miku_debug_lib(os,"os")
+
+function os.time()
+    return 1234
+end
+
+-- MATH LIB:
+function math.randomseed()
+    -- STUB STUB
+end
+
+function math.min(x,y)
+    if x < y then
+        return x
+    else
+        return y
+    end
+end
+
+function math.max(x,y)
+    if x > y then
+        return x
+    else
+        return y
+    end
+end
+
 string.char = function() error("string.char") end
 
 local module_cache = {}
@@ -23,12 +52,15 @@ function assert(v,msg,...)
     return v, msg, ...
 end
 
-function math.max(x,y)
-    if x > y then
-        return x
-    else
-        return y
-    end
+function next(tab,prev_key)
+    print("NEXT",tab,prev_key)
+    local k = "aaa"
+    local v = "bbb"
+    return k, v
+end
+
+function pairs(tab)
+    return next, tab
 end
 
 function module(name,...)
