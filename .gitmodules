@@ -1,0 +1,3 @@
+[submodule "lua/glib_official"]
+	path = lua/glib_official
+	url = https://github.com/Facepunch/garrysmod.git
