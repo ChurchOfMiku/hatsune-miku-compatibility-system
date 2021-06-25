@@ -21,17 +21,17 @@ namespace Miku.GMod
 
 	class GModGlobal
 	{
-		public static GmodMachineClient GModClient;
-		public static GmodMachineServer GModServer;
+		public static GmodMachineClient Client;
+		public static GmodMachineServer Server;
 
 		public static GModMachineBase GetMachine()
 		{
-			if ( GModClient != null)
+			if ( Client != null)
 			{
-				return GModClient;
+				return Client;
 			}
 
-			return GModServer;
+			return Server;
 		}
 
 		[Event( "hotloaded" )]
@@ -39,7 +39,7 @@ namespace Miku.GMod
 		{
 			if ( Host.IsServer )
 			{
-				GModServer = new GmodMachineServer();
+				Server = new GmodMachineServer();
 			}
 			if ( Host.IsClient )
 			{
@@ -50,11 +50,11 @@ namespace Miku.GMod
 				}
 				Local.Hud = new RootPanelNoScaling();
 
-				GModClient = new GmodMachineClient();
+				Client = new GmodMachineClient();
 			}
 
-			GModServer?.LoadSWEP( "weapon_base", "test/Best of Toybox/lua/weapons/weapon_base/init.lua" );
-			GModClient?.LoadSWEP( "weapon_base", "test/Best of Toybox/lua/weapons/weapon_base/cl_init.lua" );
+			//GModServer?.LoadSWEP( "weapon_base", "test/Best of Toybox/lua/weapons/weapon_base/init.lua" );
+			//GModClient?.LoadSWEP( "weapon_base", "test/Best of Toybox/lua/weapons/weapon_base/cl_init.lua" );
 		}
 	}
 }

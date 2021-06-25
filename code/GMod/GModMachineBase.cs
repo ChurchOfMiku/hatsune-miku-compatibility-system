@@ -26,19 +26,20 @@ namespace Miku.GMod
 			MakeVectorFunction = Env.Get( "Vector" ).CheckFunction();
 		}
 
-		public ValueSlot Vector(Vector3 vec)
+		/*public ValueSlot Vector(Vector3 vec)
 		{
 			var res = MakeVectorFunction.Call( this, new ValueSlot[] {
 				ValueSlot.Number(vec.x),
 				ValueSlot.Number(vec.y),
 				ValueSlot.Number(vec.z) } );
 			return res[0];
-		}
+		}*/
 
 		public void LoadSWEP(string class_name, string filename)
 		{
 			// TODO use a dirname instead!
-			var swep_table = new Table();
+			
+			/*var swep_table = new Table();
 			Env.Set( "SWEP", ValueSlot.Table(swep_table) );
 
 			swep_table.Set( "Primary", ValueSlot.Table( new Table() ) );
@@ -48,7 +49,7 @@ namespace Miku.GMod
 
 			Env.Set( "SWEP", ValueSlot.NIL );
 
-			Ents.RegisterClass( class_name, ScriptedEntityKind.Weapon, swep_table );
+			Ents.RegisterClass( class_name, ScriptedEntityKind.Weapon, swep_table );*/
 		}
 
 		public ValueSlot[] RunHook(string name, ValueSlot[] args)
@@ -71,16 +72,16 @@ namespace Miku.GMod
 		public GmodMachineClient()
 		{
 			Env.Set( "CLIENT", ValueSlot.TRUE );
-			RunFile( "glib/enums_cl.lua" );
-			new Lib.Draw2D( this );
+			//RunFile( "glib/enums_cl.lua" );
+			//new Lib.Draw2D( this );
 		}
 
 		public void Frame()
 		{
-			Host.AssertClient();
-			Local.Hud.DeleteChildren( true );
+			//Host.AssertClient();
+			//Local.Hud.DeleteChildren( true );
 
-			RunHook( "HUDPaint", new ValueSlot[0] );
+			//RunHook( "HUDPaint", new ValueSlot[0] );
 		}
 	}
 

@@ -19,14 +19,14 @@ namespace Miku.GMod.Entities
 	class EntityRegistry
 	{
 
-		private Dictionary<string, (ScriptedEntityKind, Table)> ScriptedClasses = new Dictionary<string, (ScriptedEntityKind, Table)>();
+		//private Dictionary<string, (ScriptedEntityKind, Table)> ScriptedClasses = new Dictionary<string, (ScriptedEntityKind, Table)>();
 
 		private Dictionary<Entity, Table> Map = new Dictionary<Entity, Table>();
 
 		public Table ClassPlayer = null;
 		public Table ClassWeapon = null;
 
-		public void RegisterClass(string name, ScriptedEntityKind kind, Table table)
+		/*public void RegisterClass(string name, ScriptedEntityKind kind, Table table)
 		{
 			table.Set( "__index", ValueSlot.Table( table ) );
 			if (kind == ScriptedEntityKind.Weapon)
@@ -38,9 +38,9 @@ namespace Miku.GMod.Entities
 			}
 
 			ScriptedClasses[name] = (kind, table);
-		}
+		}*/
 
-		public Entity Create(string name)
+		/*public Entity Create(string name)
 		{
 			if (!ScriptedClasses.TryGetValue(name, out var pair))
 			{
@@ -54,7 +54,7 @@ namespace Miku.GMod.Entities
 			{
 				throw new Exception( "Can not create SENTs." );
 			}
-		}
+		}*/
 
 		public Table Get(Entity ent, Table class_table = null) {
 			{
