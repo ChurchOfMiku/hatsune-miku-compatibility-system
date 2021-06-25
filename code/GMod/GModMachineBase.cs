@@ -16,6 +16,7 @@ namespace Miku.GMod
 
 		public GModMachineBase()
 		{
+			RunFile( "glib/gamemode.lua" );
 			RunFile( "glib_official/garrysmod/lua/includes/modules/hook.lua" );
 			//RunFile( "glib/globals.lua" );
 			//RunFile( "glib/enums_sh.lua" );
@@ -79,10 +80,10 @@ namespace Miku.GMod
 
 		public void Frame()
 		{
-			//Host.AssertClient();
-			//Local.Hud.DeleteChildren( true );
+			Host.AssertClient();
+			Local.Hud.DeleteChildren( true );
 
-			//RunHook( "HUDPaint", new ValueSlot[0] );
+			RunHook( "HUDPaint", new ValueSlot[0] );
 		}
 	}
 

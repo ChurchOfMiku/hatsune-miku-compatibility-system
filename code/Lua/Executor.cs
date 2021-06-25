@@ -242,7 +242,7 @@ namespace Miku.Lua
 			{
 				//LIMIT = 1000;
 			}
-			while (pc < Func.Prototype.code.Length)
+			while (pc < Func.Prototype.code.Length && Results == null)
 			{
 				try
 				{
@@ -251,13 +251,12 @@ namespace Miku.Lua
 				{
 					if (!(e is SilentExecException))
 					{
-						//LogState();
 						Log.Error( e.Message );
 						Log.Error( e.StackTrace );
 						LogStack();
+						//LogState();
 					}
 					throw new SilentExecException(e);
-					//throw;
 				}
 				safety++;
 				if (safety >= LIMIT )
