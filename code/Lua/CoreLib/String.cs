@@ -4,11 +4,11 @@ namespace Miku.Lua.CoreLib
 {
 	class String
 	{
-		public static void Init( Table env )
+		public String( LuaMachine machine )
 		{
 			var lib = new Table();
 			lib.DebugLibName = "string";
-			env.Set( "string", ValueSlot.Table( lib ) );
+			machine.Env.Set( "string", ValueSlot.Table( lib ) );
 
 			lib.Set( "byte", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
 				var str = args[0].CheckString();
@@ -30,6 +30,11 @@ namespace Miku.Lua.CoreLib
 					}
 					return new ValueSlot[] { ValueSlot.Number( result ) };
 				}
+			} ) );
+
+			lib.Set( "char", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
+				char c = (char)args[0].CheckNumber();
+				return new[] { ValueSlot.String( c.ToString() ) };
 			} ) );
 
 			lib.Set( "lower", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {

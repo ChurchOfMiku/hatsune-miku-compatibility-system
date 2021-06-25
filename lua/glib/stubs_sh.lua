@@ -1,3 +1,5 @@
+net = {}
+
 function Material(name)
     return name
 end
@@ -11,5 +13,20 @@ function Vector(x,y,z)
 end
 
 function Angle()
+
+end
+
+util = {}
+if SERVER then
+    function util.AddNetworkString(str)
+        
+    end
+end
+
+function AddConsoleCommand()
+
+end
+
+function CreateConVar()
 
 end

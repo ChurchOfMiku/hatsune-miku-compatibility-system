@@ -146,11 +146,6 @@ namespace Miku.Lua
 				}
 			}
 
-			if (DebugLibName != null)
-			{
-				Sandbox.Log.Info( "GET " + DebugLibName + "." + key );
-			}
-
 			return ValueSlot.NIL;
 		}
 

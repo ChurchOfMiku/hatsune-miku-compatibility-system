@@ -1124,11 +1124,9 @@ function Proto.__index:op_tset(tab, ktag, key, val)
     self:emit(BC[ins_name], val, tab, key)
 end
 function Proto.__index:op_tsetm(base, vnum)
-    local dptr = double_new(0)
-    local iptr = ffi.cast('uint32_t*', dptr)
-    iptr[0] = vnum
-    iptr[1] = 0x43300000 -- Biased integer to avoid denormals.
-    local vidx = self:const(dptr[0])
+    local low = vnum
+    local high = 0x43300000 -- Biased integer to avoid denormals.
+    local vidx = self:const(bit.make_double(low,high))
     return self:emit(BC.TSETM, base + 1, vidx)
 end
 function Proto.__index:op_fnew(dest, pidx)

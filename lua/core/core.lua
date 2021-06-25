@@ -38,8 +38,6 @@ function math.max(x,y)
     end
 end
 
-string.char = function() error("string.char") end
-
 local module_cache = {}
 module_cache.ffi = ffi
 module_cache.bit = bit
@@ -56,11 +54,23 @@ function pairs(tab)
     return next, tab
 end
 
+package = {}
+_R.miku_debug_lib(package,"package")
+
+function package.seeall(mod)
+    setmetatable(mod,{__index=_G})
+end
+
 function module(name,...)
     local tab = {}
     _R.miku_debug_lib(tab,"[module "..name.."]")
     _G[name] = tab
     setfenv(2,tab)
+
+    local loaders = {...}
+    for i =1,#loaders do
+        loaders[i](tab)
+    end
 end
 
 function require(name)
@@ -70,7 +80,7 @@ function require(name)
     end
 
     -- Load.
-    local mod = _R.miku_bootstrap_require(name)
+    local mod = _R.miku_require(name)
 
     -- Write to cache.
     module_cache[name] = mod

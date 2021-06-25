@@ -50,7 +50,7 @@ namespace Miku.Lua
 
 		public Table Env = new Table();
 		private Table Registry = new Table();
-		private Function CompileFunction;
+		private Function CompileFunction = null!;
 
 		public LuaMachine()
 		{
@@ -61,17 +61,26 @@ namespace Miku.Lua
 
 			// Load libraries: TODO all should use: new CoreLib.X( this );
 			CoreLib.Bit.Init(Env);
-			CoreLib.String.Init(Env);
+			new CoreLib.String(this);
 
 			CoreLib.Misc.Init(Env);
 
 			new CoreLib.Globals( this );
 
-			Registry.Set( "miku_bootstrap_require", ValueSlot.UserFunction( (ValueSlot[] args, Executor ex ) => {
+			Registry.Set( "miku_require", ValueSlot.UserFunction( (ValueSlot[] args, Executor ex ) => {
 				string mod_name = args[0].CheckString();
+
+				var file_name = "glib_official/garrysmod/lua/includes/modules/" + mod_name + ".lua";
+				if ( CompileFunction != null && CheckFile( file_name ) )
+				{
+					// TODO: Normal require doesn't actually return anything.
+					RunFile( file_name );
+					return null;
+				}
+
 				// NOTE: Uses original env, which I assume is what we want?
 				var res = BootstrapRequire( Env, mod_name );
-				return new ValueSlot[] {res};
+				return new[] {res};
 			}));
 
 			Registry.Set( "miku_debug_lib", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
@@ -116,11 +125,22 @@ namespace Miku.Lua
 			}
 		}
 
+		private static string GetFilePath(string filename)
+		{
+			return $"lua/{filename}".Replace( "//", "/" );
+		}
+
 		public void RunFile(string filename )
 		{
-			string fullname = $"lua/{filename}".Replace("//","/");
+			string fullname = GetFilePath( filename );
 			var code = FileSystem.Mounted.ReadAllText( fullname );
 			RunString( code, fullname );
+		}
+
+		public bool CheckFile(string filename)
+		{
+			string fullname = GetFilePath( filename );
+			return FileSystem.Mounted.FileExists( fullname );
 		}
 	}
 }

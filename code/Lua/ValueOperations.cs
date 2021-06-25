@@ -37,6 +37,10 @@ namespace Miku.Lua
 						throw new Exception( $"Attempt to use {mt_index.Kind} as __index." );
 					}
 				}
+				if (result.Kind == ValueKind.Nil && tab.DebugLibName == null)
+				{
+					Sandbox.Log.Info( "GET " + tab.DebugLibName + "." + key );
+				}
 				return result;
 			} else
 			{
