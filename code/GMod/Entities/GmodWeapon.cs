@@ -40,11 +40,12 @@ namespace Miku.GMod.Entities
 
 		public override void AttackPrimary()
 		{
-			if (LuaTable != null)
+			/*if (LuaTable != null)
 			{
 				var method = ValueOperations.Get( ValueSlot.Table( LuaTable ), ValueSlot.String( "PrimaryAttack" ) );
 				method.CheckFunction().Call( GModGlobal.Server, new ValueSlot[] { ValueSlot.Table( LuaTable ) } );
-			}
+			}*/
+
 			//var method = LuaTable.Get( "PrimaryAttack" ).CheckFunction();
 			//base.AttackPrimary();
 			//var dmg = new DamageInfo();

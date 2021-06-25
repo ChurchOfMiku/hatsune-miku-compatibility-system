@@ -626,7 +626,7 @@ namespace Miku.Lua
 								upvals[i] = uv_box;
 							}
 						}
-						var new_func = new Function( Func.Env, new_proto, upvals );
+						var new_func = new Function( new_proto, Func.Env, Func.PrimitiveMT, upvals );
 						StackSet( A, ValueSlot.Function( new_func ) );
 						break;
 					}
@@ -647,7 +647,7 @@ namespace Miku.Lua
 				case OpCode.GGET:
 					{
 						var str = Func.Prototype.GetConstGC( D );
-						StackSet( A, ValueOperations.Get( ValueSlot.Table(Func.Env), str ) );
+						StackSet( A, ValueOperations.Get( ValueSlot.Table(Func.Env), str, Func.PrimitiveMT ) );
 						break;
 					}
 				case OpCode.GSET:
@@ -658,18 +658,18 @@ namespace Miku.Lua
 					}
 				case OpCode.TGETV:
 					{
-						StackSet( A, ValueOperations.Get( StackGet( B ), StackGet( C ) ) );
+						StackSet( A, ValueOperations.Get( StackGet( B ), StackGet( C ), Func.PrimitiveMT ) );
 						break;
 					}
 				case OpCode.TGETS:
 					{
 						var str = Func.Prototype.GetConstGC( C );
-						StackSet( A, ValueOperations.Get( StackGet( B ), str ) );
+						StackSet( A, ValueOperations.Get( StackGet( B ), str, Func.PrimitiveMT ) );
 						break;
 					}
 				case OpCode.TGETB:
 					{
-						StackSet( A, ValueOperations.Get( StackGet( B ), ValueSlot.Number(C) ) );
+						StackSet( A, ValueOperations.Get( StackGet( B ), ValueSlot.Number(C), Func.PrimitiveMT ) );
 						break;
 					}
 				case OpCode.TSETV:

@@ -20,7 +20,7 @@ namespace Miku.Lua
 			throw new Exception( $"Attempt to get length of {val.Kind}." );
 		}
 
-		public static ValueSlot Get(ValueSlot arg, ValueSlot key)
+		public static ValueSlot Get(ValueSlot arg, ValueSlot key, PrimitiveMetaTables prim_meta )
 		{
 			if ( arg.Kind == ValueKind.Table )
 			{
@@ -28,24 +28,41 @@ namespace Miku.Lua
 				var result = tab.Get(key);
 				if (result.Kind == ValueKind.Nil && tab.MetaTable != null )
 				{
-					var mt_index = tab.MetaTable.Get( "__index" );
-					if (mt_index.Kind == ValueKind.Table)
-					{
-						return Get( mt_index, key ); // TODO this might result in an infinite loop!
-					} else if (mt_index.Kind != ValueKind.Nil)
-					{
-						throw new Exception( $"Attempt to use {mt_index.Kind} as __index." );
-					}
+					return MetaGet(tab.MetaTable, arg, key, prim_meta);
 				}
-				if (result.Kind == ValueKind.Nil && tab.DebugLibName == null)
+				if (result.Kind == ValueKind.Nil && tab.DebugLibName != null)
 				{
 					Sandbox.Log.Info( "GET " + tab.DebugLibName + "." + key );
 				}
 				return result;
 			} else
 			{
+				var meta = prim_meta.Get(arg);
+				if (meta != null)
+				{
+					var result = MetaGet( meta, arg, key, prim_meta );
+					if (result.Kind != ValueKind.Nil)
+					{
+						return result;
+					}
+				}
 				throw new Exception( $"Attempt to index {arg.Kind} {arg} with {key}." );
 			}
+		}
+
+		private static ValueSlot MetaGet(Table mt, ValueSlot arg, ValueSlot key, PrimitiveMetaTables prim_meta )
+		{
+			var mt_index = mt.Get( "__index" );
+			if ( mt_index.Kind == ValueKind.Table )
+			{
+				// TODO we might need the original arg, for __index functions?
+				return Get( mt_index, key, prim_meta ); // TODO this might result in an infinite loop!
+			}
+			if (mt_index.Kind != ValueKind.Nil )
+			{
+				throw new Exception( $"Attempt to use {mt_index.Kind} as __index." );
+			}
+			return ValueSlot.NIL;
 		}
 	}
 }

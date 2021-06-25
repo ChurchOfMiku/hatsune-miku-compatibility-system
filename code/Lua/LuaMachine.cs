@@ -28,14 +28,14 @@ namespace Miku.Lua
 			return builder.ToString();
 		}
 
-		public ValueSlot BootstrapRequire(Table env, string name)
+		public ValueSlot BootstrapRequire(string name)
 		{
 			string filename = name.Replace('.','/');
 
 			var bytes = FileSystem.Mounted.ReadAllBytes( $"lua/core/{filename}.bc" );
 
 			var proto = Dump.Read( bytes.ToArray() );
-			var func = new Function( env, proto, new Executor.UpValueBox[0] );
+			var func = new Function( proto, Env, PrimitiveMeta );
 			var res = func.Call(this);
 			if (res.Length != 0)
 			{
@@ -50,6 +50,7 @@ namespace Miku.Lua
 
 		public Table Env = new Table();
 		private Table Registry = new Table();
+		protected PrimitiveMetaTables PrimitiveMeta = new PrimitiveMetaTables();
 		private Function CompileFunction = null!;
 
 		public LuaMachine()
@@ -79,7 +80,7 @@ namespace Miku.Lua
 				}
 
 				// NOTE: Uses original env, which I assume is what we want?
-				var res = BootstrapRequire( Env, mod_name );
+				var res = BootstrapRequire( mod_name );
 				return new[] {res};
 			}));
 
@@ -90,8 +91,8 @@ namespace Miku.Lua
 				return null;
 			}));
 
-			BootstrapRequire( Env, "core" );
-			CompileFunction = BootstrapRequire( Env, "lang.compile" ).CheckTable().Get( "string" ).CheckFunction();
+			BootstrapRequire( "core" );
+			CompileFunction = BootstrapRequire( "lang.compile" ).CheckTable().Get( "string" ).CheckFunction();
 		}
 
 		public void RunString(string code,string name)
@@ -114,7 +115,7 @@ namespace Miku.Lua
 					dump_bytes[i] = (byte)n;
 				}
 				var new_proto = Dump.Read( dump_bytes );
-				var new_func = new Function( Env, new_proto, new Executor.UpValueBox[0] );
+				var new_func = new Function( new_proto, Env, PrimitiveMeta );
 
 				Stopwatch sw2 = Stopwatch.StartNew();
 				new_func.Call(this);

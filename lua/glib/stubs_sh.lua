@@ -30,3 +30,5 @@ end
 function CreateConVar()
 
 end
+
+sql = {}

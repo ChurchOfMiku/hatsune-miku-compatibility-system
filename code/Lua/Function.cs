@@ -8,12 +8,18 @@ namespace Miku.Lua
 	{
 		public ProtoFunction Prototype;
 		public Table Env;
+		public PrimitiveMetaTables PrimitiveMT;
 		public Executor.UpValueBox[] UpValues;
 
-		public Function( Table env, ProtoFunction prototype, Executor.UpValueBox[] upvals)
+		public Function( ProtoFunction prototype, Table env, PrimitiveMetaTables prim_meta, Executor.UpValueBox[] upvals = null! )
 		{
-			Env = env;
+			if (upvals == null)
+			{
+				upvals = new Executor.UpValueBox[0];
+			}
 			Prototype = prototype;
+			Env = env;
+			PrimitiveMT = prim_meta;
 			UpValues = upvals;
 		}
 

@@ -7,6 +7,16 @@ function isfunction(x)
     return type(x) == "function"
 end
 
+function FindMetaTable(name)
+    local result = _R[name]
+    -- temp: create the table if not exist
+    if result == nil then
+        result = {}
+        _R[name] = result
+    end
+    return result
+end
+
 TYPE_NONE = -1	-- Invalid type
 TYPE_INVALID = -1
 TYPE_NIL = 0	-- nil
@@ -54,4 +64,4 @@ TYPE_PROJECTEDTEXTURE = 41 -- ProjectedTexture
 TYPE_PHYSCOLLIDE = 42 -- PhysCollide
 TYPE_SURFACEINFO = 43 -- SurfaceInfo
 TYPE_COUNT = 44	-- Amount of TYPE_* enums
-TYPE_COLOR = 255
+-- TYPE_COLOR is set by includes/extensions/net.lua

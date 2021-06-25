@@ -26,6 +26,10 @@ namespace Miku.GMod
 				Env.Set( "GAME_DLL",   IsServer ? ValueSlot.TRUE : ValueSlot.NIL );
 			}
 
+			// Setup string metatable.
+			PrimitiveMeta.MetaString = new Table();
+			PrimitiveMeta.MetaString.Set( "__index", Env.Get( "string" ) );
+
 			RunFile( "glib/types.lua" );
 			RunFile( "glib/stubs_sh.lua" );
 			RunFile( "glib/gamemode.lua" );

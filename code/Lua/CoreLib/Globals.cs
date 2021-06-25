@@ -26,9 +26,10 @@ namespace Miku.Lua.CoreLib
 				if ( x.Kind == ValueKind.String )
 				{
 					double result = 0;
+					// WARNING: this might be locale sensitive -- last time I checked the locale-independent parsing crap wasn't whitelisted
 					if ( double.TryParse( x.CheckString(), out result ) )
 					{
-						return new ValueSlot[] { ValueSlot.Number( result ) };
+						return new[] { ValueSlot.Number( result ) };
 					}
 				}
 				if ( x.Kind == ValueKind.Number )
@@ -38,6 +39,16 @@ namespace Miku.Lua.CoreLib
 				throw new Exception( "can't convert to number: " + x );
 			} ) );
 
+			env.Set( "tostring", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) =>
+			{
+				// Todo this may need to call __tostring meta or whatever.
+				var x = args[0];
+				if ( x.Kind == ValueKind.String )
+				{
+					return new[] { x };
+				}
+				return new[] { ValueSlot.String(x.ToString()) };
+			} ) );
 
 			env.Set( "next", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
 				var tab = args[0].CheckTable();
