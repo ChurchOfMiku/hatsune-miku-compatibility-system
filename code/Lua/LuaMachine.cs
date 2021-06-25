@@ -49,12 +49,17 @@ namespace Miku.Lua
 		}
 
 		public Table Env = new Table();
+		private Table Registry = new Table();
 		private Function CompileFunction;
 
 		public LuaMachine()
 		{
+			// Set up global table.
 			Env.DebugLibName = "_G";
+			Env.Set( "_G", ValueSlot.Table( Env ) );
+			Env.Set( "_R", ValueSlot.Table( Registry ) );
 
+			// Load libraries: TODO all should use: new CoreLib.X( this );
 			CoreLib.Bit.Init(Env);
 			CoreLib.String.Init(Env);
 
@@ -62,14 +67,14 @@ namespace Miku.Lua
 
 			new CoreLib.Globals( this );
 
-			Env.Set( "_MIKU_BOOTSTRAP_REQUIRE", ValueSlot.UserFunction( (ValueSlot[] args, Executor ex ) => {
+			Registry.Set( "miku_bootstrap_require", ValueSlot.UserFunction( (ValueSlot[] args, Executor ex ) => {
 				string mod_name = args[0].CheckString();
 				// NOTE: Uses original env, which I assume is what we want?
 				var res = BootstrapRequire( Env, mod_name );
 				return new ValueSlot[] {res};
 			}));
 
-			Env.Set( "_MIKU_DEBUG_LIB", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
+			Registry.Set( "miku_debug_lib", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
 				var tab = args[0].CheckTable();
 				var name = args[1].CheckString();
 				tab.DebugLibName = name;
@@ -85,6 +90,7 @@ namespace Miku.Lua
 			Stopwatch sw = Stopwatch.StartNew();
 			var results = CompileFunction.Call( this, new ValueSlot[] { ValueSlot.String(code), ValueSlot.String(name) } );
 			double compile_time = sw.Elapsed.TotalMilliseconds;
+
 			if (results[0].Kind == ValueKind.True)
 			{
 				var dump = results[1].CheckTable();

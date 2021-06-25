@@ -8,11 +8,11 @@ module_cache.ffi = ffi
 module_cache.bit = bit
 module_cache.jit = {version_num = 20100}
 
-function assert(x)
-    if not x then
-        error("assert failed")
+function assert(v,msg,...)
+    if not v then
+        error(msg or "assertion failed!")
     end
-    return x
+    return v, msg, ...
 end
 
 function math.max(x,y)
@@ -23,17 +23,23 @@ function math.max(x,y)
     end
 end
 
-function math.Clamp(x,low,high)
-    if x < low then return low end
-    if x > high then return high end
-    return x
+function module(name,...)
+    local tab = {}
+    _R.miku_debug_lib(tab,"[module "..name.."]")
+    _G[name] = tab
+    setfenv(2,tab)
 end
 
-require = function(name)
+function require(name)
+    -- Check cache
     if module_cache[name] then
         return module_cache[name]
     end
-    local mod = _MIKU_BOOTSTRAP_REQUIRE(name)
+
+    -- Load.
+    local mod = _R.miku_bootstrap_require(name)
+
+    -- Write to cache.
     module_cache[name] = mod
     return mod
 end

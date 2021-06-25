@@ -207,7 +207,13 @@ namespace Miku.Lua
 		public void Log()
 		{
 			Sandbox.Log.Info( $"LEN = {GetLength()}" );
-			Sandbox.Log.Info( $"TODO LOG ARRAY!" );
+			if (Array != null)
+			{
+				for (int i=0;i<Array.Count;i++ )
+				{
+					Sandbox.Log.Info( $"[{i+1}] = {Array[i]}" );
+				}
+			}
 			if (Dict != null)
 			{
 				foreach ( var pair in Dict )

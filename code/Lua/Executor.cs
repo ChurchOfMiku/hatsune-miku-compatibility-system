@@ -95,6 +95,28 @@ namespace Miku.Lua
 			StoreVarArgs( args.Length );
 		}
 
+		public Function? GetFunctionAtLevel(int level)
+		{
+			if (level <= 0)
+			{
+				return null;
+			}
+			if (level == 1)
+			{
+				return Func;
+			}
+			level--;
+			foreach (var entry in CallStack )
+			{
+				level--;
+				if (level == 0)
+				{
+					return entry.Func;
+				}
+			}
+			return null;
+		}
+
 		private void AddFrame( Function new_func, int ret_base, int ret_count, int arg_count )
 		{
 			// Push old function + PC to stack.
@@ -232,6 +254,7 @@ namespace Miku.Lua
 						//LogState();
 						Log.Error( e.Message );
 						Log.Error( e.StackTrace );
+						LogStack();
 					}
 					throw new SilentExecException(e);
 					//throw;
@@ -244,6 +267,16 @@ namespace Miku.Lua
 				}
 			}
 		}
+
+		public void LogStack()
+		{
+			Log.Info( " at " + Func.Prototype.DebugName );
+			foreach ( var level in CallStack )
+			{
+				Log.Info( " at " + level.Func.Prototype.DebugName );
+			}
+		}
+
 		public void LogState()
 		{
 			Log.Info( "======= STACK =======" );
@@ -657,6 +690,17 @@ namespace Miku.Lua
 					{
 						var table = StackGet( B ).CheckTable();
 						table.Set( (int)C, StackGet( A ) );
+						break;
+					}
+				case OpCode.TSETM:
+					{
+						var table = StackGet( A - 1 ).CheckTable();
+						var num = Func.Prototype.GetConstNum( D );
+						var start_index = (int)BitConverter.DoubleToInt64Bits( num );
+						for (int i=0;i<MultiRes;i++ )
+						{
+							table.Set( start_index + i, StackGet(A + (uint)i) );
+						}
 						break;
 					}
 				// Calls and Iterators

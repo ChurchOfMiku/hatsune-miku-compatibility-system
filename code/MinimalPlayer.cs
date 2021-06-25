@@ -26,7 +26,7 @@ namespace Miku
 			Camera = new ThirdPersonCamera();
 
 			Inventory = new BaseInventory(this);
-			if (GMod.GModGlobal.GModServer == null)
+			/*if (GMod.GModGlobal.Server == null)
 			{
 				throw new Exception( "lol" );
 			}
@@ -34,7 +34,7 @@ namespace Miku
 			if (swep != null)
 			{
 				Inventory.Add( swep, true );
-			}
+			}*/
 
 			EnableAllCollisions = true;
 			EnableDrawing = true;

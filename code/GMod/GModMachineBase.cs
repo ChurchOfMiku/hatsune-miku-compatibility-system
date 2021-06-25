@@ -16,24 +16,25 @@ namespace Miku.GMod
 
 		public GModMachineBase()
 		{
-			RunFile( "glib/globals.lua" );
-			RunFile( "glib/enums_sh.lua" );
-			RunFile( "glib/hook.lua" );
-			new Lib.Player( this );
-			new Lib.Weapon( this );
+			RunFile( "glib_official/garrysmod/lua/includes/modules/hook.lua" );
+			//RunFile( "glib/globals.lua" );
+			//RunFile( "glib/enums_sh.lua" );
+			//RunFile( "glib/hook.lua" );
+			//new Lib.Player( this );
+			//new Lib.Weapon( this );
 
 			RunHookFunction = Env.Get( "hook" ).CheckTable().Get( "Run" ).CheckFunction();
-			MakeVectorFunction = Env.Get( "Vector" ).CheckFunction();
+			//MakeVectorFunction = Env.Get( "Vector" ).CheckFunction();
 		}
 
-		/*public ValueSlot Vector(Vector3 vec)
+		public ValueSlot Vector(Vector3 vec)
 		{
 			var res = MakeVectorFunction.Call( this, new ValueSlot[] {
 				ValueSlot.Number(vec.x),
 				ValueSlot.Number(vec.y),
 				ValueSlot.Number(vec.z) } );
 			return res[0];
-		}*/
+		}
 
 		public void LoadSWEP(string class_name, string filename)
 		{

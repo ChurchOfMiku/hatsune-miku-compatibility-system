@@ -48,6 +48,27 @@ namespace Miku.Lua.CoreLib
 				return new ValueSlot[] { result };
 			} ) );
 
+			env.Set( "setfenv", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) =>
+			{
+				var env = args[1].CheckTable();
+				var func_or_loc = args[0];
+				if (func_or_loc.Kind == ValueKind.Function)
+				{
+					func_or_loc.CheckFunction().Env = env;
+					return new[] { func_or_loc };
+				} else
+				{
+					int stack_level = (int)func_or_loc.CheckNumber();
+					var func = ex.GetFunctionAtLevel(stack_level);
+					if (func == null)
+					{
+						throw new Exception( "Bad stack level?" );
+					}
+					func.Env = env;
+					return null;
+				}
+			} ) );
+
 			env.Set( "pcall", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
 				var func = args[0].CheckFunction(); // assume this is a lua function
 				var func_args = new ValueSlot[args.Length - 1];

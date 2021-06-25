@@ -28,7 +28,7 @@ namespace Miku
 		public override void FrameSimulate( Client cl )
 		{
 			base.FrameSimulate( cl );
-			GMod.GModGlobal.GModClient.Frame();
+			GMod.GModGlobal.Client.Frame();
 		}
 
 		/// <summary>

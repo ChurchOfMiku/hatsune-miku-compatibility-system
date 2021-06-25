@@ -43,7 +43,7 @@ namespace Miku.GMod.Entities
 			if (LuaTable != null)
 			{
 				var method = ValueOperations.Get( ValueSlot.Table( LuaTable ), ValueSlot.String( "PrimaryAttack" ) );
-				method.CheckFunction().Call( GMod.GModGlobal.GModServer, new ValueSlot[] { ValueSlot.Table( LuaTable ) } );
+				method.CheckFunction().Call( GModGlobal.Server, new ValueSlot[] { ValueSlot.Table( LuaTable ) } );
 			}
 			//var method = LuaTable.Get( "PrimaryAttack" ).CheckFunction();
 			//base.AttackPrimary();
