@@ -1,7 +1,93 @@
 ﻿using System;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Miku.Lua.CoreLib
 {
+	class PatternConverter
+	{
+		// Lua = https://www.lua.org/pil/20.2.html
+		// C# = https://docs.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference
+		// Anchors: multiline garbage?
+		// Empty char classes are invalid.
+		// Make sure empty patterns are handled correctly.
+		public static Regex Convert( string pattern )
+		{
+			var converter = new PatternConverter(pattern);
+			return converter.Run();
+		}
+
+		private string LuaPattern;
+		private int index = 0;
+
+		StringBuilder Result = new StringBuilder();
+
+		char GetChar()
+		{
+			return LuaPattern[index++];
+		}
+
+		bool HasChar()
+		{
+			return index < LuaPattern.Length;
+		}
+
+		private PatternConverter(string pattern)
+		{
+			LuaPattern = pattern;
+		}
+
+		private Regex Run()
+		{
+			while (HasChar())
+			{
+				char c = GetChar();
+				switch (c)
+				{
+					// Safe literal chars:
+					case char cc when (Char.IsLetter( cc )):
+					case '_':
+					case '@':
+						Result.Append( c );
+						break;
+
+					// Special chars that map 1:1
+					case '(':
+					case ')':
+						// TODO regex ctor should reject mismatched parens?
+						// NOTE: open paren must not be followed by a ?
+					case '.':
+					case '+':
+						Result.Append( c );
+						break;
+					// Anchors. TODO figure out if we should use alternatives that don't care about multiline crap.
+					case '^':
+						if (index == 1)
+						{
+							Result.Append('^');
+						} else
+						{
+							Result.Append( @"\^" );
+						}
+						break;
+					case '$':
+						if (index == LuaPattern.Length)
+						{
+							Result.Append( '$' );
+						} else
+						{
+							Result.Append( @"\$" );
+						}
+						break;
+					default:
+						throw new Exception( "HANDLE CHAR " + LuaPattern + " " + c );
+				}
+
+			}
+			return new Regex(Result.ToString());
+		}
+	}
+
 	class String
 	{
 		public String( LuaMachine machine )
@@ -72,22 +158,36 @@ namespace Miku.Lua.CoreLib
 			lib.Set( "match", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
 				var str = args[0].CheckString();
 				var pattern = args[1].CheckString();
-				bool result = false;
-				switch ( pattern )
+				if (args.Length > 2)
 				{
-					case "^TK_": result = str.StartsWith( "TK_" ); break;
-					case "^@(.+)$":
-						{
-							if ( str.StartsWith( "@" ) )
-							{
-								return new ValueSlot[] { ValueSlot.String( str.Substring( 1 ) ) };
-							}
-							result = false;
-							break;
-						}
-					default: throw new Exception( "match " + pattern );
+					throw new Exception( "string.match offset NYI" );
 				}
-				return new ValueSlot[] { ValueSlot.Bool( result ) };
+				var regex = PatternConverter.Convert( pattern );
+				var match = regex.Match( str );
+
+				if (!match.Success)
+				{
+					return null;
+				}
+
+				if ( pattern.Contains( '(' ) )
+				{
+					Sandbox.Log.Info( "==> " + regex + " " + match.Groups.Count + " " + match.Captures.Count );
+				}
+
+				// TODO: nesting behavior, lua goes outside-in
+				// TODO: trying to repeat ()'s results in nil return
+				if (match.Groups.Count > 1)
+				{
+					var results = new ValueSlot[match.Groups.Count - 1];
+					for (int i=1;i<match.Groups.Count;i++ )
+					{
+						results[i - 1] = ValueSlot.String( match.Groups[i].Value );
+					}
+					return results;
+				}
+
+				return new[] { ValueSlot.String( match.Value ) };
 			} ) );
 
 			lib.Set( "format", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {

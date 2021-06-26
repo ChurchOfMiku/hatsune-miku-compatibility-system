@@ -68,6 +68,10 @@ namespace Miku.Lua
 			}
 		}
 
+		// We allocate this much extra space on the stack.
+		// multirets can take up more space than the frame
+		private const int STACK_MARGIN = 100;
+
 		private int pc = 0;
 		private int MultiRes = 0;
 		private int StackTop = 0; // last entry in the stack + 1
@@ -137,7 +141,7 @@ namespace Miku.Lua
 			// Grow value stack.
 			FrameSize = Math.Max( Func.Prototype.numSlots , arg_count);
 			StackTop += FrameSize;
-			while ( ValueStack.Count < StackTop )
+			while ( ValueStack.Count < StackTop + STACK_MARGIN )
 			{
 				ValueStack.Add( ValueSlot.NIL );
 			}

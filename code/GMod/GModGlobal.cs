@@ -54,7 +54,7 @@ namespace Miku.GMod
 			}
 
 			//Client?.RunFile( "test/free_darkrp_hud.lua" );
-			Client?.RunFile( "test/continue.lua" );
+			Client?.RunFile( "test/patterns.lua" );
 
 			//GModServer?.LoadSWEP( "weapon_base", "test/Best of Toybox/lua/weapons/weapon_base/init.lua" );
 			//GModClient?.LoadSWEP( "weapon_base", "test/Best of Toybox/lua/weapons/weapon_base/cl_init.lua" );
