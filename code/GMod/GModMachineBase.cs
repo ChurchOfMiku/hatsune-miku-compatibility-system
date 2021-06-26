@@ -36,17 +36,9 @@ namespace Miku.GMod
 
 			new Lib.Player( this );
 
-			//RunFile( "glib_official/garrysmod/lua/includes/util.lua" ); // also includes util/color.lua
-			//RunFile( "glib_official/garrysmod/lua/includes/modules/hook.lua" );
 			RunFile( "glib_official/garrysmod/lua/includes/init.lua" );
-
-
-			//RunFile( "glib/globals.lua" );
-			//RunFile( "glib/enums_sh.lua" );
-			//RunFile( "glib/hook.lua" );
-			//new Lib.Weapon( this );
-
 			RunHookFunction = Env.Get( "hook" ).CheckTable().Get( "Run" ).CheckFunction();
+
 			//MakeVectorFunction = Env.Get( "Vector" ).CheckFunction();
 		}
 

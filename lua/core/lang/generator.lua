@@ -758,11 +758,13 @@ end
 function StatementRule:RepeatStatement(node)
     local base_register = self.ctx.freereg
     local loop_begin_location, loop_exit_location = genid(), genid()
+    local continue_location = genid()
     local loop_uclo_location = genid()
-    self:loop_enter(loop_exit_location, base_register, loop_begin_location)
+    self:loop_enter(loop_exit_location, base_register, continue_location)
     self.ctx:here(loop_begin_location)
     self.ctx:loop(loop_exit_location)
     self:block_emit(node.body)
+    self.ctx:here(continue_location)
     local need_body_uclo = self.ctx.scope.need_uclo
     if need_body_uclo then
         self:test_emit(node.test, loop_uclo_location, self.ctx.freereg)
@@ -788,13 +790,14 @@ function StatementRule:BreakStatement()
     self.ctx.scope.need_uclo = false
 end
 function StatementRule:ContinueStatement()
-    local base, _, need_uclo, enter = self.ctx:current_loop()
-    self.ctx:scope_jump(enter, base, need_uclo)
+    local base, _, need_uclo, continue_location = self.ctx:current_loop()
+    self.ctx:scope_jump(continue_location, base, need_uclo)
     self.ctx.scope.need_uclo = false
 end
 function StatementRule:ForStatement(node)
     local free = self.ctx.freereg
     local exit = genid()
+    local continue_location = genid()
     local init = node.init
     local name = init.id.name
     local line = node.line
@@ -809,12 +812,13 @@ function StatementRule:ForStatement(node)
     end
     local forivinfo = self.ctx:forivars(0x01)
     local loop = self.ctx:op_fori(free)
-    self:loop_enter(exit, free, loop)
+    self:loop_enter(exit, free, continue_location)
     self.ctx:newvar(name)
     self:block_enter()
     self:block_emit(node.body)
     self:block_leave()
     self:loop_leave(node.body.lastline)
+    self.ctx:here(continue_location)
     self.ctx:op_forl(free, loop)
     self.ctx:setpcline(line)
     forivinfo.endpc = #self.ctx.code
@@ -920,9 +924,9 @@ local function generate(tree, name)
         if lastline then self.ctx:line(lastline) end
     end
 
-    function self:loop_enter(exit, exit_reg, enter)
+    function self:loop_enter(exit, exit_reg, continue_location)
         self:block_enter()
-        self.ctx:loop_register(exit, exit_reg, enter)
+        self.ctx:loop_register(exit, exit_reg, continue_location)
     end
 
     function self:loop_leave(lastline)

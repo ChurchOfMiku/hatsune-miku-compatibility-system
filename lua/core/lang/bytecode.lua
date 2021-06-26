@@ -970,11 +970,11 @@ function Proto.__index:goto_label(label_name)
 end
 -- Add information in the current scope about the loop, its exit location
 -- and save register.
-function Proto.__index:loop_register(exit, exit_reg, enter)
-    if not enter then
-        error("no loop entry!")
+function Proto.__index:loop_register(exit, exit_reg, continue_point)
+    if not continue_point then
+        error("no loop continue point!")
     end
-    self.scope.loop_enter = enter
+    self.scope.loop_continue = continue_point
     self.scope.loop_exit = exit
     self.scope.loop_basereg = exit_reg
 end
@@ -990,7 +990,7 @@ function Proto.__index:current_loop()
         scope = scope.outer
     end
     assert(scope, "no loop to break")
-    return scope.loop_basereg, scope.loop_exit, need_uclo, scope.loop_enter
+    return scope.loop_basereg, scope.loop_exit, need_uclo, scope.loop_continue
 end
 function Proto.__index:global_uclo()
     local scope = self.scope
