@@ -165,17 +165,13 @@ namespace Miku.Lua.CoreLib
 				var regex = PatternConverter.Convert( pattern );
 				var match = regex.Match( str );
 
+				//Sandbox.Log.Info( "==> " + str + " " + pattern + " " + match );
+
 				if (!match.Success)
 				{
 					return null;
 				}
 
-				if ( pattern.Contains( '(' ) )
-				{
-					Sandbox.Log.Info( "==> " + regex + " " + match.Groups.Count + " " + match.Captures.Count );
-				}
-
-				// TODO: nesting behavior, lua goes outside-in
 				// TODO: trying to repeat ()'s results in nil return
 				if (match.Groups.Count > 1)
 				{

@@ -53,7 +53,7 @@ namespace Miku.Lua
 			return x ? TRUE : FALSE;
 		}
 
-		public static ValueSlot Prim(uint t)
+		public static ValueSlot Prim(int t)
 		{
 			if ( t == 1 ) {
 				return FALSE;

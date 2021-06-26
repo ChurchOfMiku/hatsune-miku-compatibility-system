@@ -12,12 +12,12 @@
 
 		public string DebugName;
 
-		public ValueSlot GetConstGC(uint index)
+		public ValueSlot GetConstGC(int index)
 		{
 			return this.constGC[this.constGC.Length - 1 - index];
 		}
 
-		public double GetConstNum( uint index )
+		public double GetConstNum( int index )
 		{
 			return this.constNum[index];
 		}
