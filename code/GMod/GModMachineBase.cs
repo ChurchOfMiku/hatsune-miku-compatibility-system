@@ -28,13 +28,24 @@ namespace Miku.GMod
 				Env.Set( "GAME_DLL",   IsServer ? ValueSlot.TRUE : ValueSlot.NIL );
 			}
 
+			// Load Enum Dumps
+			RunFile( "glib/enums_shared.lua" );
+			if ( IsClient )
+			{
+				RunFile( "glib/enums_client.lua" );
+			}
+			else
+			{
+				RunFile( "glib/enums_server.lua" );
+			}
+
 			RunFile( "glib/types.lua" );
 			RunFile( "glib/stubs_sh.lua" );
 			RunFile( "glib/gamemode.lua" );
 
 			new Lib.Player( this );
 
-			SetupStateSpecificInternalLibs();
+			SetupRealmInternalLibs();
 
 			RunFile( "glib_official/garrysmod/lua/includes/init.lua" );
 			RunHookFunction = Env.Get( "hook" ).CheckTable().Get( "Run" ).CheckFunction();
@@ -42,7 +53,7 @@ namespace Miku.GMod
 			//MakeVectorFunction = Env.Get( "Vector" ).CheckFunction();
 		}
 
-		protected abstract void SetupStateSpecificInternalLibs();
+		protected abstract void SetupRealmInternalLibs();
 
 		public ValueSlot Vector(Vector3 vec)
 		{
@@ -92,7 +103,7 @@ namespace Miku.GMod
 			//RunFile( "glib_official/garrysmod/lua/includes/extensions/client/globals.lua" );
 		}
 
-		protected override void SetupStateSpecificInternalLibs()
+		protected override void SetupRealmInternalLibs()
 		{
 			new Lib.Draw2D( this );
 			RunFile( "glib/draw2d.lua" ); // stub file ATM
@@ -111,7 +122,7 @@ namespace Miku.GMod
 	{
 		public override bool IsClient => false;
 
-		protected override void SetupStateSpecificInternalLibs()
+		protected override void SetupRealmInternalLibs()
 		{
 
 		}

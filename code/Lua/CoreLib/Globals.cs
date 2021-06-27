@@ -74,9 +74,21 @@ namespace Miku.Lua.CoreLib
 			} ) );
 
 			env.Set( "getmetatable", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
-				var table = args[0].CheckTable();
-				var result = table.MetaTable != null ? ValueSlot.Table( table.MetaTable ) : ValueSlot.NIL;
-				return new ValueSlot[] { result };
+				var val = args[0];
+				if (val.Kind == ValueKind.Table)
+				{
+					var table = val.CheckTable();
+					if (table.MetaTable != null)
+					{
+						return new ValueSlot[] { ValueSlot.Table( table.MetaTable ) };
+					}
+				}
+				var prim_mt = ex.Machine.PrimitiveMeta.Get( val );
+				if (prim_mt != null)
+				{
+					return new ValueSlot[] { ValueSlot.Table( prim_mt ) };
+				}
+				return null;
 			} ) );
 
 			env.Set( "setfenv", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) =>

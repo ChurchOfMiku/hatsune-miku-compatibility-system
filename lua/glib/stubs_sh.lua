@@ -36,6 +36,9 @@ if CLIENT then
     function LoadPresets()
         return {}
     end
+
+    vgui = {}
+    _R.miku_debug_lib(vgui,"vgui")
 end
 
 function AddConsoleCommand()
@@ -72,3 +75,9 @@ _R.miku_debug_lib(ents,"ents")
 
 player = {}
 _R.miku_debug_lib(player,"player")
+
+game = {}
+_R.miku_debug_lib(game,"game")
+
+motionsensor = {}
+_R.miku_debug_lib(motionsensor,"motionsensor")

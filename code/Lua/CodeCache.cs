@@ -11,11 +11,11 @@ namespace Miku.Lua
 	
     class CodeCache
 	{
-		private const bool DISABLE = false;
+		private static bool DISABLE = false;
 
 		public static string GetCacheFileName( string source )
 		{
-			var bytes = UTF8Encoding.UTF8.GetBytes( source );
+			var bytes = Encoding.UTF8.GetBytes( source );
 			var hash = MD5.Calculate( bytes );
 			return "cc/" + hash + ".bc";
 		}
