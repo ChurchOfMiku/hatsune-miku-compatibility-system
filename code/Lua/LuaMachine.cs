@@ -104,14 +104,25 @@ namespace Miku.Lua
 				code = code.Replace( "DEFINE_BASECLASS", "local BaseClass = baseclass.Get" );
 			}
 
-			Stopwatch sw = Stopwatch.StartNew();
-			var results = CompileFunction.Call( this, new ValueSlot[] { ValueSlot.String(code), ValueSlot.String(name) } );
-			double compile_time = sw.Elapsed.TotalMilliseconds;
+			var cache_file = CodeCache.GetCacheFileName(code);
+			byte[]? dump_bytes = CodeCache.GetCode( cache_file );
 
-			if (results[0].Kind == ValueKind.True)
+			double time_compile = -1;
+
+			if (dump_bytes == null)
 			{
+				Stopwatch sw_compile = Stopwatch.StartNew();
+				var results = CompileFunction.Call( this, new ValueSlot[] { ValueSlot.String(code), ValueSlot.String(name) } );
+				time_compile = sw_compile.Elapsed.TotalMilliseconds;
+
+				if ( results[0].Kind != ValueKind.True )
+				{
+					Log.Error( results[1] );
+					throw new Exception( "Lua compile failed." );
+				}
+
 				var dump = results[1].CheckTable();
-				byte[] dump_bytes = new byte[dump.GetLength()];
+				dump_bytes = new byte[dump.GetLength()];
 				for (int i=0;i< dump_bytes.Length; i++ )
 				{
 					int n = (int)dump.Get( i + 1 ).CheckNumber();
@@ -121,17 +132,17 @@ namespace Miku.Lua
 					}
 					dump_bytes[i] = (byte)n;
 				}
-				var new_proto = Dump.Read( dump_bytes );
-				var new_func = new Function( new_proto, Env, PrimitiveMeta );
 
-				Stopwatch sw2 = Stopwatch.StartNew();
-				new_func.Call(this);
-				Log.Warning( $"Finished {name}; C = {compile_time} ms; E = {sw2.Elapsed.TotalMilliseconds} ms" );
-			} else
-			{
-				Log.Error( results[1] );
-				throw new Exception("Lua compile failed.");
+				CodeCache.SetCode(cache_file, dump_bytes);
 			}
+
+			var new_proto = Dump.Read( dump_bytes );
+			var new_func = new Function( new_proto, Env, PrimitiveMeta );
+
+			Stopwatch sw_exec = Stopwatch.StartNew();
+			new_func.Call( this );
+			string time_compile_str = time_compile > 0 ? time_compile + " ms" : "CACHED";
+			Log.Warning( $"Finished {name}; C = {time_compile_str}; E = {sw_exec.Elapsed.TotalMilliseconds} ms" );
 		}
 
 		private static string GetFilePath(string filename)
