@@ -251,7 +251,7 @@ namespace Miku.Lua
 		public void Run()
 		{
 			int safety = 0;
-			int LIMIT = 5_000_000;
+			int LIMIT = 10_000_000;
 
 			while (pc < Func.Prototype.code.Length && Results == null)
 			{
