@@ -8,10 +8,9 @@ namespace Miku.Lua
 	{
 		public ProtoFunction Prototype;
 		public Table Env;
-		public PrimitiveMetaTables PrimitiveMT;
 		public Executor.UpValueBox[] UpValues;
 
-		public Function( ProtoFunction prototype, Table env, PrimitiveMetaTables prim_meta, Executor.UpValueBox[] upvals = null! )
+		public Function( ProtoFunction prototype, Table env, Executor.UpValueBox[] upvals = null! )
 		{
 			if (upvals == null)
 			{
@@ -19,14 +18,12 @@ namespace Miku.Lua
 			}
 			Prototype = prototype;
 			Env = env;
-			PrimitiveMT = prim_meta;
 			UpValues = upvals;
 		}
 
 		public ValueSlot[] Call(LuaMachine machine, ValueSlot[]? args = null)
 		{
-			var exec = new Executor( this, args ?? new ValueSlot[0] );
-			exec.Machine = machine;
+			var exec = new Executor( this, args ?? new ValueSlot[0], machine );
 			exec.Run();
 			if ( exec.Results == null )
 			{

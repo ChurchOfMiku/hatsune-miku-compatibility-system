@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Sandbox;
 
 namespace Miku.Lua
 {
@@ -32,7 +33,7 @@ namespace Miku.Lua
 				}
 				if (result.Kind == ValueKind.Nil && tab.DebugLibName != null)
 				{
-					Sandbox.Log.Info( "GET " + tab.DebugLibName + "." + key );
+					Log.Warning( "GET " + tab.DebugLibName + "." + key );
 				}
 				return result;
 			} else

@@ -86,10 +86,11 @@ namespace Miku.Lua
 
 		public ValueSlot[]? Results;
 
-		public LuaMachine? Machine;
+		public readonly LuaMachine Machine;
 
-		public Executor( Function func, ValueSlot[] args )
+		public Executor( Function func, ValueSlot[] args, LuaMachine machine )
 		{
+			Machine = machine;
 			AddFrameL( func, 0, 0 );
 			Func = func; // used to suppress null warning
 			for (int i=0;i<args.Length;i++ )
@@ -643,7 +644,7 @@ namespace Miku.Lua
 								upvals[i] = uv_box;
 							}
 						}
-						var new_func = new Function( new_proto, Func.Env, Func.PrimitiveMT, upvals );
+						var new_func = new Function( new_proto, Func.Env, upvals );
 						StackSet( A, ValueSlot.Function( new_func ) );
 						break;
 					}
@@ -664,7 +665,7 @@ namespace Miku.Lua
 				case OpCode.GGET:
 					{
 						var str = Func.Prototype.GetConstGC( D );
-						StackSet( A, ValueOperations.Get( ValueSlot.Table(Func.Env), str, Func.PrimitiveMT ) );
+						StackSet( A, ValueOperations.Get( ValueSlot.Table(Func.Env), str, Machine.PrimitiveMeta ) );
 						break;
 					}
 				case OpCode.GSET:
@@ -675,18 +676,18 @@ namespace Miku.Lua
 					}
 				case OpCode.TGETV:
 					{
-						StackSet( A, ValueOperations.Get( StackGet( B ), StackGet( C ), Func.PrimitiveMT ) );
+						StackSet( A, ValueOperations.Get( StackGet( B ), StackGet( C ), Machine.PrimitiveMeta ) );
 						break;
 					}
 				case OpCode.TGETS:
 					{
 						var str = Func.Prototype.GetConstGC( C );
-						StackSet( A, ValueOperations.Get( StackGet( B ), str, Func.PrimitiveMT ) );
+						StackSet( A, ValueOperations.Get( StackGet( B ), str, Machine.PrimitiveMeta ) );
 						break;
 					}
 				case OpCode.TGETB:
 					{
-						StackSet( A, ValueOperations.Get( StackGet( B ), ValueSlot.Number(C), Func.PrimitiveMT ) );
+						StackSet( A, ValueOperations.Get( StackGet( B ), ValueSlot.Number(C), Machine.PrimitiveMeta ) );
 						break;
 					}
 				case OpCode.TSETV:

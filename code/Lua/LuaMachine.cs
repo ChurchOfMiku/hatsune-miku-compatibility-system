@@ -37,7 +37,7 @@ namespace Miku.Lua
 			var bytes = FileSystem.Mounted.ReadAllBytes( $"lua/core/{filename}.bc" );
 
 			var proto = Dump.Read( bytes.ToArray() );
-			var func = new Function( proto, Env, PrimitiveMeta );
+			var func = new Function( proto, Env );
 			var res = func.Call(this);
 			if (res.Length != 0)
 			{
@@ -50,9 +50,10 @@ namespace Miku.Lua
 			return ValueSlot.NIL;
 		}
 
-		public Table Env = new Table();
-		private Table Registry = new Table();
-		protected PrimitiveMetaTables PrimitiveMeta = new PrimitiveMetaTables();
+		public readonly Table Env = new Table();
+		public readonly Table Registry = new Table();
+		public readonly PrimitiveMetaTables PrimitiveMeta = new PrimitiveMetaTables();
+
 		private Function CompileFunction = null!;
 
 		public LuaMachine()
@@ -137,12 +138,12 @@ namespace Miku.Lua
 			}
 
 			var new_proto = Dump.Read( dump_bytes );
-			var new_func = new Function( new_proto, Env, PrimitiveMeta );
+			var new_func = new Function( new_proto, Env );
 
 			Stopwatch sw_exec = Stopwatch.StartNew();
 			new_func.Call( this );
 			string time_compile_str = time_compile > 0 ? time_compile + " ms" : "CACHED";
-			Log.Warning( $"Finished {name}; C = {time_compile_str}; E = {sw_exec.Elapsed.TotalMilliseconds} ms" );
+			Log.Info( $"Finished {name}; C = {time_compile_str}; E = {sw_exec.Elapsed.TotalMilliseconds} ms" );
 		}
 
 		private static string GetFilePath(string filename)
