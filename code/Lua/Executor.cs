@@ -150,8 +150,8 @@ namespace Miku.Lua
 			}
 		}
 
-		// NOTE ret_source_base is an ABSOLUTE stack ref
-		private void PopFrame(int ret_source_base, int ret_slots_available)
+		// NOTE ret_source_base is now a LOCAL stack offset
+		private void PopFrameL(int ret_source_base, int ret_slots_available)
 		{
 			if (CallStack.Count == 0)
 			{
@@ -162,6 +162,9 @@ namespace Miku.Lua
 				}
 			} else
 			{
+				// Need to get this stack offset before messing with the exec state.
+				int real_source_base = GetRealStackIndex( ret_source_base );
+
 				var frame_info = CallStack.Pop();
 				int ret_dest_base = frame_info.RetBase;
 				int ret_slots_to_fill = frame_info.RetCount;
@@ -171,18 +174,18 @@ namespace Miku.Lua
 					MultiRes = ret_slots_available;
 				}
 
+
 				Func = frame_info.Func;
 				pc = frame_info.PC;
 				VarArgs = frame_info.VarArgs;
 				FrameTop = FrameBase;
 				FrameBase = frame_info.FrameBase;
 
-				// TODO set return values correctly
 				for ( int i = 0; i < ret_slots_to_fill; i++ )
 				{
 					if ( i < ret_slots_available )
 					{
-						StackSet( ret_dest_base + i, ValueStack[ret_source_base + i] );
+						StackSet( ret_dest_base + i, ValueStack[real_source_base + i] );
 					}
 					else
 					{
@@ -195,7 +198,6 @@ namespace Miku.Lua
 		/// <summary>
 		/// This ensures unprovided args slots are clear, and stores extra args in VarArgs if applicable.
 		/// </summary>
-		/// <param name="args_in"></param>
 		private void FixArguments(int args_in)
 		{
 			if ( args_in < Func.Prototype.numArgs )
@@ -747,7 +749,7 @@ namespace Miku.Lua
 							}
 						}
 
-						var call_func = ValueStack[call_base]; // TODO, meta calls
+						var call_func = StackGet(A); // TODO, meta calls
 						if (call_func.Kind == ValueKind.Function)
 						{
 							if ( is_tailcall )
@@ -794,7 +796,7 @@ namespace Miku.Lua
 
 							for ( int i = 0; i < arg_count; i++ )
 							{
-								args[i] = ValueStack[arg_base + i];
+								args[i] = StackGet( A + 1 + i );
 							}
 							var rets = user_func( args, this );
 
@@ -824,7 +826,7 @@ namespace Miku.Lua
 
 							if (is_tailcall)
 							{
-								PopFrame( ret_base, ret_count );
+								PopFrameL( A, ret_count );
 							}
 							break;
 						}
@@ -860,27 +862,24 @@ namespace Miku.Lua
 				// Returns
 				case OpCode.RETM:
 					{
-						int ret_base = GetRealStackIndex( A );
 						int ret_count = (int)D + MultiRes;
-						PopFrame(ret_base, ret_count);
+						PopFrameL(A, ret_count);
 						break;
 					}
 				case OpCode.RET:
 					{
-						int ret_base = GetRealStackIndex( A );
-						int ret_count = (int)D - 1;
-						PopFrame( ret_base, ret_count );
+						int ret_count = D - 1;
+						PopFrameL( A, ret_count );
 						break;
 					}
 				case OpCode.RET0:
 					{
-						PopFrame( 0, 0 );
+						PopFrameL( 0, 0 );
 						break;
 					}
 				case OpCode.RET1:
 					{
-						int ret_base = GetRealStackIndex( A );
-						PopFrame( ret_base, 1 );
+						PopFrameL( A, 1 );
 						break;
 					}
 				// Loops and Branches
