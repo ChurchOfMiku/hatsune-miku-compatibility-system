@@ -39,6 +39,17 @@ if CLIENT then
 
     vgui = {}
     _R.miku_debug_lib(vgui,"vgui")
+
+    function surface.GetTextureID( name )
+        return 0
+    end
+
+    render = {}
+    _R.miku_debug_lib(vgui,"render")
+
+    function render.GetScreenEffectTexture()
+        return "NO_TEXTURE"
+    end
 end
 
 function AddConsoleCommand()

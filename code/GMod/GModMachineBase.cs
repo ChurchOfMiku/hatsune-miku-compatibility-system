@@ -39,13 +39,12 @@ namespace Miku.GMod
 				RunFile( "glib/enums_server.lua" );
 			}
 
-			RunFile( "glib/types.lua" );
-			RunFile( "glib/stubs_sh.lua" );
-			RunFile( "glib/gamemode.lua" );
-
 			new Lib.Player( this );
-
 			SetupRealmInternalLibs();
+
+			RunFile( "glib/stubs.lua" );
+			RunFile( "glib/types.lua" );
+			RunFile( "glib/gamemode.lua" );
 
 			RunFile( "glib_official/garrysmod/lua/includes/init.lua" );
 			RunHookFunction = Env.Get( "hook" ).CheckTable().Get( "Run" ).CheckFunction();
@@ -106,7 +105,6 @@ namespace Miku.GMod
 		protected override void SetupRealmInternalLibs()
 		{
 			new Lib.Draw2D( this );
-			RunFile( "glib/draw2d.lua" ); // stub file ATM
 		}
 
 		public void Frame()

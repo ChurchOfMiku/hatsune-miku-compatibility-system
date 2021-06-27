@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<head>
+    <title>HMCS Status</title>
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+        table {
+            border-collapse: collapse;
+            margin: 5px 0;
+            display: none;
+        }
+        td {
+            border: 1px solid black;
+            padding: 5px;
+        }
+        td.rs.rc {
+            background: linear-gradient(45deg,#f3f17a 45%,#78ebdb 55%);
+        }
+        td.rm, .st-menu {
+            background: #aaa;
+        }
+        td.rs {
+            background: #78ebdb;
+        }
+        td.rc {
+            background: #f3f17a;
+        }
+        .st-nyi {
+            background: #eb7878;
+        }
+        .bar {
+            position:relative;
+            border: 1px solid black;
+            margin: 5px 0;
+        }
+        .bar div {
+            display: inline-block;
+            height: 100%;
+        }
+        .bar span {
+            width: 100%;
+            text-align: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+    @BIG_BAR@
+    <p>Not listed:</p>
+    <ul>
+        <li>Classes - Next TODO</li>
+        <li>Hooks - Not a concern right now.</li>
+        <li>Panels - Not a concern right now.</li>
+        <li>Enums - Should be good.</li>
+    </ul>
+    <h1>Libraries</h1>
+    
+<h2>Global</h2>
+<div class='bar' style='width: 400px; height: 30px; font-size: 30px;'><div style='width: 11.11111111111111%;' class='st-menu'></div><div style='width: 88.88888888888889%;' class='st-nyi'></div><span>11.1%</span></div>
+<button onclick="showTable('lib.global')">Details</button>
+<table id="lib.global" style="display: table;">
+    <tr><td class='rc rs rm '>C S M </td><td>AccessorFunc</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>Add_NPC_Class</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rm '>M </td><td>AddBackgroundImage</td><td class='st-menu'>MENU</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>AddConsoleCommand</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>AddCSLuaFile</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rm '>C M </td><td>AddonMaterial</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rs '>S </td><td>AddOriginToPVS</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>AddWorldTip</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>Angle</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>AngleRand</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>assert</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rs '>S </td><td>BroadcastLua</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>BuildNetworkedVarsTable</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rm '>M </td><td>CanAddServerToFavorites</td><td class='st-menu'>MENU</td><td></td></tr>
+<tr><td class='rm '>M </td><td>CancelLoading</td><td class='st-menu'>MENU</td><td></td></tr>
+<tr><td class='rm '>M </td><td>ChangeBackground</td><td class='st-menu'>MENU</td><td></td></tr>
+<tr><td class='rc rm '>C M </td><td>ChangeTooltip</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rm '>M </td><td>ClearBackgroundImages</td><td class='st-menu'>MENU</td><td></td></tr>
+<tr><td class='rc '>C </td><td>ClientsideModel</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>ClientsideRagdoll</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>ClientsideScene</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rm '>C M </td><td>CloseDermaMenus</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>collectgarbage</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>Color</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>ColorAlpha</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>ColorRand</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>ColorToHSL</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>ColorToHSV</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>CompileFile</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>CompileString</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rm '>M </td><td>ConsoleAutoComplete</td><td class='st-menu'>MENU</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>ConVarExists</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>CreateClientConVar</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>CreateConVar</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rm '>C M </td><td>CreateMaterial</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>CreateParticleSystem</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>CreatePhysCollideBox</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>CreatePhysCollidesFromModel</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>CreateSound</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>CreateSprite</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>CurTime</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>DamageInfo</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>DebugInfo</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>DEFINE_BASECLASS</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>DeriveGamemode</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rm '>C M </td><td>Derma_Anim</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rm '>C M </td><td>Derma_DrawBackgroundBlur</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rm '>C M </td><td>Derma_Hook</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rm '>C M </td><td>Derma_Install_Convar_Functions</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rm '>C M </td><td>Derma_Message</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rm '>C M </td><td>Derma_Query</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rm '>C M </td><td>Derma_StringRequest</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rm '>C M </td><td>DermaMenu</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rm '>C M </td><td>DisableClipping</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>DOF_Kill</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>DOF_Start</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>DOFModeHack</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rm '>M </td><td>DrawBackground</td><td class='st-menu'>MENU</td><td></td></tr>
+<tr><td class='rc '>C </td><td>DrawBloom</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>DrawBokehDOF</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>DrawColorModify</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>DrawMaterialOverlay</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>DrawMotionBlur</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>DrawSharpen</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>DrawSobel</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>DrawSunbeams</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>DrawTexturize</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>DrawToyTown</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>DropEntityIfHeld</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>DynamicLight</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>EffectData</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>Either</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>EmitSentence</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>EmitSound</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rm '>C M </td><td>EndTooltip</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>Entity</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>error</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>ErrorNoHalt</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>ErrorNoHaltWithStack</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>EyeAngles</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>EyePos</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>EyeVector</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>FindMetaTable</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rm '>C M </td><td>FindTooltip</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>Format</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>FrameNumber</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>FrameTime</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rm '>M </td><td>GameDetails</td><td class='st-menu'>MENU</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>gcinfo</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>GetConVar</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>GetConVar_Internal</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>GetConVarNumber</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>GetConVarString</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rm '>M </td><td>GetDefaultLoadingHTML</td><td class='st-menu'>MENU</td><td></td></tr>
+<tr><td class='rm '>M </td><td>GetDemoFileDetails</td><td class='st-menu'>MENU</td><td></td></tr>
+<tr><td class='rm '>M </td><td>GetDownloadables</td><td class='st-menu'>MENU</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>getfenv</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>GetGlobalAngle</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>GetGlobalBool</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>GetGlobalEntity</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>GetGlobalFloat</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>GetGlobalInt</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>GetGlobalString</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>GetGlobalVector</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>GetHostName</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>GetHUDPanel</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rm '>M </td><td>GetLoadPanel</td><td class='st-menu'>MENU</td><td></td></tr>
+<tr><td class='rm '>M </td><td>GetLoadStatus</td><td class='st-menu'>MENU</td><td></td></tr>
+<tr><td class='rm '>M </td><td>GetMapList</td><td class='st-menu'>MENU</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>getmetatable</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rm '>M </td><td>GetOverlayPanel</td><td class='st-menu'>MENU</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>GetPredictionPlayer</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>GetRenderTarget</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>GetRenderTargetEx</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rm '>M </td><td>GetSaveFileDetails</td><td class='st-menu'>MENU</td><td></td></tr>
+<tr><td class='rc '>C </td><td>GetTimeoutInfo</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>GetViewEntity</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>HSLToColor</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>HSVToColor</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>HTTP</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>include</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>IncludeCS</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>ipairs</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>isangle</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>isbool</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>IsColor</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>IsEnemyEntityName</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>IsEntity</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>IsFirstTimePredicted</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>IsFriendEntityName</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>isfunction</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rm '>M </td><td>IsInGame</td><td class='st-menu'>MENU</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>ismatrix</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>IsMounted</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>isnumber</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>ispanel</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>isstring</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>istable</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>IsTableOfEntitiesValid</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>IsUselessModel</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>IsValid</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>isvector</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rm '>M </td><td>JoinServer</td><td class='st-menu'>MENU</td><td></td></tr>
+<tr><td class='rc rm '>C M </td><td>JS_Language</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rm '>C M </td><td>JS_Utility</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rm '>C M </td><td>JS_Workshop</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rm '>C M </td><td>Label</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rm '>M </td><td>LanguageChanged</td><td class='st-menu'>MENU</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>Lerp</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>LerpAngle</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>LerpVector</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rm '>M </td><td>LoadAddonPresets</td><td class='st-menu'>MENU</td><td></td></tr>
+<tr><td class='rm '>M </td><td>LoadLastMap</td><td class='st-menu'>MENU</td><td></td></tr>
+<tr><td class='rc '>C </td><td>LoadPresets</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rm '>C M </td><td>Localize</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>LocalPlayer</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>LocalToWorld</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>Material</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>Matrix</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>Mesh</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>Model</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>module</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>Msg</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>MsgAll</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>MsgC</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>MsgN</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>NamedColor</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>newproxy</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>next</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rm '>M </td><td>NumDownloadables</td><td class='st-menu'>MENU</td><td></td></tr>
+<tr><td class='rc '>C </td><td>NumModelSkins</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>OnModelLoaded</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rm '>M </td><td>OpenFolder</td><td class='st-menu'>MENU</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>OrderVectors</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>pairs</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>Particle</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>ParticleEffect</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>ParticleEffectAttach</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>ParticleEmitter</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rs '>S </td><td>Path</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>pcall</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>Player</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>PositionSpawnIcon</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>PrecacheParticleSystem</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rs '>S </td><td>PrecacheScene</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>PrecacheSentenceFile</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rs '>S </td><td>PrecacheSentenceGroup</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>print</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rs '>S </td><td>PrintMessage</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>PrintTable</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>ProjectedTexture</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>ProtectedCall</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>RandomPairs</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>rawequal</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>rawget</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>rawset</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>RealFrameTime</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>RealTime</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rs '>S </td><td>RecipientFilter</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rm '>M </td><td>RecordDemoFrame</td><td class='st-menu'>MENU</td><td></td></tr>
+<tr><td class='rc rm '>C M </td><td>RegisterDermaMenuForClose</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rm '>C M </td><td>RememberCursorPosition</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rm '>C M </td><td>RemoveTooltip</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>RenderAngles</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>RenderDoF</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>RenderStereoscopy</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>RenderSuperDoF</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>require</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rm '>C M </td><td>RestoreCursorPosition</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>RunConsoleCommand</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rm '>M </td><td>RunGameUICommand</td><td class='st-menu'>MENU</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>RunString</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>RunStringEx</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>SafeRemoveEntity</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>SafeRemoveEntityDelayed</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rm '>M </td><td>SaveAddonPresets</td><td class='st-menu'>MENU</td><td></td></tr>
+<tr><td class='rm '>M </td><td>SaveLastMap</td><td class='st-menu'>MENU</td><td></td></tr>
+<tr><td class='rc '>C </td><td>SavePresets</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>ScreenScale</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rm '>C M </td><td>ScrH</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rm '>C M </td><td>ScrW</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>select</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>SendUserMessage</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>SentenceDuration</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rs '>S </td><td>ServerLog</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rm '>C M </td><td>SetClipboardText</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>setfenv</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>SetGlobalAngle</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>SetGlobalBool</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>SetGlobalEntity</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>SetGlobalFloat</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>SetGlobalInt</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>SetGlobalString</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>SetGlobalVector</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>setmetatable</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>SetPhysConstraintSystem</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>SortedPairs</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>SortedPairsByMemberValue</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>SortedPairsByValue</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>Sound</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>SoundDuration</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>SQLStr</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>SScale</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>STNDRD</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rs '>S </td><td>SuppressHostEvents</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>SysTime</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>TauntCamera</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rm '>C M </td><td>TextEntryLoseFocus</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>TimedCos</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>TimedSin</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>tobool</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rm '>M </td><td>ToggleFavourite</td><td class='st-menu'>MENU</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>tonumber</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>tostring</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rm '>M </td><td>TranslateDownloadableName</td><td class='st-menu'>MENU</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>type</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>TypeID</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>unpack</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>UnPredictedCurTime</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rm '>M </td><td>UpdateLoadPanel</td><td class='st-menu'>MENU</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>UTIL_IsUselessModel</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rm '>C M </td><td>ValidPanel</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>Vector</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>VectorRand</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rm '>C M </td><td>VGUIFrameTime</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc '>C </td><td>VGUIRect</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rm '>C M </td><td>VisualizeLayout</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rm '>C M </td><td>WorkshopFileBase</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>C S </td><td>WorldToLocal</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>C S M </td><td>xpcall</td><td class='st-nyi'>NYI</td><td></td></tr>
+
+</table>
+    <h1>Classes</h1>
+    @CLASSES@
+    <script>
+        function showTable(id) {
+            console.log(event.target.remove());
+            document.getElementById(id).style.display = "table";
+        }
+    </script>
+</body>

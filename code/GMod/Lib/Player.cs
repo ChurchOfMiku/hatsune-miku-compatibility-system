@@ -14,8 +14,7 @@ namespace Miku.GMod.Lib
 
 		public Player(GModMachineBase machine)
 		{
-			machine.RunFile( "glib/player.lua" );
-			var class_player = machine.Env.Get( "_CLASS_PLAYER" ).CheckTable();
+			var class_player = new Table();
 			machine.Ents.ClassPlayer = class_player;
 
 			class_player.Set( "Health", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
