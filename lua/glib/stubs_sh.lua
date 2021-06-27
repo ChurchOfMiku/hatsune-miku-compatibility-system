@@ -23,7 +23,17 @@ if SERVER then
     end
 end
 
+if CLIENT then
+    function LoadPresets()
+        return {}
+    end
+end
+
 function AddConsoleCommand()
+
+end
+
+function AddCSLuaFile()
 
 end
 
@@ -32,3 +42,6 @@ function CreateConVar()
 end
 
 sql = {}
+function sql.Query(...)
+    print("sql query",...)
+end

@@ -260,15 +260,14 @@ namespace Miku.Lua
 				} catch (Exception e)
 				{
 					// TODO throw an exception that contains exectuor info, don't log anything here.
-					throw;
-					/*if (!(e is SilentExecException))
+					if (!(e is SilentExecException))
 					{
 						Log.Error( e.Message );
 						Log.Error( e.StackTrace );
 						LogStack();
-						LogState();
+						//LogState();
 					}
-					throw new SilentExecException(e);*/
+					throw new SilentExecException(e);
 				}
 				safety++;
 				if (safety >= LIMIT )

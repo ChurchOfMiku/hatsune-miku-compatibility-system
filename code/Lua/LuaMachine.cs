@@ -16,6 +16,8 @@ namespace Miku.Lua
 	}
 	class LuaMachine
 	{
+		protected bool DoBaseClassReplacement = false;
+
 		public static string Concat( ValueSlot[] args )
 		{
 			var builder = new StringBuilder();
@@ -97,6 +99,11 @@ namespace Miku.Lua
 
 		public void RunString(string code,string name)
 		{
+			if (DoBaseClassReplacement)
+			{
+				code = code.Replace( "DEFINE_BASECLASS", "local BaseClass = baseclass.Get" );
+			}
+
 			Stopwatch sw = Stopwatch.StartNew();
 			var results = CompileFunction.Call( this, new ValueSlot[] { ValueSlot.String(code), ValueSlot.String(name) } );
 			double compile_time = sw.Elapsed.TotalMilliseconds;

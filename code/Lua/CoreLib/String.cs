@@ -50,6 +50,8 @@ namespace Miku.Lua.CoreLib
 					case char cc when (Char.IsLetter( cc )):
 					case '_':
 					case '@':
+					case '\'':
+					case '\0': // REALLY not sure about this one.
 						Result.Append( c );
 						break;
 
@@ -81,6 +83,20 @@ namespace Miku.Lua.CoreLib
 							Result.Append( @"\$" );
 						}
 						break;
+					case '%':
+						{
+							char char_class = GetChar();
+							switch (char_class)
+							{
+								case 'x':
+									Result.Append( "[0-9A-Fa-f]" );
+									break;
+								default:
+									throw new Exception( "HANDLE CLASS " + LuaPattern + " " + char_class );
+							}
+
+							break;
+						}
 					default:
 						throw new Exception( "HANDLE CHAR " + LuaPattern + " " + c );
 				}
@@ -157,6 +173,31 @@ namespace Miku.Lua.CoreLib
 				return new ValueSlot[] { ValueSlot.String( str.Substring( start, length ) ) };
 			} ) );
 
+			lib.Set( "find", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) =>
+			{
+				var str = args[0].CheckString();
+				var pattern = args[1].CheckString();
+				if ( args.Length > 2 )
+				{
+					throw new Exception( "string.find offset/noPatterns NYI" );
+				}
+
+				var regex = PatternConverter.Convert( pattern );
+				var match = regex.Match( str );
+
+				if (!match.Success)
+				{
+					return null;
+				}
+
+				if ( match.Groups.Count > 1 )
+				{
+					throw new Exception( "string.find groups" );
+				}
+
+				return new[] { ValueSlot.Number(match.Index + 1), ValueSlot.Number(match.Index + match.Length) };
+			} ) );
+
 			lib.Set( "match", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
 				var str = args[0].CheckString();
 				var pattern = args[1].CheckString();
@@ -186,6 +227,28 @@ namespace Miku.Lua.CoreLib
 				}
 
 				return new[] { ValueSlot.String( match.Value ) };
+			} ) );
+
+			lib.Set( "gsub", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) =>
+			{
+				var str = args[0].CheckString();
+				var pattern = args[1].CheckString();
+				var replace = args[2];
+				if ( args.Length > 3 )
+				{
+					throw new Exception( "string.gsub maxReplaces NYI" );
+				}
+
+				var regex = PatternConverter.Convert( pattern );
+				if (replace.Kind == ValueKind.String)
+				{
+					var result = regex.Replace( str, replace.CheckString() );
+					return new[] { ValueSlot.String( result ) };
+				} else
+				{
+					throw new Exception( "string.gsub replace = " + replace );
+				}
+
 			} ) );
 
 			var format_regex = new Regex(@"%([\-+ #0]*)(\d*)(\.\d*)?([\w%])");

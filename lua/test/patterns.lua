@@ -11,7 +11,4 @@
 
 
 
-print(string.match("asdfasdf", '(((.)(.)(.)))'))
-
-
-A + 2
+print(string.find("asdfa\0sdf", 'df'))

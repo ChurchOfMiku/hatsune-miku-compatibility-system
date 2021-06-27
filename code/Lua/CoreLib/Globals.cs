@@ -23,11 +23,21 @@ namespace Miku.Lua.CoreLib
 
 			env.Set( "tonumber", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
 				var x = args[0];
+				if (args.Length > 1)
+				{
+					throw new Exception("tonumber base NYI");
+				}
 				if ( x.Kind == ValueKind.String )
 				{
 					double result = 0;
+					string str = x.CheckString();
+					if (str.StartsWith("0x"))
+					{
+						// TODO probably not totally sufficient
+						return new[] { ValueSlot.Number( Convert.ToInt32( str, 16 ) ) };
+					}
 					// WARNING: this might be locale sensitive -- last time I checked the locale-independent parsing crap wasn't whitelisted
-					if ( double.TryParse( x.CheckString(), out result ) )
+					if ( double.TryParse( str, out result ) )
 					{
 						return new[] { ValueSlot.Number( result ) };
 					}
@@ -139,16 +149,37 @@ namespace Miku.Lua.CoreLib
 				return new ValueSlot[] { ValueSlot.String( result ) };
 			} ) );
 
+			string[] INCLUDE_PATHS = new[] {
+				"glib_official/garrysmod/lua/"
+			};
 			env.Set( "include", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
 				string filename = args[0].CheckString();
-				string fullpath = ex.GetDirectory() + filename;
 
-				if (ex.Machine == null)
+
+				if ( ex.Machine == null )
 				{
-					throw new Exception("Include: No LuaMachine?");
+					throw new Exception( "Include: No LuaMachine?" );
 				}
-				ex.Machine.RunFile(fullpath);
-				return null;
+
+				// TODO do we check absolute or relative first?
+
+				foreach (var path in INCLUDE_PATHS)
+				{
+					string fullpath = path + filename;
+
+					if (ex.Machine.CheckFile( fullpath ) )
+					{
+						ex.Machine.RunFile( fullpath );
+						return null;
+					}
+				}
+
+				{
+					string fullpath = ex.GetDirectory() + filename;
+
+					ex.Machine.RunFile(fullpath);
+					return null;
+				}
 			} ) );
 		}
 	}

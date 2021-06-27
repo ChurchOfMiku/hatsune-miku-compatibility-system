@@ -16,6 +16,8 @@ namespace Miku.GMod
 
 		public GModMachineBase()
 		{
+			DoBaseClassReplacement = true;
+
 			// Setup glua-specific constants.
 			// SEE https://wiki.facepunch.com/gmod/Global_Variables
 			{
@@ -36,11 +38,15 @@ namespace Miku.GMod
 
 			new Lib.Player( this );
 
+			SetupStateSpecificInternalLibs();
+
 			RunFile( "glib_official/garrysmod/lua/includes/init.lua" );
 			RunHookFunction = Env.Get( "hook" ).CheckTable().Get( "Run" ).CheckFunction();
 
 			//MakeVectorFunction = Env.Get( "Vector" ).CheckFunction();
 		}
+
+		protected abstract void SetupStateSpecificInternalLibs();
 
 		public ValueSlot Vector(Vector3 vec)
 		{
@@ -87,8 +93,11 @@ namespace Miku.GMod
 
 		public GmodMachineClient()
 		{
-			RunFile( "glib_official/garrysmod/lua/includes/extensions/client/globals.lua" );
+			//RunFile( "glib_official/garrysmod/lua/includes/extensions/client/globals.lua" );
+		}
 
+		protected override void SetupStateSpecificInternalLibs()
+		{
 			new Lib.Draw2D( this );
 			RunFile( "glib/draw2d.lua" ); // stub file ATM
 		}
@@ -105,6 +114,11 @@ namespace Miku.GMod
 	class GmodMachineServer : GModMachineBase
 	{
 		public override bool IsClient => false;
+
+		protected override void SetupStateSpecificInternalLibs()
+		{
+
+		}
 
 		public GmodMachineServer()
 		{
