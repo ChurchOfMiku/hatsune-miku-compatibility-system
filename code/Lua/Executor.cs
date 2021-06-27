@@ -512,16 +512,22 @@ namespace Miku.Lua
 						StackSet( A, ValueSlot.Number( result ) );
 						break;
 					}
+				case OpCode.ADDNV:
 				case OpCode.SUBNV:
 				case OpCode.MULNV:
+				case OpCode.DIVNV:
+				case OpCode.MODNV:
 					{
 						double nB = StackGet( B ).CheckNumber();
 						double nC = Func.Prototype.GetConstNum( C );
 						double result = 0;
 						switch ( OP )
 						{
+							case OpCode.ADDNV: result = nC + nB; break;
 							case OpCode.SUBNV: result = nC - nB; break;
 							case OpCode.MULNV: result = nC * nB; break;
+							case OpCode.DIVNV: result = nC / nB; break;
+							case OpCode.MODNV: result = nC % nB; break;
 						}
 						StackSet( A, ValueSlot.Number( result ) );
 						break;

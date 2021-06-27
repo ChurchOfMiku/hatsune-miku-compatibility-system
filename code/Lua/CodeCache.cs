@@ -11,6 +11,8 @@ namespace Miku.Lua
 	
     class CodeCache
 	{
+		private const bool DISABLE = false;
+
 		public static string GetCacheFileName( string source )
 		{
 			var bytes = UTF8Encoding.UTF8.GetBytes( source );
@@ -20,6 +22,11 @@ namespace Miku.Lua
 
 		public static byte[]? GetCode(string filename)
 		{
+			if ( DISABLE )
+			{
+				return null;
+			}
+
 			if (FileSystem.Data.FileExists( filename ) )
 			{
 				return FileSystem.Data.ReadAllBytes(filename).ToArray();

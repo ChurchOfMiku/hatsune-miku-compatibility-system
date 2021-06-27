@@ -50,8 +50,8 @@ namespace Miku.Lua.CoreLib
 
 			// HACK: used by parser
 			lib.Set( "make_double", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
-				long low = (int)args[0].CheckNumber();
-				long high = (int)args[1].CheckNumber();
+				long low = (uint)args[0].CheckNumber();
+				long high = (uint)args[1].CheckNumber();
 				long merged = low | (high << 32);
 				double d = BitConverter.Int64BitsToDouble( merged );
 				return new[] { ValueSlot.Number( d ) };
