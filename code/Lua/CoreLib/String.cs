@@ -114,6 +114,10 @@ namespace Miku.Lua.CoreLib
 			lib.DebugLibName = "string";
 			machine.Env.Set( "string", ValueSlot.Table( lib ) );
 
+			// Set string metatable.
+			machine.PrimitiveMeta.MetaString = new Table();
+			machine.PrimitiveMeta.MetaString.Set( "__index", ValueSlot.Table(lib) );
+
 			lib.Set( "byte", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
 				var str = args[0].CheckString();
 				int index = 0;

@@ -1,3 +1,12 @@
+function MsgN(...)
+    local parts = {...}
+    local str = ""
+    for i = 1,#parts do
+        str = str..parts[i]
+    end
+    print(str)
+end
+
 net = {}
 
 function Material(name)
@@ -42,6 +51,24 @@ function CreateConVar()
 end
 
 sql = {}
+_R.miku_debug_lib(sql,"sql")
+
 function sql.Query(...)
     print("sql query",...)
 end
+
+file = {}
+_R.miku_debug_lib(file,"file")
+
+--local fake_file = {}
+--_R.miku_debug_lib(fake_file,"[class File]")
+
+function file.Open()
+    return nil
+end
+
+ents = {}
+_R.miku_debug_lib(ents,"ents")
+
+player = {}
+_R.miku_debug_lib(player,"player")
