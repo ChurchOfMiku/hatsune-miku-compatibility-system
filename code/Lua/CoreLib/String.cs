@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Text;
 using System.Text.RegularExpressions;
+using Sandbox;
+using System.Collections.Generic;
 
 namespace Miku.Lua.CoreLib
 {
@@ -186,9 +188,43 @@ namespace Miku.Lua.CoreLib
 				return new[] { ValueSlot.String( match.Value ) };
 			} ) );
 
+			var format_regex = new Regex(@"%([\-+ #0]*)(\d*)(\.\d*)?([\w%])");
 			lib.Set( "format", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
-				string joined = LuaMachine.Concat( args );
-				return new ValueSlot[] { ValueSlot.String( "[" + joined + "]" ) };
+				string format = args[0].CheckString();
+
+				// TODO escape {'s
+				var format_params = new List<object>();
+
+				string converted_format = format_regex.Replace( format, ( match ) =>
+				{
+					var flags = match.Groups[1].Value;
+					var width = match.Groups[2].Value;
+					var precision = match.Groups[3].Value;
+					var spec = match.Groups[4].Value;
+
+					Assert.True( flags.Length == 0 );
+					Assert.True( width.Length == 0 );
+					Assert.True( precision.Length == 0 );
+
+					int spec_index = format_params.Count;
+					ValueSlot val = args[spec_index + 1];
+
+					if ( spec == "s" )
+					{
+						// TODO is this the right behavior?
+						format_params.Add( val.ToString() );
+					} else if (spec == "d" || spec == "i") {
+						format_params.Add( val.CheckNumber() );
+					} else
+					{
+						throw new Exception( "format spec = " + spec );
+					}
+					return "{" + spec_index + "}";
+				} );
+
+				var result = string.Format( converted_format, format_params.ToArray() );
+
+				return new[] { ValueSlot.String( result ) };
 			} ) );
 		}
 	}

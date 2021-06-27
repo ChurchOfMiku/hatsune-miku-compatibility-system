@@ -259,14 +259,16 @@ namespace Miku.Lua
 					Step();
 				} catch (Exception e)
 				{
-					if (!(e is SilentExecException))
+					// TODO throw an exception that contains exectuor info, don't log anything here.
+					throw;
+					/*if (!(e is SilentExecException))
 					{
 						Log.Error( e.Message );
 						Log.Error( e.StackTrace );
 						LogStack();
 						LogState();
 					}
-					throw new SilentExecException(e);
+					throw new SilentExecException(e);*/
 				}
 				safety++;
 				if (safety >= LIMIT )
@@ -754,39 +756,25 @@ namespace Miku.Lua
 						{
 							if ( is_tailcall )
 							{
-								// Save arguments.
-								// TODO it is PROBABLY safe to just copy the args, since they will always be on equal or greater indices
-								var args = new ValueSlot[arg_count];
-								for ( int i = 0; i < arg_count; i++ )
-								{
-									args[i] = ValueStack[arg_base + i];
-								}
-
 								// Clear current function and reset stack.
 								// TODO this is very stupid. Do something about it.
 								FrameTop = FrameBase;
 								Func = null!;
 
 								AddFrameL( call_func.CheckFunction(), 0, 0 );
-
-								for ( int i = 0; i < arg_count; i++ )
-								{
-									StackSet( i, args[i] );
-								}
-
-								FixArguments( arg_count );
 							} else
 							{
 								AddFrameL( call_func.CheckFunction(), A, ret_count );
-
-								for (int i=0;i<arg_count;i++ )
-								{
-									var arg_val = ValueStack[arg_base + i];
-									StackSet( i, arg_val );
-								}
-
-								FixArguments( arg_count );
 							}
+
+							// Set arguments.
+							for (int i=0;i<arg_count;i++ )
+							{
+								var arg_val = ValueStack[arg_base + i];
+								StackSet( i, arg_val );
+							}
+
+							FixArguments( arg_count );
 
 							return; // DO NOT INCREMENT PC
 						} else

@@ -122,7 +122,8 @@ namespace Miku.Lua
 				Log.Warning( $"Finished {name}; C = {compile_time} ms; E = {sw2.Elapsed.TotalMilliseconds} ms" );
 			} else
 			{
-				throw new Exception( "compile failed" );
+				Log.Error( results[1] );
+				throw new Exception("Lua compile failed.");
 			}
 		}
 

@@ -98,18 +98,20 @@ namespace Miku.Lua.CoreLib
 					func_args[i] = args[i + 1];
 				}
 				ValueSlot[] call_results;
+
+				// We make an entirely new executor to call the function in.
+				// Throwing exceptions could put the executor in a bad state.
 				try
 				{
 					call_results = func.Call( machine, func_args );
 				}
 				catch ( Exception e )
 				{
-					Log.Warning( e.Message );
-					throw new Exception( "TODO pcall error handling!" );
+					return new[] { ValueSlot.FALSE, ValueSlot.String( e.Message ) };
 				}
 
 				ValueSlot[] pcall_results = new ValueSlot[call_results.Length + 1];
-				pcall_results[0] = ValueSlot.Bool( true );
+				pcall_results[0] = ValueSlot.TRUE;
 				for ( int i = 0; i < call_results.Length; i++ )
 				{
 					pcall_results[i + 1] = call_results[i];
