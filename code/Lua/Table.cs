@@ -3,6 +3,8 @@
 using System.Collections.Generic;
 using System;
 
+using Sandbox;
+
 namespace Miku.Lua
 {
 	class Table
@@ -234,7 +236,7 @@ namespace Miku.Lua
 			return result;
 		}
 
-		public void Log()
+		/*public void Log()
 		{
 			Sandbox.Log.Info( $"LEN = {GetLength()}" );
 			if (Array != null)
@@ -249,6 +251,61 @@ namespace Miku.Lua
 				foreach ( var pair in Dict )
 				{
 					Sandbox.Log.Info( $"[{pair.Key}] = {pair.Value}" );
+				}
+			}
+		}*/
+
+		// Used to generate the status pages that tell us how much of the API is implemented.
+		public void Dump(string filename)
+		{
+			var dict = new Dictionary<string, string>();
+
+			DumpInternal( "", dict, 3 );
+
+			FileSystem.Data.WriteJson(filename,dict);
+		}
+
+		private void DumpInternal(string prefix, Dictionary<string, string> dict, int levels)
+		{
+			if (levels <= 0)
+			{
+				return;
+			}
+			levels--;
+			if (Dict != null)
+			{
+				foreach (var pair in Dict)
+				{
+					if (pair.Key.Kind == ValueKind.String)
+					{
+						var key_str = pair.Key.CheckString();
+						if ( key_str == "_G" || key_str.Contains('.') || key_str.Contains( '/' ))
+						{
+							continue;
+						}
+
+						if (pair.Value.Kind == ValueKind.UserFunction)
+						{
+							dict[prefix+key_str] = "CSHARP";
+						} else if (pair.Value.Kind == ValueKind.Function)
+						{
+							var func = pair.Value.CheckFunction();
+							string debug_name = func.Prototype.DebugName;
+							if ( debug_name.Contains("/glib_official/"))
+							{
+								dict[prefix + key_str] = "FP-LUA";
+							} else if ( debug_name.Contains( "/stubs.lua" ) )
+							{
+								dict[prefix + key_str] = "STUB";
+							} else
+							{
+								dict[prefix + key_str] = "LUA";
+							}
+						} else if (pair.Value.Kind == ValueKind.Table)
+						{
+							pair.Value.CheckTable().DumpInternal( prefix + key_str + ".", dict, levels );
+						}
+					}
 				}
 			}
 		}

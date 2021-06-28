@@ -13,10 +13,12 @@ namespace Miku.Lua
 	{
 		private static bool DISABLE = false;
 
-		public static string GetCacheFileName( string source )
+		public static string GetCacheFileName( string name, string source )
 		{
-			var bytes = Encoding.UTF8.GetBytes( source );
-			var hash = MD5.Calculate( bytes );
+			var bytes_1 = Encoding.UTF8.GetBytes( name );
+			var bytes_2 = Encoding.UTF8.GetBytes( source );
+
+			var hash = MD5.Calculate( bytes_1.Concat(bytes_2).ToArray() );
 			return "cc/" + hash + ".bc";
 		}
 

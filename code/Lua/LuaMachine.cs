@@ -105,7 +105,7 @@ namespace Miku.Lua
 				code = code.Replace( "DEFINE_BASECLASS", "local BaseClass = baseclass.Get" );
 			}
 
-			var cache_file = CodeCache.GetCacheFileName(code);
+			var cache_file = CodeCache.GetCacheFileName(name, code);
 			byte[]? dump_bytes = CodeCache.GetCode( cache_file );
 
 			double time_compile = -1;

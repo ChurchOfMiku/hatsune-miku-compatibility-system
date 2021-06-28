@@ -7,7 +7,7 @@
         }
         table {
             border-collapse: collapse;
-            margin: 5px 0;
+            margin: 5px 100px;
             display: none;
         }
         td {
@@ -26,10 +26,38 @@
         td.rc {
             background: #f3f17a;
         }
+        td.ru {
+            background: #e97af3;
+        }
         .st-nyi {
             background: #eb7878;
         }
+        .st-error {
+            background: #F00;
+            color: white;
+        }
+        .st-stub {
+            background: #ff8248;
+        }
+        .st-fp-lua {
+            background: #7be4bb;
+        }
+        .st-lua {
+            background: #7ee47b;
+        }
+        .st-csharp {
+            background: #0e850a;
+            color: white;
+        }
+        h2 {
+            display: inline-block;
+            vertical-align: middle;
+            width: 400px;
+            margin: 5px 0;
+        }
         .bar {
+            vertical-align: middle;
+            display: inline-block;
             position:relative;
             border: 1px solid black;
             margin: 5px 0;
@@ -48,10 +76,11 @@
     </style>
 </head>
 <body>
-    @BIG_BAR@
+    <h1>HMCS Status</h1>
+    @HEADER@
+    <button onclick="toggleAll()">Toggle All</button>
     <p>Not listed:</p>
     <ul>
-        <li>Classes - Next TODO</li>
         <li>Hooks - Not a concern right now.</li>
         <li>Panels - Not a concern right now.</li>
         <li>Enums - Should be good.</li>
@@ -62,8 +91,22 @@
     @CLASSES@
     <script>
         function showTable(id) {
-            console.log(event.target.remove());
-            document.getElementById(id).style.display = "table";
+            let elem = document.getElementById(id);
+            if (elem.style.display == "table") {
+                elem.style.display = "";
+            } else {
+                elem.style.display = "table";
+            }
+        }
+        function toggleAll() {
+            var first_open = document.getElementById("section_0").style.display == "table";
+            document.querySelectorAll("*[id^=section_]").forEach((elem)=>{
+                if (first_open) {
+                    elem.style.display = "";
+                } else {
+                    elem.style.display = "table";
+                }
+            });
         }
     </script>
 </body>

@@ -4,6 +4,13 @@ const fs = require('fs');
 const $ = cheerio.load(fs.readFileSync('index.html'));
 const TEMPLATE = fs.readFileSync('template.html').toString();
 
+const CLIENT_DUMP = JSON.parse(fs.readFileSync(__dirname+"/../../../data/local/hatsune-miku-compatibility-system/client.json"));
+const SERVER_DUMP = JSON.parse(fs.readFileSync(__dirname+"/../../../data/local/hatsune-miku-compatibility-system/server.json"));
+
+let GLOBAL_COUNTS = {};
+
+let STATUS_TYPES = ["MENU","CSHARP","LUA","FP-LUA","STUB","NYI","ERROR"];
+
 function makeBar(counts,width,height) {
     let total = 0;
     let good = 0;
@@ -13,12 +20,12 @@ function makeBar(counts,width,height) {
         total += c;
     }
 
-    ["MENU","CSHARP","LUA","FP-LUA","STUB","NYI"].forEach((key)=>{
+    STATUS_TYPES.forEach((key)=>{
         let c = counts[key];
         if (c == null) {
             return;
         }
-        if (key == "MENU") {
+        if (key != "ERROR" && key != "NYI" && key != "STUB") {
             good += c;
         }
         let status_class = "st-"+key.toLowerCase();
@@ -28,42 +35,114 @@ function makeBar(counts,width,height) {
     return `<div class='bar' style='width: ${width}px; height: ${height}px; font-size: ${height}px;'>${contents}</div>`;
 }
 
-let counts = {};
-let table_contents = "";
-$("#sidebar details:has(summary:contains(Globals)) li").each((i,elem)=>{
-    /*$(elem).find("li").each((i,elem)=>{
-        let name = $(elem).text().trim();
-        console.log(name,i);
-    });*/
-    let a = $(elem).find("a");
-    let realms = "";
-    if (a.hasClass("rc")) realms += "rc ";
-    if (a.hasClass("rs")) realms += "rs ";
-    if (a.hasClass("rm")) realms += "rm ";
+let section_id = 0;
 
-    let name = $(elem).text().trim();
-    let status = "NYI";
-    if (realms == "rm ") {
-        status = "MENU";
+function makeSection(section_name_pretty,prefix,elems,force_open) {
+    let counts = {};
+    let table_contents = "";
+
+    function generateRow(elem,prefix) {
+        let a = $(elem).find("a");
+        let realms = "";
+        if (a.hasClass("rc")) realms += "rc ";
+        if (a.hasClass("rs")) realms += "rs ";
+        if (a.hasClass("rm")) realms += "rm ";
+        let realm_pretty = "";
+        if (realms.includes("rc")) {
+            if (realms.includes("rs")) {
+                realm_pretty = "Shared";
+            } else {
+                realm_pretty = "Client";
+            }
+        } else if (realms.includes("rs")) {
+            realm_pretty = "Server";
+        } else if (realms == "rm ") {
+            realm_pretty = "Menu";
+        } else {
+            realm_pretty = "Field?";
+            realms += "ru ";
+        }
+    
+        let name = prefix+$(elem).text().trim();
+        let status = "NYI";
+        let notes = "";
+
+        let status_c = CLIENT_DUMP[name];
+        let status_s = SERVER_DUMP[name];
+        if (realm_pretty == "Menu") {
+            status = "MENU";
+        } else if (realm_pretty == "Shared") {
+            if (status_c != status_s) {
+                status = "ERROR";
+                notes = `Inconsistent shared status, CL = `+status_c+", SV = "+status_s;
+            } else if (status_c != null) {
+                status = status_c;
+            }
+        } else if (realm_pretty == "Client") {
+            if (status_c != null) {
+                status = status_c;
+            }
+        }else if (realm_pretty == "Server") {
+            if (status_s != null) {
+                status = status_s;
+            }
+        }
+    
+        counts[status]=(counts[status]||0)+1;
+    
+        let status_class = "st-"+status.toLowerCase();
+        return `<tr><td class='${realms}'>${realm_pretty}</td><td>${name}</td><td class='${status_class}'>${status}</td><td>${notes}</td></tr>\n`;
     }
-    let notes = "";
 
-    counts[status]=(counts[status]||0)+1;
+    function handleList(elems,prefix) {
+        elems.each((i,elem)=>{
+            let sub_title = $(elem).children("details").children("summary").text().trim();
+            if (sub_title) {
+                handleList($(elem).children("details").children("ul").children("li"),prefix+sub_title+".");
+            } else {
+                table_contents += generateRow(elem,prefix);
+            }
+        });
+    }
 
-    let realms_pretty = realms.replace(/r/g,"").toUpperCase();
-    let status_class = "st-"+status.toLowerCase();
-    table_contents += `<tr><td class='${realms}'>${realms_pretty}</td><td>${name}</td><td class='${status_class}'>${status}</td><td>${notes}</td></tr>\n`;
+    handleList(elems,prefix);
+
+    for (let k in counts) {
+        GLOBAL_COUNTS[k] = (GLOBAL_COUNTS[k]||0)+counts[k];
+    }
+    
+    let section = `<div>
+    <h2>${section_name_pretty}</h2>
+    ${makeBar(counts,400,30)}
+    <button onclick="showTable('section_${section_id}')">Toggle Details</button>
+    <table id="section_${section_id}" ${force_open?'style="display: table;"':""}>
+        ${table_contents}
+    </table></div>`;
+    section_id++;
+    return section;
+}
+
+let lib_sections = makeSection("Global","",$("#sidebar details:has(summary:contains(Globals)) li"));
+let libs = $("#sidebar details:has(summary:contains(Libraries))>ul>li");
+libs.each((i,elem)=>{
+    let name = $(elem).children("details").children("summary").text().trim();
+    lib_sections += makeSection(name,name+".",$(elem).children("details").children("ul").children("li"));
 });
 
-let section_name_pretty = "Global";
-let section_id = "lib.global";
+let class_sections = "";
+let classes = $("#sidebar details:has(summary:contains(Classes))>ul>li");
+classes.each((i,elem)=>{
+    let name = $(elem).children("details").children("summary").text().trim();
+    class_sections += makeSection(name,"_R."+name+".",$(elem).children("details").children("ul").children("li"));
+});
 
-let section = `
-<h2>${section_name_pretty}</h2>
-${makeBar(counts,400,30)}
-<button onclick="showTable('${section_id}')">Details</button>
-<table id="${section_id}" style="display: table;">
-    ${table_contents}
-</table>`;
+let header = "<p><i>Generated @ "+new Date()+"</i></p>";
+header += makeBar(GLOBAL_COUNTS,1000,100);
+header += "<ul>";
+STATUS_TYPES.forEach((key)=>{
+    let status_class = "st-"+key.toLowerCase();
+    header += `<li><span class='${status_class}'>${GLOBAL_COUNTS[key]||0} ${key}</span></li>`;
+});
+header += "</ul>";
 
-fs.writeFileSync("hmcs_status.html",TEMPLATE.replace("@LIBRARIES@",section));
+fs.writeFileSync("hmcs_status.html",TEMPLATE.replace("@HEADER@",header).replace("@LIBRARIES@",lib_sections).replace("@CLASSES@",class_sections));

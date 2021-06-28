@@ -21,6 +21,8 @@ namespace Miku.GMod
 
 	class GModGlobal
 	{
+		static bool DUMP_STATUS = true;
+
 		public static GmodMachineClient Client;
 		public static GmodMachineServer Server;
 
@@ -58,6 +60,11 @@ namespace Miku.GMod
 
 			//GModServer?.LoadSWEP( "weapon_base", "test/Best of Toybox/lua/weapons/weapon_base/init.lua" );
 			//GModClient?.LoadSWEP( "weapon_base", "test/Best of Toybox/lua/weapons/weapon_base/cl_init.lua" );
+			if (DUMP_STATUS)
+			{
+				Client?.Env.Dump( "client.json" );
+				Server?.Env.Dump( "server.json" );
+			}
 		}
 	}
 }
