@@ -87,6 +87,9 @@ _R.miku_debug_lib(ents,"ents")
 player = {}
 _R.miku_debug_lib(player,"player")
 
+team = {}
+_R.miku_debug_lib(team,"team")
+
 game = {}
 _R.miku_debug_lib(game,"game")
 

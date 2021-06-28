@@ -59,6 +59,10 @@ namespace Miku.Lua
 				// TODO we might need the original arg, for __index functions?
 				return Get( mt_index, key, prim_meta ); // TODO this might result in an infinite loop!
 			}
+			if (mt_index.Kind == ValueKind.Function)
+			{
+				throw new Exception( "Attempt to use function as index. " + mt_index.CheckFunction().Prototype.DebugName );
+			}
 			if (mt_index.Kind != ValueKind.Nil )
 			{
 				throw new Exception( $"Attempt to use {mt_index.Kind} as __index." );

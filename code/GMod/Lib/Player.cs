@@ -15,7 +15,9 @@ namespace Miku.GMod.Lib
 		public Player(GModMachineBase machine)
 		{
 			var class_player = new Table();
+			class_player.DebugLibName = "[class Player]";
 			machine.Ents.ClassPlayer = class_player;
+			machine.Registry.Set( "Player", ValueSlot.Table( class_player ) );
 
 			class_player.Set( "Health", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
 				var ply = args[0].CheckTable().UserData as Sandbox.Player;
