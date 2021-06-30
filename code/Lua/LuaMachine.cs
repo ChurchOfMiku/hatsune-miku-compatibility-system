@@ -38,16 +38,7 @@ namespace Miku.Lua
 
 			var proto = Dump.Read( bytes.ToArray() );
 			var func = new Function( proto, Env );
-			var res = func.Call(this);
-			if (res.Length != 0)
-			{
-				if ( res.Length != 1)
-				{
-					throw new Exception( "Module returned multiple values." );
-				}
-				return res[0];
-			}
-			return ValueSlot.NIL;
+			return func.Call( this ).GetResult(0);
 		}
 
 		public readonly Table Env = new Table();
@@ -116,13 +107,14 @@ namespace Miku.Lua
 				var results = CompileFunction.Call( this, new ValueSlot[] { ValueSlot.String(code), ValueSlot.String(name) } );
 				time_compile = sw_compile.Elapsed.TotalMilliseconds;
 
-				if ( results[0].Kind != ValueKind.True )
+
+				if ( results.GetResult( 0 ).Kind != ValueKind.True )
 				{
-					Log.Error( results[1] );
+					Log.Error( results.GetResult( 1 ) );
 					throw new Exception( "Lua compile failed." );
 				}
 
-				var dump = results[1].CheckTable();
+				var dump = results.GetResult( 1 ).CheckTable();
 				dump_bytes = new byte[dump.GetLength()];
 				for (int i=0;i< dump_bytes.Length; i++ )
 				{

@@ -201,9 +201,10 @@ Buf.__index = {}
 Buf.__index.need = function(self, size)
     -- no-op
 end
+local table_insert = table.insert
 Buf.__index.put = function(self, v)
     v = band(v,0xFF)
-    table.insert(self,v)
+    table_insert(self,v)
 end
 Buf.__index.put_uint8 = Buf.__index.put
 

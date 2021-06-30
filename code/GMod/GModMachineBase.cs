@@ -56,11 +56,10 @@ namespace Miku.GMod
 
 		public ValueSlot Vector(Vector3 vec)
 		{
-			var res = MakeVectorFunction.Call( this, new ValueSlot[] {
+			return MakeVectorFunction.Call( this, new ValueSlot[] {
 				ValueSlot.Number(vec.x),
 				ValueSlot.Number(vec.y),
-				ValueSlot.Number(vec.z) } );
-			return res[0];
+				ValueSlot.Number(vec.z) } ).GetResult( 0 );
 		}
 
 		public void LoadSWEP(string class_name, string filename)
@@ -80,7 +79,7 @@ namespace Miku.GMod
 			Ents.RegisterClass( class_name, ScriptedEntityKind.Weapon, swep_table );*/
 		}
 
-		public ValueSlot[] RunHook(string name, ValueSlot[] args)
+		public Executor RunHook(string name, ValueSlot[] args)
 		{
 			var full_args = new ValueSlot[args.Length + 1];
 			full_args[0] = ValueSlot.String( name );

@@ -4,7 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Diagnostics;
+
 using Sandbox;
+
 
 namespace Miku.Lua
 {
@@ -72,32 +75,68 @@ namespace Miku.Lua
 
 		private int pc = 0; // signed because it can be set to -1 at the start of a call
 		private int MultiRes = 0;
-		private Function Func;
+		private Function Func = null!; // our current function
 
-		// ALL assignments to the value stack need to use StackSet. Otherwise we risk breaking the stack frame.
+		/// <summary>
+		/// Stack of values.
+		/// ALL assignments to the value stack need to use StackSet. Otherwise we risk breaking the stack frame.
+		/// </summary>
 		private List<ValueSlot> ValueStack = new List<ValueSlot>();
-		private int FrameTop = 0; // last entry in the stack + 1
-		private int FrameBase = 0; // zeroth entry in the stack
+
+		/// <summary>
+		/// Last entry in the stack + 1.
+		/// </summary>
+		private int FrameTop = 0;
+
+		/// <summary>
+		/// Zeroth entry in the stack.
+		/// </summary>
+		private int FrameBase = 0;
 
 		private Stack<FrameInfo> CallStack = new Stack<FrameInfo>();
 		private SortedDictionary<int, UpValueBox> OpenUpValues = new SortedDictionary<int, UpValueBox>();
 
+		/// <summary>
+		/// Not to be confused with MultiRes, stores the arguments from `...`.
+		/// </summary>
 		private ValueSlot[]? VarArgs;
 
-		public ValueSlot[]? Results;
+		/// <summary>
+		///  Set if the executor has completed.
+		/// </summary>
+		private int? ResultCount;
+
+		public int GetResultCount()
+		{
+			if (!ResultCount.HasValue)
+			{
+				throw new Exception( "Executor is not finished." );
+			}
+			return ResultCount.Value;
+		}
+
+		public ValueSlot GetResult(int i)
+		{
+			int res_count = GetResultCount();
+			if (i<0 || i>=res_count)
+			{
+				return ValueSlot.NIL;
+			}
+			return ValueStack[i];
+		}
 
 		public readonly LuaMachine Machine;
 
 		public Executor( Function func, ValueSlot[] args, LuaMachine machine )
 		{
 			Machine = machine;
-			AddFrameL( func, 0, 0 );
-			Func = func; // used to suppress null warning
+
+			CallPrepare( func, 0, 0 );
 			for (int i=0;i<args.Length;i++ )
 			{
 				StackSet(i, args[i]);
 			}
-			FixArguments( args.Length );
+			CallArgsReady( args.Length );
 		}
 
 		public Function? GetFunctionAtLevel(int level)
@@ -124,10 +163,10 @@ namespace Miku.Lua
 
 		// TODO pull function from stack, simplify all calls
 		// NOTE ret_base is now a LOCAL stack offset
-		private void AddFrameL( Function new_func, int ret_base, int ret_count )
+		private void CallPrepare( Function new_func, int ret_base = 0, int ret_count = 0, bool replace = false )
 		{
 			// Push old function + PC to stack.
-			if (Func != null)
+			if (Func != null && !replace)
 			{
 				CallStack.Push( new FrameInfo{
 					Func = Func,
@@ -140,9 +179,12 @@ namespace Miku.Lua
 			}
 
 			Func = new_func;
-			this.pc = 0;
+			this.pc = -1;
 			VarArgs = null;
-			FrameBase = FrameTop;
+			if (!replace)
+			{
+				FrameBase = FrameTop;
+			}
 			
 			// Make sure the stack has plenty of slots.
 			while ( ValueStack.Count < FrameTop + STACK_MARGIN )
@@ -151,15 +193,49 @@ namespace Miku.Lua
 			}
 		}
 
-		// NOTE ret_source_base is now a LOCAL stack offset
-		private void PopFrameL(int ret_source_base, int ret_slots_available)
+		/// <summary>
+		/// This ensures unprovided args slots are clear, and stores extra args in VarArgs if applicable.
+		/// </summary>
+		private void CallArgsReady( int args_in )
 		{
+			if ( args_in < Func.Prototype.numArgs )
+			{
+				// we need to clear arguments we're not using
+				for ( int i = args_in; i < Func.Prototype.numArgs; i++ )
+				{
+					StackSet( i, ValueSlot.NIL );
+				}
+			}
+
+			if ( Func.Prototype.IsVarArg() )
+			{
+				if ( args_in > Func.Prototype.numArgs )
+				{
+					int varg_base = Func.Prototype.numArgs;
+					int varg_count = args_in - Func.Prototype.numArgs;
+					VarArgs = new ValueSlot[varg_count];
+					for ( int i = 0; i < varg_count; i++ )
+					{
+						VarArgs[i] = StackGet( varg_base + i );
+					}
+				}
+				else
+				{
+					VarArgs = new ValueSlot[0];
+				}
+			}
+		}
+
+		// NOTE ret_source_base is now a LOCAL stack offset
+		private void Return(int ret_source_base, int ret_slots_available)
+		{
+			// TODO clear stack slots that are no-longer used, to prevent leaking references.
 			if (CallStack.Count == 0)
 			{
-				Results = new ValueSlot[ret_slots_available];
+				ResultCount = ret_slots_available;
 				for ( int i = 0; i < ret_slots_available; i++ )
 				{
-					Results[i] = StackGet(ret_source_base + i);
+					ValueStack[i] = StackGet(ret_source_base + i);
 				}
 			} else
 			{
@@ -196,38 +272,6 @@ namespace Miku.Lua
 			}
 		}
 
-		/// <summary>
-		/// This ensures unprovided args slots are clear, and stores extra args in VarArgs if applicable.
-		/// </summary>
-		private void FixArguments(int args_in)
-		{
-			if ( args_in < Func.Prototype.numArgs )
-			{
-				// we need to clear arguments we're not using
-				for (int i=args_in; i<Func.Prototype.numArgs; i++ )
-				{
-					StackSet( i, ValueSlot.NIL );
-				}
-			}
-
-			if (Func.Prototype.IsVarArg())
-			{
-				if ( args_in > Func.Prototype.numArgs )
-				{
-					int varg_base = Func.Prototype.numArgs;
-					int varg_count = args_in - Func.Prototype.numArgs;
-					VarArgs = new ValueSlot[varg_count];
-					for (int i=0;i<varg_count;i++ )
-					{
-						VarArgs[i] = StackGet(varg_base + i);
-					}
-				} else
-				{
-					VarArgs = new ValueSlot[0];
-				}
-			}
-		}
-
 		private int GetRealStackIndex( int index )
 		{
 			return FrameBase + index;
@@ -253,7 +297,7 @@ namespace Miku.Lua
 			int safety = 0;
 			int LIMIT = 10_000_000;
 
-			while (pc < Func.Prototype.code.Length && Results == null)
+			while (ResultCount == null)
 			{
 				try
 				{
@@ -277,6 +321,7 @@ namespace Miku.Lua
 					throw new Exception( "hit safety" );
 				}
 			}
+			Profiler.Stop();
 		}
 
 		public void LogStack()
@@ -336,8 +381,15 @@ namespace Miku.Lua
 
 		public void Step()
 		{
+			//var timer = Stopwatch.StartNew();
+			if (pc<0)
+			{
+				pc = 0;
+			}
 			uint instr = Func.Prototype.code[pc];
 			var OP = (OpCode)(instr & 0xFF);
+
+			Profiler.Update(OP,Func.Prototype.DebugName);
 			int A = (int)((instr >> 8) & 0xFF);
 			int B = (int)((instr >> 24) & 0xFF);
 			int C = (int)((instr >> 16) & 0xFF);
@@ -760,32 +812,17 @@ namespace Miku.Lua
 						var call_func = StackGet(A); // TODO, meta calls
 						if (call_func.Kind == ValueKind.Function)
 						{
-							if ( is_tailcall )
-							{
-								// Clear current function and reset stack.
-								// TODO this is very stupid. Do something about it.
-								FrameTop = FrameBase;
-								Func = null!;
-
-								AddFrameL( call_func.CheckFunction(), 0, 0 );
-							} else
-							{
-								AddFrameL( call_func.CheckFunction(), A, ret_count );
-							}
-
-							// Set arguments.
+							CallPrepare( call_func.CheckFunction(), A, ret_count, is_tailcall );
 							for (int i=0;i<arg_count;i++ )
 							{
 								var arg_val = ValueStack[arg_base + i];
 								StackSet( i, arg_val );
 							}
-
-							FixArguments( arg_count );
-
-							return; // DO NOT INCREMENT PC
+							CallArgsReady( arg_count );
 						} else
 						{
 							var user_func = call_func.CheckUserFunction();
+							Profiler.UpdateUserFunc( "CSHARP (ANON)" );
 							var args = new ValueSlot[arg_count];
 
 							for ( int i = 0; i < arg_count; i++ )
@@ -820,10 +857,10 @@ namespace Miku.Lua
 
 							if (is_tailcall)
 							{
-								PopFrameL( A, ret_count );
+								Return( A, ret_count );
 							}
-							break;
 						}
+						break;
 					}
 				case OpCode.VARG:
 					{
@@ -855,27 +892,17 @@ namespace Miku.Lua
 					}
 				// Returns
 				case OpCode.RETM:
-					{
-						int ret_count = (int)D + MultiRes;
-						PopFrameL(A, ret_count);
+						Return(A, D + MultiRes);
 						break;
-					}
 				case OpCode.RET:
-					{
-						int ret_count = D - 1;
-						PopFrameL( A, ret_count );
+						Return( A, D - 1 );
 						break;
-					}
 				case OpCode.RET0:
-					{
-						PopFrameL( 0, 0 );
+						Return( 0, 0 );
 						break;
-					}
 				case OpCode.RET1:
-					{
-						PopFrameL( A, 1 );
+						Return( A, 1 );
 						break;
-					}
 				// Loops and Branches
 				case OpCode.LOOP:
 					{

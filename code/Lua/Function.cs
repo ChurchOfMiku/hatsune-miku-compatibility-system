@@ -21,15 +21,11 @@ namespace Miku.Lua
 			UpValues = upvals;
 		}
 
-		public ValueSlot[] Call(LuaMachine machine, ValueSlot[]? args = null)
+		public Executor Call(LuaMachine machine, ValueSlot[]? args = null)
 		{
 			var exec = new Executor( this, args ?? new ValueSlot[0], machine );
 			exec.Run();
-			if ( exec.Results == null )
-			{
-				throw new Exception( "Executor did not return?" );
-			}
-			return exec.Results;
+			return exec;
 		}
 	}
 }

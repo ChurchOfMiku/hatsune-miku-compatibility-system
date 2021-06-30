@@ -119,7 +119,7 @@ namespace Miku.Lua.CoreLib
 				{
 					func_args[i] = args[i + 1];
 				}
-				ValueSlot[] call_results;
+				Executor call_results;
 
 				// We make an entirely new executor to call the function in.
 				// Throwing exceptions could put the executor in a bad state.
@@ -132,11 +132,12 @@ namespace Miku.Lua.CoreLib
 					return new[] { ValueSlot.FALSE, ValueSlot.String( e.Message ) };
 				}
 
-				ValueSlot[] pcall_results = new ValueSlot[call_results.Length + 1];
+				int result_count = call_results.GetResultCount();
+				ValueSlot[] pcall_results = new ValueSlot[result_count + 1];
 				pcall_results[0] = ValueSlot.TRUE;
-				for ( int i = 0; i < call_results.Length; i++ )
+				for ( int i = 0; i < result_count; i++ )
 				{
-					pcall_results[i + 1] = call_results[i];
+					pcall_results[i + 1] = call_results.GetResult(i);
 				}
 
 				return pcall_results;
