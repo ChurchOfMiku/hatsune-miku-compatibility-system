@@ -32,7 +32,7 @@ namespace Miku.Lua
 		{
 			Cycle();
 			CurrentOp = null;
-			CurrentFunc = func;
+			CurrentFunc = "[CSHARP] "+func;
 		}
 
 		public static void Stop()

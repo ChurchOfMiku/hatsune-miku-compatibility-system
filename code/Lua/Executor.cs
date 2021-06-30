@@ -73,9 +73,11 @@ namespace Miku.Lua
 		// multirets can take up more space than the frame
 		private const int STACK_MARGIN = 260;
 
-		private int pc = 0; // signed because it can be set to -1 at the start of a call
+		private int PC = 0; // signed because it can be set to -1 at the start of a call
 		private int MultiRes = 0;
 		private Function Func = null!; // our current function
+
+		private UserFunction? UserFunc = null;
 
 		/// <summary>
 		/// Stack of values.
@@ -102,27 +104,48 @@ namespace Miku.Lua
 		private ValueSlot[]? VarArgs;
 
 		/// <summary>
-		///  Set if the executor has completed.
+		///  Used for results of an execution.
 		/// </summary>
-		private int? ResultCount;
+		private int ResultCount = -1;
 
 		public int GetResultCount()
 		{
-			if (!ResultCount.HasValue)
-			{
-				throw new Exception( "Executor is not finished." );
-			}
-			return ResultCount.Value;
+			return ResultCount;
 		}
 
 		public ValueSlot GetResult(int i)
 		{
-			int res_count = GetResultCount();
-			if (i<0 || i>=res_count)
+			if (i<0 || i>= ResultCount )
 			{
 				return ValueSlot.NIL;
 			}
 			return ValueStack[i];
+		}
+
+		/// <summary>
+		/// Used for UserFunction arguments.
+		/// </summary>
+		private int ArgCount = -1;
+
+		public int GetArgCount()
+		{
+			return ArgCount;
+		}
+
+		public ValueSlot GetArg(int i)
+		{
+			if ( i < 0 || i >= ArgCount )
+			{
+				return ValueSlot.NIL;
+			}
+			return StackGet( i );
+		}
+
+		private int RetCount = -1;
+		public void Return(ValueSlot val)
+		{
+			StackSet( ArgCount + RetCount, val );
+			RetCount++;
 		}
 
 		public readonly LuaMachine Machine;
@@ -131,12 +154,15 @@ namespace Miku.Lua
 		{
 			Machine = machine;
 
-			CallPrepare( func, 0, 0 );
+			CallPrepare( ValueSlot.Function( func ), 0, 0 );
 			for (int i=0;i<args.Length;i++ )
 			{
 				StackSet(i, args[i]);
 			}
 			CallArgsReady( args.Length );
+
+			// Need to force PC to zero since it defaults to -1.
+			PC = 0;
 		}
 
 		public Function? GetFunctionAtLevel(int level)
@@ -163,14 +189,15 @@ namespace Miku.Lua
 
 		// TODO pull function from stack, simplify all calls
 		// NOTE ret_base is now a LOCAL stack offset
-		private void CallPrepare( Function new_func, int ret_base = 0, int ret_count = 0, bool replace = false )
+		private void CallPrepare( ValueSlot new_func, int ret_base = 0, int ret_count = 0, bool replace = false )
 		{
 			// Push old function + PC to stack.
-			if (Func != null && !replace)
+			if ( Func != null && !replace )
 			{
-				CallStack.Push( new FrameInfo{
+				CallStack.Push( new FrameInfo
+				{
 					Func = Func,
-					PC = pc,
+					PC = PC,
 					VarArgs = VarArgs,
 					FrameBase = FrameBase,
 					RetBase = ret_base,
@@ -178,9 +205,24 @@ namespace Miku.Lua
 				} );
 			}
 
-			Func = new_func;
-			this.pc = -1;
+			if (new_func.Kind == ValueKind.Function)
+			{
+				Func = new_func.CheckFunction();
+			} else if (new_func.Kind == ValueKind.UserFunction)
+			{
+				if (UserFunc != null)
+				{
+					throw new Exception( "recursive C# call, might need to do something about this" );
+				}
+				UserFunc = new_func.CheckUserFunction();
+				Profiler.UpdateUserFunc(UserFunc.Name);
+			} else
+			{
+				throw new Exception( "attempt to call: " + new_func );
+			}
+			PC = -1;
 			VarArgs = null;
+
 			if (!replace)
 			{
 				FrameBase = FrameTop;
@@ -198,6 +240,33 @@ namespace Miku.Lua
 		/// </summary>
 		private void CallArgsReady( int args_in )
 		{
+			// If a UserFunc, we handle the invocation here.
+			if (UserFunc != null)
+			{
+				int old_arg_count = ArgCount;
+				int old_ret_count = RetCount;
+				ArgCount = args_in;
+				RetCount = 0;
+
+				var ret_val = UserFunc.Func( this );
+				if (ret_val != null)
+				{
+					Return( ret_val.Value );
+				}
+
+				int ret_base = ArgCount;
+				int ret_count = RetCount;
+
+				ArgCount = old_arg_count;
+				RetCount = old_ret_count;
+				UserFunc = null;
+
+				//Sandbox.Log.Info( "A "+ PC );
+				ReturnInternal( ret_base, ret_count );
+				//Sandbox.Log.Info( "B "+ PC );
+				return;
+			}
+
 			if ( args_in < Func.Prototype.numArgs )
 			{
 				// we need to clear arguments we're not using
@@ -213,6 +282,7 @@ namespace Miku.Lua
 				{
 					int varg_base = Func.Prototype.numArgs;
 					int varg_count = args_in - Func.Prototype.numArgs;
+
 					VarArgs = new ValueSlot[varg_count];
 					for ( int i = 0; i < varg_count; i++ )
 					{
@@ -227,7 +297,7 @@ namespace Miku.Lua
 		}
 
 		// NOTE ret_source_base is now a LOCAL stack offset
-		private void Return(int ret_source_base, int ret_slots_available)
+		private void ReturnInternal(int ret_source_base, int ret_slots_available)
 		{
 			// TODO clear stack slots that are no-longer used, to prevent leaking references.
 			if (CallStack.Count == 0)
@@ -251,9 +321,8 @@ namespace Miku.Lua
 					MultiRes = ret_slots_available;
 				}
 
-
 				Func = frame_info.Func;
-				pc = frame_info.PC;
+				PC = frame_info.PC;
 				VarArgs = frame_info.VarArgs;
 				FrameTop = FrameBase;
 				FrameBase = frame_info.FrameBase;
@@ -297,7 +366,7 @@ namespace Miku.Lua
 			int safety = 0;
 			int LIMIT = 10_000_000;
 
-			while (ResultCount == null)
+			while (ResultCount == -1)
 			{
 				try
 				{
@@ -371,7 +440,7 @@ namespace Miku.Lua
 				var C = (instr >> 16) & 0xFF;
 				var D = (instr >> 16) & 0xFFFF;
 				string arrow = "";
-				if (pc == i)
+				if (PC == i)
 				{
 					arrow = "<--------------";
 				}
@@ -381,12 +450,7 @@ namespace Miku.Lua
 
 		public void Step()
 		{
-			//var timer = Stopwatch.StartNew();
-			if (pc<0)
-			{
-				pc = 0;
-			}
-			uint instr = Func.Prototype.code[pc];
+			uint instr = Func.Prototype.code[PC];
 			var OP = (OpCode)(instr & 0xFF);
 
 			Profiler.Update(OP,Func.Prototype.DebugName);
@@ -403,17 +467,17 @@ namespace Miku.Lua
 				case OpCode.ISLE:
 				case OpCode.ISGT:
 					{
-						double nA = StackGet( A ).CheckNumber();
-						double nD = StackGet( D ).CheckNumber();
+						double lhs = StackGet( A ).CheckNumber();
+						double rhs = StackGet( D ).CheckNumber();
 						bool skip = false;
 						switch (OP)
 						{
-							case OpCode.ISLT: skip = !(nA < nD); break;
-							case OpCode.ISGE: skip = !(nA >= nD); break;
-							case OpCode.ISLE: skip = !(nA <= nD); break;
-							case OpCode.ISGT: skip = !(nA > nD); break;
+							case OpCode.ISLT: skip = !(lhs < rhs); break;
+							case OpCode.ISGE: skip = !(lhs >= rhs); break;
+							case OpCode.ISLE: skip = !(lhs <= rhs); break;
+							case OpCode.ISGT: skip = !(lhs > rhs); break;
 						}
-						if (skip) { pc++; }
+						if (skip) { PC++; }
 						break;
 					}
 				case OpCode.ISEQV:
@@ -421,7 +485,7 @@ namespace Miku.Lua
 						var vA = StackGet( A );
 						var vD = StackGet( D );
 						bool skip = !vA.Equals( vD );
-						if ( skip ) { pc++; }
+						if ( skip ) { PC++; }
 						break;
 					}
 				case OpCode.ISNEV:
@@ -429,7 +493,7 @@ namespace Miku.Lua
 						var vA = StackGet( A );
 						var vD = StackGet( D );
 						bool skip = vA.Equals( vD );
-						if ( skip ) { pc++; }
+						if ( skip ) { PC++; }
 						break;
 					}
 				case OpCode.ISEQS:
@@ -437,7 +501,7 @@ namespace Miku.Lua
 						var vA = StackGet( A );
 						var vD = Func.Prototype.GetConstGC( D );
 						bool skip = !vA.Equals(vD);
-						if ( skip ) { pc++; }
+						if ( skip ) { PC++; }
 						break;
 					}
 				case OpCode.ISNES:
@@ -445,7 +509,7 @@ namespace Miku.Lua
 						var vA = StackGet( A );
 						var vD = Func.Prototype.GetConstGC( D );
 						bool skip = vA.Equals( vD );
-						if ( skip ) { pc++; }
+						if ( skip ) { PC++; }
 						break;
 					}
 				case OpCode.ISEQN:
@@ -453,7 +517,7 @@ namespace Miku.Lua
 						var vA = StackGet( A );
 						var vD = ValueSlot.Number( Func.Prototype.GetConstNum( D ) );
 						bool skip = !vA.Equals( vD );
-						if ( skip ) { pc++; }
+						if ( skip ) { PC++; }
 						break;
 					}
 				case OpCode.ISNEN:
@@ -461,7 +525,7 @@ namespace Miku.Lua
 						var vA = StackGet( A );
 						var vD = ValueSlot.Number( Func.Prototype.GetConstNum( D ) );
 						bool skip = vA.Equals( vD );
-						if ( skip ) { pc++; }
+						if ( skip ) { PC++; }
 						break;
 					}
 				case OpCode.ISEQP:
@@ -469,7 +533,7 @@ namespace Miku.Lua
 						var vA = StackGet( A );
 						var vD = ValueSlot.Prim( D );
 						bool skip = !vA.Equals( vD );
-						if ( skip ) { pc++; }
+						if ( skip ) { PC++; }
 						break;
 					}
 				case OpCode.ISNEP:
@@ -477,7 +541,7 @@ namespace Miku.Lua
 						var vA = StackGet( A );
 						var vD = ValueSlot.Prim( D );
 						bool skip = vA.Equals( vD );
-						if ( skip ) { pc++; }
+						if ( skip ) { PC++; }
 						break;
 					}
 				// Test and Copy
@@ -489,7 +553,7 @@ namespace Miku.Lua
 							StackSet( A, val );
 						} else
 						{
-							pc++;
+							PC++;
 						}
 						break;
 					}
@@ -502,30 +566,28 @@ namespace Miku.Lua
 						}
 						else
 						{
-							pc++;
+							PC++;
 						}
 						break;
 					}
 				case OpCode.IST:
 					if ( !StackGet( D ).IsTruthy() )
 					{
-						pc++;
+						PC++;
 					}
 					break;
 				case OpCode.ISF:
 					if ( StackGet( D ).IsTruthy() )
 					{
-						pc++;
+						PC++;
 					}
 					break;
 				// ISEQN
 				// ISNEN
 				// Move and Unary Ops
 				case OpCode.MOV:
-					{
-						StackSet( A, StackGet( D ) );
-						break;
-					}
+					StackSet( A, StackGet( D ) );
+					break;
 				case OpCode.NOT:
 					{
 						bool result = !StackGet( D ).IsTruthy();
@@ -809,57 +871,16 @@ namespace Miku.Lua
 							}
 						}
 
-						var call_func = StackGet(A); // TODO, meta calls
-						if (call_func.Kind == ValueKind.Function)
+						var call_func = StackGet(A);
+
+						CallPrepare( call_func, A, ret_count, is_tailcall );
+						for (int i=0;i<arg_count;i++ )
 						{
-							CallPrepare( call_func.CheckFunction(), A, ret_count, is_tailcall );
-							for (int i=0;i<arg_count;i++ )
-							{
-								var arg_val = ValueStack[arg_base + i];
-								StackSet( i, arg_val );
-							}
-							CallArgsReady( arg_count );
-						} else
-						{
-							var user_func = call_func.CheckUserFunction();
-							Profiler.UpdateUserFunc( "CSHARP (ANON)" );
-							var args = new ValueSlot[arg_count];
-
-							for ( int i = 0; i < arg_count; i++ )
-							{
-								args[i] = StackGet( A + 1 + i );
-							}
-							var rets = user_func( args, this );
-
-							// tail calls return everything
-							if ( is_tailcall )
-							{
-								ret_count = -1;
-							}
-
-							// return all
-							if (ret_count == -1 && rets != null)
-							{
-								ret_count = rets.Length;
-								MultiRes = ret_count;
-							}
-
-							for ( int i = 0; i < ret_count; i++ )
-							{
-								if (rets != null && i < rets.Length)
-								{
-									StackSet( A + i, rets[i] );
-								} else
-								{
-									StackSet( A + i, ValueSlot.NIL );
-								}
-							}
-
-							if (is_tailcall)
-							{
-								Return( A, ret_count );
-							}
+							var arg_val = ValueStack[arg_base + i];
+							StackSet( i, arg_val );
 						}
+						CallArgsReady( arg_count );
+
 						break;
 					}
 				case OpCode.VARG:
@@ -892,16 +913,16 @@ namespace Miku.Lua
 					}
 				// Returns
 				case OpCode.RETM:
-						Return(A, D + MultiRes);
+						ReturnInternal(A, D + MultiRes);
 						break;
 				case OpCode.RET:
-						Return( A, D - 1 );
+						ReturnInternal( A, D - 1 );
 						break;
 				case OpCode.RET0:
-						Return( 0, 0 );
+						ReturnInternal( 0, 0 );
 						break;
 				case OpCode.RET1:
-						Return( A, 1 );
+						ReturnInternal( A, 1 );
 						break;
 				// Loops and Branches
 				case OpCode.LOOP:
@@ -960,13 +981,13 @@ namespace Miku.Lua
 				default:
 					throw new Exception( $"> {OP}" );
 			}
-			pc++;
+			PC++;
 		}
 
 		private void Jump(int D)
 		{
 			int jump_offset = D - 0x8000;
-			pc += jump_offset;
+			PC += jump_offset;
 		}
 
 		public string? GetDirectory()

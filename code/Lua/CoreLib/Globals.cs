@@ -102,7 +102,7 @@ namespace Miku.Lua.CoreLib
 				} else
 				{
 					int stack_level = (int)func_or_loc.CheckNumber();
-					var func = ex.GetFunctionAtLevel(stack_level);
+					var func = ex.GetFunctionAtLevel(stack_level + 1);
 					if (func == null)
 					{
 						throw new Exception( "Bad stack level?" );

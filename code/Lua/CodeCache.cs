@@ -11,7 +11,7 @@ namespace Miku.Lua
 	
     class CodeCache
 	{
-		private static bool DISABLE = true;
+		private static bool DISABLE = false;
 
 		public static string GetCacheFileName( string name, string source )
 		{

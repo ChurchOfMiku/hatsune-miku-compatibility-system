@@ -4,8 +4,18 @@ using System;
 
 namespace Miku.Lua
 {
+	using UserFunctionOld = Func<ValueSlot[], Executor, ValueSlot[]?>;
 
-	using UserFunction = Func<ValueSlot[], Executor, ValueSlot[]?>;
+	class UserFunction {
+		public string Name;
+		public Func<Executor, ValueSlot?> Func;
+
+		public UserFunction( string name, Func<Executor, ValueSlot?> func )
+		{
+			Name = name;
+			Func = func;
+		}
+	}
 
 	enum ValueKind
 	{
@@ -79,9 +89,26 @@ namespace Miku.Lua
 			return new ValueSlot( ValueKind.Function, x );
 		}
 
-		public static ValueSlot UserFunction( UserFunction x )
+		public static ValueSlot UserFunction( UserFunctionOld inner_func )
 		{
-			return new ValueSlot( ValueKind.UserFunction, x );
+			var wrapper = new UserFunction("? (LEGACY USER FUNCTION)",(Executor exec) => {
+				var args = new ValueSlot[exec.GetArgCount()];
+				for (int i=0;i<args.Length;i++)
+				{
+					args[i] = exec.GetArg(i);
+				}
+				var results = inner_func( args, exec );
+				if (results != null)
+				{
+					for (int i=0;i<results.Length;i++ )
+					{
+						exec.Return( results[i] );
+					}
+				}
+				return null;
+			} );
+
+			return new ValueSlot( ValueKind.UserFunction, wrapper );
 		}
 
 		public bool IsTruthy()
