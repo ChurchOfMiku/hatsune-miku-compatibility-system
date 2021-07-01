@@ -61,6 +61,7 @@ namespace Miku.GMod
 				Server?.Env.Dump( "server.json" );
 			}
 
+			Client?.RunString( "team.SetUp(1,'some team',Color(255,0,0))", "blah" );
 			Client?.RunFile( "scripts/free_darkrp_hud.lua" );
 			
 			//Client?.RunFile( "test/patterns.lua" );

@@ -17,8 +17,8 @@
         td.rs.rc {
             background: linear-gradient(45deg,#f3f17a 45%,#78ebdb 55%);
         }
-        td.rm, .st-menu {
-            background: #aaa;
+        td.rm {
+            background: #bbb;
         }
         td.rs {
             background: #78ebdb;
@@ -29,25 +29,28 @@
         td.ru {
             background: #e97af3;
         }
+
+        .st-menu {
+            background: #bbb;
+        }
         .st-nyi {
-            background: #eb7878;
+            background: #ffa6a6;
         }
         .st-error {
             background: #F00;
             color: white;
         }
         .st-stub {
-            background: #ff8248;
+            background: #da873a;
         }
         .st-fp-lua {
-            background: #7be4bb;
+            background: #7be4c1;
         }
         .st-lua {
-            background: #7ee47b;
+            background: #b6ffb3;
         }
         .st-csharp {
-            background: #0e850a;
-            color: white;
+            background: #00ff00;
         }
         h2 {
             display: inline-block;
@@ -61,10 +64,13 @@
             position:relative;
             border: 1px solid black;
             margin: 5px 0;
+            overflow: hidden;
+            white-space: nowrap;
         }
         .bar div {
             display: inline-block;
             height: 100%;
+            border-right: 1px dotted grey;
         }
         .bar span {
             width: 100%;
@@ -77,7 +83,7 @@
 </head>
 <body>
     <h1>Hatsune Miku Compatibility System API Status</h1>
-    <p><i>Generated @ Sun Jun 27 2021 19:03:10 GMT-0600 (Mountain Daylight Time)</i></p><div class='bar' style='width: 1000px; height: 100px; font-size: 100px;'><div style='width: 1.2557077625570776%;' class='st-menu'></div><div style='width: 1.0273972602739725%;' class='st-csharp'></div><div style='width: 0.3995433789954338%;' class='st-lua'></div><div style='width: 18.46461187214612%;' class='st-fp-lua'></div><div style='width: 0.3424657534246575%;' class='st-stub'></div><div style='width: 78.45319634703196%;' class='st-nyi'></div><div style='width: 0.05707762557077625%;' class='st-error'></div><span>21.1%</span></div><ul><li><span class='st-menu'>44 MENU</span></li><li><span class='st-csharp'>36 CSHARP</span></li><li><span class='st-lua'>14 LUA</span></li><li><span class='st-fp-lua'>647 FP-LUA</span></li><li><span class='st-stub'>12 STUB</span></li><li><span class='st-nyi'>2749 NYI</span></li><li><span class='st-error'>2 ERROR</span></li></ul>
+    <p><i>Generated @ Thu Jul 01 2021 00:05:33 GMT-0600 (Mountain Daylight Time)</i></p><div class='bar' style='width: 1000px; height: 100px; font-size: 100px;'><div style='width: 1.2557077625570776%;' class='st-menu'></div><div style='width: 1.3984018264840181%;' class='st-csharp'></div><div style='width: 0.3995433789954338%;' class='st-lua'></div><div style='width: 18.46461187214612%;' class='st-fp-lua'></div><div style='width: 0.3995433789954338%;' class='st-stub'></div><div style='width: 78.02511415525115%;' class='st-nyi'></div><div style='width: 0.05707762557077625%;' class='st-error'></div><span>21.5%</span></div><ul><li><span class='st-menu'>44 MENU</span></li><li><span class='st-csharp'>49 CSHARP</span></li><li><span class='st-lua'>14 LUA</span></li><li><span class='st-fp-lua'>647 FP-LUA</span></li><li><span class='st-stub'>14 STUB</span></li><li><span class='st-nyi'>2734 NYI</span></li><li><span class='st-error'>2 ERROR</span></li></ul>
     <button onclick="toggleAll()">Toggle All</button>
     <p>Not listed:</p>
     <ul>
@@ -1069,7 +1075,7 @@
 
     </table></div><div>
     <h2>math</h2>
-    <div class='bar' style='width: 400px; height: 30px; font-size: 30px;'><div style='width: 2.083333333333333%;' class='st-csharp'></div><div style='width: 6.25%;' class='st-lua'></div><div style='width: 35.41666666666667%;' class='st-fp-lua'></div><div style='width: 56.25%;' class='st-nyi'></div><span>43.8%</span></div>
+    <div class='bar' style='width: 400px; height: 30px; font-size: 30px;'><div style='width: 4.166666666666666%;' class='st-csharp'></div><div style='width: 6.25%;' class='st-lua'></div><div style='width: 35.41666666666667%;' class='st-fp-lua'></div><div style='width: 54.166666666666664%;' class='st-nyi'></div><span>45.8%</span></div>
     <button onclick="showTable('section_46')">Toggle Details</button>
     <table id="section_46" >
         <tr><td class='rc rs rm '>Shared</td><td>math.huge</td><td class='st-nyi'>NYI</td><td></td></tr>
@@ -1085,7 +1091,7 @@
 <tr><td class='rc rs rm '>Shared</td><td>math.BinToInt</td><td class='st-fp-lua'>FP-LUA</td><td></td></tr>
 <tr><td class='rc rs rm '>Shared</td><td>math.BSplinePoint</td><td class='st-fp-lua'>FP-LUA</td><td></td></tr>
 <tr><td class='rc rs rm '>Shared</td><td>math.calcBSplineN</td><td class='st-fp-lua'>FP-LUA</td><td></td></tr>
-<tr><td class='rc rs rm '>Shared</td><td>math.ceil</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs rm '>Shared</td><td>math.ceil</td><td class='st-csharp'>CSHARP</td><td></td></tr>
 <tr><td class='rc rs rm '>Shared</td><td>math.Clamp</td><td class='st-fp-lua'>FP-LUA</td><td></td></tr>
 <tr><td class='rc rs rm '>Shared</td><td>math.cos</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rs rm '>Shared</td><td>math.cosh</td><td class='st-nyi'>NYI</td><td></td></tr>
@@ -1730,7 +1736,7 @@
 
     </table></div><div>
     <h2>surface</h2>
-    <div class='bar' style='width: 400px; height: 30px; font-size: 30px;'><div style='width: 21.428571428571427%;' class='st-csharp'></div><div style='width: 3.571428571428571%;' class='st-stub'></div><div style='width: 75%;' class='st-nyi'></div><span>21.4%</span></div>
+    <div class='bar' style='width: 400px; height: 30px; font-size: 30px;'><div style='width: 46.42857142857143%;' class='st-csharp'></div><div style='width: 3.571428571428571%;' class='st-stub'></div><div style='width: 50%;' class='st-nyi'></div><span>46.4%</span></div>
     <button onclick="showTable('section_76')">Toggle Details</button>
     <table id="section_76" >
         <tr><td class='rc rm '>Client</td><td>surface.CreateFont</td><td class='st-csharp'>CSHARP</td><td></td></tr>
@@ -1740,7 +1746,7 @@
 <tr><td class='rc rm '>Client</td><td>surface.DrawOutlinedRect</td><td class='st-csharp'>CSHARP</td><td></td></tr>
 <tr><td class='rc rm '>Client</td><td>surface.DrawPoly</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rm '>Client</td><td>surface.DrawRect</td><td class='st-csharp'>CSHARP</td><td></td></tr>
-<tr><td class='rc rm '>Client</td><td>surface.DrawText</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rm '>Client</td><td>surface.DrawText</td><td class='st-csharp'>CSHARP</td><td></td></tr>
 <tr><td class='rc rm '>Client</td><td>surface.DrawTexturedRect</td><td class='st-csharp'>CSHARP</td><td></td></tr>
 <tr><td class='rc rm '>Client</td><td>surface.DrawTexturedRectRotated</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rm '>Client</td><td>surface.DrawTexturedRectUV</td><td class='st-nyi'>NYI</td><td></td></tr>
@@ -1748,18 +1754,18 @@
 <tr><td class='rc rm '>Client</td><td>surface.GetDrawColor</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc '>Client</td><td>surface.GetHUDTexture</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rm '>Client</td><td>surface.GetTextColor</td><td class='st-nyi'>NYI</td><td></td></tr>
-<tr><td class='rc rm '>Client</td><td>surface.GetTextSize</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rm '>Client</td><td>surface.GetTextSize</td><td class='st-csharp'>CSHARP</td><td></td></tr>
 <tr><td class='rc rm '>Client</td><td>surface.GetTextureID</td><td class='st-stub'>STUB</td><td></td></tr>
 <tr><td class='rc rm '>Client</td><td>surface.GetTextureSize</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rm '>Client</td><td>surface.PlaySound</td><td class='st-nyi'>NYI</td><td></td></tr>
-<tr><td class='rc rm '>Client</td><td>surface.ScreenHeight</td><td class='st-nyi'>NYI</td><td></td></tr>
-<tr><td class='rc rm '>Client</td><td>surface.ScreenWidth</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rm '>Client</td><td>surface.ScreenHeight</td><td class='st-csharp'>CSHARP</td><td></td></tr>
+<tr><td class='rc rm '>Client</td><td>surface.ScreenWidth</td><td class='st-csharp'>CSHARP</td><td></td></tr>
 <tr><td class='rc rm '>Client</td><td>surface.SetAlphaMultiplier</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rm '>Client</td><td>surface.SetDrawColor</td><td class='st-csharp'>CSHARP</td><td></td></tr>
-<tr><td class='rc rm '>Client</td><td>surface.SetFont</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rm '>Client</td><td>surface.SetFont</td><td class='st-csharp'>CSHARP</td><td></td></tr>
 <tr><td class='rc rm '>Client</td><td>surface.SetMaterial</td><td class='st-csharp'>CSHARP</td><td></td></tr>
-<tr><td class='rc rm '>Client</td><td>surface.SetTextColor</td><td class='st-nyi'>NYI</td><td></td></tr>
-<tr><td class='rc rm '>Client</td><td>surface.SetTextPos</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rm '>Client</td><td>surface.SetTextColor</td><td class='st-csharp'>CSHARP</td><td></td></tr>
+<tr><td class='rc rm '>Client</td><td>surface.SetTextPos</td><td class='st-csharp'>CSHARP</td><td></td></tr>
 <tr><td class='rc rm '>Client</td><td>surface.SetTexture</td><td class='st-nyi'>NYI</td><td></td></tr>
 
     </table></div><div>
@@ -3831,7 +3837,7 @@
 
     </table></div><div>
     <h2>Player</h2>
-    <div class='bar' style='width: 400px; height: 30px; font-size: 30px;'><div style='width: 7.196969696969697%;' class='st-fp-lua'></div><div style='width: 92.42424242424242%;' class='st-nyi'></div><div style='width: 0.3787878787878788%;' class='st-error'></div><span>7.2%</span></div>
+    <div class='bar' style='width: 400px; height: 30px; font-size: 30px;'><div style='width: 1.893939393939394%;' class='st-csharp'></div><div style='width: 7.196969696969697%;' class='st-fp-lua'></div><div style='width: 0.7575757575757576%;' class='st-stub'></div><div style='width: 89.77272727272727%;' class='st-nyi'></div><div style='width: 0.3787878787878788%;' class='st-error'></div><span>9.1%</span></div>
     <button onclick="showTable('section_123')">Toggle Details</button>
     <table id="section_123" >
         <tr><td class='rc rs '>Shared</td><td>_R.Player.AccountID</td><td class='st-nyi'>NYI</td><td></td></tr>
@@ -3850,7 +3856,7 @@
 <tr><td class='rc rs '>Shared</td><td>_R.Player.AnimRestartMainSequence</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rs '>Shared</td><td>_R.Player.AnimSetGestureSequence</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rs '>Shared</td><td>_R.Player.AnimSetGestureWeight</td><td class='st-nyi'>NYI</td><td></td></tr>
-<tr><td class='rc rs '>Shared</td><td>_R.Player.Armor</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>Shared</td><td>_R.Player.Armor</td><td class='st-stub'>STUB</td><td></td></tr>
 <tr><td class='rs '>Server</td><td>_R.Player.Ban</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rs '>Shared</td><td>_R.Player.CanUseFlashlight</td><td class='st-fp-lua'>FP-LUA</td><td></td></tr>
 <tr><td class='rc rs '>Shared</td><td>_R.Player.ChatPrint</td><td class='st-nyi'>NYI</td><td></td></tr>
@@ -3882,7 +3888,7 @@
 <tr><td class='rs '>Server</td><td>_R.Player.Freeze</td><td class='st-fp-lua'>FP-LUA</td><td></td></tr>
 <tr><td class='rc rs '>Shared</td><td>_R.Player.GetActiveWeapon</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rs '>Server</td><td>_R.Player.GetActivity</td><td class='st-nyi'>NYI</td><td></td></tr>
-<tr><td class='rc rs '>Shared</td><td>_R.Player.GetAimVector</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>Shared</td><td>_R.Player.GetAimVector</td><td class='st-csharp'>CSHARP</td><td></td></tr>
 <tr><td class='rc rs '>Shared</td><td>_R.Player.GetAllowFullRotation</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rs '>Shared</td><td>_R.Player.GetAllowWeaponsInVehicle</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rs '>Shared</td><td>_R.Player.GetAmmo</td><td class='st-nyi'>NYI</td><td></td></tr>
@@ -3914,7 +3920,7 @@
 <tr><td class='rc rs '>Shared</td><td>_R.Player.GetLaggedMovementValue</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rs '>Shared</td><td>_R.Player.GetMaxArmor</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rs '>Shared</td><td>_R.Player.GetMaxSpeed</td><td class='st-nyi'>NYI</td><td></td></tr>
-<tr><td class='rc rs '>Shared</td><td>_R.Player.GetName</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>Shared</td><td>_R.Player.GetName</td><td class='st-csharp'>CSHARP</td><td></td></tr>
 <tr><td class='rc rs '>Shared</td><td>_R.Player.GetNoCollideWithTeammates</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rs '>Shared</td><td>_R.Player.GetObserverMode</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rs '>Shared</td><td>_R.Player.GetObserverTarget</td><td class='st-nyi'>NYI</td><td></td></tr>
@@ -3928,7 +3934,7 @@
 <tr><td class='rc rs '>Shared</td><td>_R.Player.GetRagdollEntity</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rs '>Shared</td><td>_R.Player.GetRenderAngles</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rs '>Shared</td><td>_R.Player.GetRunSpeed</td><td class='st-nyi'>NYI</td><td></td></tr>
-<tr><td class='rc rs '>Shared</td><td>_R.Player.GetShootPos</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>Shared</td><td>_R.Player.GetShootPos</td><td class='st-csharp'>CSHARP</td><td></td></tr>
 <tr><td class='rc rs '>Shared</td><td>_R.Player.GetSlowWalkSpeed</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rs '>Shared</td><td>_R.Player.GetStepSize</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rs '>Shared</td><td>_R.Player.GetSuitPower</td><td class='st-nyi'>NYI</td><td></td></tr>
@@ -3988,8 +3994,8 @@
 <tr><td class='rc rs '>Shared</td><td>_R.Player.LocalEyeAngles</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rs '>Server</td><td>_R.Player.Lock</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rs '>Shared</td><td>_R.Player.MotionSensorPos</td><td class='st-nyi'>NYI</td><td></td></tr>
-<tr><td class='rc rs '>Shared</td><td>_R.Player.Name</td><td class='st-nyi'>NYI</td><td></td></tr>
-<tr><td class='rc rs '>Shared</td><td>_R.Player.Nick</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>Shared</td><td>_R.Player.Name</td><td class='st-csharp'>CSHARP</td><td></td></tr>
+<tr><td class='rc rs '>Shared</td><td>_R.Player.Nick</td><td class='st-csharp'>CSHARP</td><td></td></tr>
 <tr><td class='rs '>Server</td><td>_R.Player.OwnerSteamID64</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rs '>Shared</td><td>_R.Player.PacketLoss</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rs '>Shared</td><td>_R.Player.PhysgunUnfreeze</td><td class='st-nyi'>NYI</td><td></td></tr>
@@ -4085,7 +4091,7 @@
 <tr><td class='rs '>Server</td><td>_R.Player.StripWeapons</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rs '>Server</td><td>_R.Player.SuppressHint</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rs '>Server</td><td>_R.Player.SwitchToDefaultWeapon</td><td class='st-fp-lua'>FP-LUA</td><td></td></tr>
-<tr><td class='rc rs '>Shared</td><td>_R.Player.Team</td><td class='st-nyi'>NYI</td><td></td></tr>
+<tr><td class='rc rs '>Shared</td><td>_R.Player.Team</td><td class='st-stub'>STUB</td><td></td></tr>
 <tr><td class='rs '>Server</td><td>_R.Player.TimeConnected</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rs '>Server</td><td>_R.Player.TraceHullAttack</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rs '>Shared</td><td>_R.Player.TranslateWeaponActivity</td><td class='st-nyi'>NYI</td><td></td></tr>

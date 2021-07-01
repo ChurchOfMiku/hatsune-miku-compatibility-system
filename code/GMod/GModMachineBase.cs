@@ -103,7 +103,7 @@ namespace Miku.GMod
 
 		protected override void SetupRealmInternalLibs()
 		{
-			new Lib.Draw2D( this );
+			new Lib.Surface( this );
 		}
 
 		public void Frame()

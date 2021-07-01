@@ -57,8 +57,7 @@ namespace Miku.Lua
 			// Load libraries: TODO all should use: new CoreLib.X( this );
 			CoreLib.Bit.Init(Env);
 			new CoreLib.String(this);
-
-			CoreLib.Misc.Init(Env);
+			new CoreLib.Misc(this);
 
 			new CoreLib.Globals( this );
 

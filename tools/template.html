@@ -17,8 +17,8 @@
         td.rs.rc {
             background: linear-gradient(45deg,#f3f17a 45%,#78ebdb 55%);
         }
-        td.rm, .st-menu {
-            background: #aaa;
+        td.rm {
+            background: #bbb;
         }
         td.rs {
             background: #78ebdb;
@@ -29,25 +29,28 @@
         td.ru {
             background: #e97af3;
         }
+
+        .st-menu {
+            background: #bbb;
+        }
         .st-nyi {
-            background: #eb7878;
+            background: #ffa6a6;
         }
         .st-error {
             background: #F00;
             color: white;
         }
         .st-stub {
-            background: #ff8248;
+            background: #da873a;
         }
         .st-fp-lua {
-            background: #7be4bb;
+            background: #7be4c1;
         }
         .st-lua {
-            background: #7ee47b;
+            background: #b6ffb3;
         }
         .st-csharp {
-            background: #0e850a;
-            color: white;
+            background: #00ff00;
         }
         h2 {
             display: inline-block;
@@ -61,10 +64,13 @@
             position:relative;
             border: 1px solid black;
             margin: 5px 0;
+            overflow: hidden;
+            white-space: nowrap;
         }
         .bar div {
             display: inline-block;
             height: 100%;
+            border-right: 1px dotted grey;
         }
         .bar span {
             width: 100%;

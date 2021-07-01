@@ -44,10 +44,6 @@ if CLIENT then
         return 0
     end
 
-    function surface.SetFont()
-
-    end
-
     render = {}
     _R.miku_debug_lib(vgui,"render")
 
@@ -104,6 +100,29 @@ _R.miku_debug_lib(motionsensor,"motionsensor")
 do
     local Player = FindMetaTable("Player")
     function Player:Team()
-        return "some team"
+        return 1
     end
+
+    function Player:Armor()
+        return 0
+    end
+
+    -- DARKRP
+    function Player:isWanted()
+        return false
+    end
+
+    function Player:getDarkRPVar(var)
+        if var == "HasGunlicense" then return false end
+        if var == "money" then return 10 end
+        print("var",var)
+    end
+end
+
+-- DARKRP
+DarkRP = {}
+_R.miku_debug_lib(DarkRP,"DarkRP")
+
+function DarkRP.formatMoney(x)
+    return "$"..x
 end

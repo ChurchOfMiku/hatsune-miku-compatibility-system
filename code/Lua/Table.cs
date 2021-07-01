@@ -255,6 +255,42 @@ namespace Miku.Lua
 			}
 		}*/
 
+		public ValueSlot DefineFunc(string name, Func<Executor, ValueSlot?> func)
+		{
+			if (DebugLibName == null)
+			{
+				throw new Exception("DefineFunc should only be called on libraries/classes with debug names.");
+			}
+			var wrapper = new ProtoFunction();
+			wrapper.DebugName = "[CSHARP] "+DebugLibName+"."+name;
+			wrapper.UserFunc = func;
+
+			var val = ValueSlot.Function( new Function( wrapper, null! ) );
+
+			Set(name, val);
+
+			return val;
+		}
+
+		public Table DefineLib(string name)
+		{
+			if ( DebugLibName == null )
+			{
+				throw new Exception( "DefineLib should only be called on Env or libraries with debug names." );
+			}
+			var table = new Table();
+			if (DebugLibName == "_G")
+			{
+				table.DebugLibName = name;
+			} else
+			{
+				table.DebugLibName = DebugLibName + "." + name;
+			}
+
+			Set( name, ValueSlot.Table(table) );
+			return table;
+		}
+
 		// Used to generate the status pages that tell us how much of the API is implemented.
 		public void Dump(string filename)
 		{

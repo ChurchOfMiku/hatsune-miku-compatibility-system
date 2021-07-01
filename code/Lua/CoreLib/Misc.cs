@@ -5,8 +5,10 @@ namespace Miku.Lua.CoreLib
 {
 	class Misc
 	{
-		public static void Init( Table env )
+		public Misc( LuaMachine machine )
 		{
+			var env = machine.Env;
+
 			var table_lib = new Table();
 			table_lib.DebugLibName = "table";
 			env.Set( "table", ValueSlot.Table( table_lib ) );
@@ -18,13 +20,17 @@ namespace Miku.Lua.CoreLib
 				return null;
 			} ) );
 
-			var math_lib = new Table();
-			math_lib.DebugLibName = "math";
-			env.Set( "math", ValueSlot.Table( math_lib ) );
-			math_lib.Set( "floor", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
-				double n = args[0].CheckNumber();
-				return new ValueSlot[] { ValueSlot.Number( Math.Floor( n ) ) };
-			} ) );
+			var math_lib = env.DefineLib( "math" );
+
+			math_lib.DefineFunc( "floor", ( Executor ex ) => {
+				double n = ex.GetArg(0).CheckNumber();
+				return ValueSlot.Number( Math.Floor( n ) );
+			} );
+
+			math_lib.DefineFunc( "ceil", ( Executor ex ) => {
+				double n = ex.GetArg( 0 ).CheckNumber();
+				return ValueSlot.Number( Math.Ceiling( n ) );
+			} );
 		}
 	}
 }
