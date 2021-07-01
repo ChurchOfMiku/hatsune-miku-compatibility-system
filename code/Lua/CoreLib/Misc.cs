@@ -9,9 +9,9 @@ namespace Miku.Lua.CoreLib
 		{
 			var env = machine.Env;
 
-			var table_lib = new Table();
-			table_lib.DebugLibName = "table";
-			env.Set( "table", ValueSlot.Table( table_lib ) );
+			// TABLE
+			var table_lib = env.DefineLib( "table" );
+
 			table_lib.Set( "insert", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
 				Assert.True( args.Length == 2 );
 				var table = args[0].CheckTable();
@@ -20,6 +20,7 @@ namespace Miku.Lua.CoreLib
 				return null;
 			} ) );
 
+			// MATH
 			var math_lib = env.DefineLib( "math" );
 
 			math_lib.DefineFunc( "floor", ( Executor ex ) => {
@@ -31,6 +32,19 @@ namespace Miku.Lua.CoreLib
 				double n = ex.GetArg( 0 ).CheckNumber();
 				return ValueSlot.Number( Math.Ceiling( n ) );
 			} );
+
+			// OS
+			var os_lib = env.DefineLib( "os" );
+			os_lib.DefineFunc( "time", ( Executor ex ) => {
+				var time = DateTimeOffset.Now.ToUnixTimeSeconds();
+				return ValueSlot.Number( time );
+			} );
+
+			// MISC
+			env.DefineLib( "ffi" );
+			env.DefineLib( "jit" );
+			env.DefineLib( "debug" );
+			env.DefineLib( "package" );
 		}
 	}
 }
