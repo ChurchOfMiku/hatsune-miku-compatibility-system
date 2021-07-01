@@ -6,17 +6,6 @@ namespace Miku.Lua
 {
 	using UserFunctionOld = Func<ValueSlot[], Executor, ValueSlot[]?>;
 
-	class UserFunction {
-		public string Name;
-		public Func<Executor, ValueSlot?> Func;
-
-		public UserFunction( string name, Func<Executor, ValueSlot?> func )
-		{
-			Name = name;
-			Func = func;
-		}
-	}
-
 	enum ValueKind
 	{
 		Nil,
@@ -26,7 +15,6 @@ namespace Miku.Lua
 		String,
 		Table,
 		Function,
-		UserFunction,
 		ProtoFunction
 	}
 
@@ -91,24 +79,30 @@ namespace Miku.Lua
 
 		public static ValueSlot UserFunction( UserFunctionOld inner_func )
 		{
-			var wrapper = new UserFunction("? (LEGACY USER FUNCTION)",(Executor exec) => {
+			// TODO factor this junk out!
+			var wrapper = new ProtoFunction();
+			wrapper.DebugName = "? (LEGACY USER FUNCTION)";
+			wrapper.UserFunc = ( Executor exec ) =>
+			{
 				var args = new ValueSlot[exec.GetArgCount()];
-				for (int i=0;i<args.Length;i++)
+				for ( int i = 0; i < args.Length; i++ )
 				{
-					args[i] = exec.GetArg(i);
+					args[i] = exec.GetArg( i );
 				}
 				var results = inner_func( args, exec );
-				if (results != null)
+				if ( results != null )
 				{
-					for (int i=0;i<results.Length;i++ )
+					for ( int i = 0; i < results.Length; i++ )
 					{
 						exec.Return( results[i] );
 					}
 				}
 				return null;
-			} );
+			};
 
-			return new ValueSlot( ValueKind.UserFunction, wrapper );
+			var func = new Function( wrapper, null! );
+
+			return Function(func);
 		}
 
 		public bool IsTruthy()
@@ -173,15 +167,6 @@ namespace Miku.Lua
 				return (Function)Reference!;
 			}
 			throw new Exception( $"{this} is not a function." );
-		}
-
-		public UserFunction CheckUserFunction()
-		{
-			if ( this.Kind == ValueKind.UserFunction )
-			{
-				return (UserFunction)Reference!;
-			}
-			throw new System.Exception( $"{this} is not a user function." );
 		}
 
 		public ValueSlot CloneCheck()

@@ -77,8 +77,6 @@ namespace Miku.Lua
 		private int MultiRes = 0;
 		private Function Func = null!; // our current function
 
-		private UserFunction? UserFunc = null;
-
 		/// <summary>
 		/// Stack of values.
 		/// ALL assignments to the value stack need to use StackSet. Otherwise we risk breaking the stack frame.
@@ -205,21 +203,7 @@ namespace Miku.Lua
 				} );
 			}
 
-			if (new_func.Kind == ValueKind.Function)
-			{
-				Func = new_func.CheckFunction();
-			} else if (new_func.Kind == ValueKind.UserFunction)
-			{
-				if (UserFunc != null)
-				{
-					throw new Exception( "recursive C# call, might need to do something about this" );
-				}
-				UserFunc = new_func.CheckUserFunction();
-				Profiler.UpdateUserFunc(UserFunc.Name);
-			} else
-			{
-				throw new Exception( "attempt to call: " + new_func );
-			}
+			Func = new_func.CheckFunction();
 			PC = -1;
 			VarArgs = null;
 
@@ -241,14 +225,16 @@ namespace Miku.Lua
 		private void CallArgsReady( int args_in )
 		{
 			// If a UserFunc, we handle the invocation here.
-			if (UserFunc != null)
+			if (Func.Prototype.UserFunc != null)
 			{
+				Profiler.UpdateUserFunc( Func.Prototype.DebugName );
+
 				int old_arg_count = ArgCount;
 				int old_ret_count = RetCount;
 				ArgCount = args_in;
 				RetCount = 0;
 
-				var ret_val = UserFunc.Func( this );
+				var ret_val = Func.Prototype.UserFunc( this );
 				if (ret_val != null)
 				{
 					Return( ret_val.Value );
@@ -259,11 +245,8 @@ namespace Miku.Lua
 
 				ArgCount = old_arg_count;
 				RetCount = old_ret_count;
-				UserFunc = null;
 
-				//Sandbox.Log.Info( "A "+ PC );
 				ReturnInternal( ret_base, ret_count );
-				//Sandbox.Log.Info( "B "+ PC );
 				return;
 			}
 
@@ -990,9 +973,14 @@ namespace Miku.Lua
 			PC += jump_offset;
 		}
 
-		public string? GetDirectory()
+		public string? GetDirectory(int level)
 		{
-			var debug_name = Func.Prototype.DebugName;
+			var func = GetFunctionAtLevel(level);
+			if (func == null)
+			{
+				return null;
+			}
+			var debug_name = func.Prototype.DebugName;
 			if (debug_name.StartsWith("@lua/"))
 			{
 				var no_prefix = debug_name.Substring( 5 );

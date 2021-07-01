@@ -188,7 +188,7 @@ namespace Miku.Lua.CoreLib
 				}
 
 				{
-					string fullpath = ex.GetDirectory() + filename;
+					string fullpath = ex.GetDirectory(2) + filename;
 
 					ex.Machine.RunFile(fullpath);
 					return null;

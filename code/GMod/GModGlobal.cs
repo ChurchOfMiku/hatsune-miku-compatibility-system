@@ -61,7 +61,7 @@ namespace Miku.GMod
 				Server?.Env.Dump( "server.json" );
 			}
 
-			//Client?.RunFile( "scripts/free_darkrp_hud.lua" );
+			Client?.RunFile( "scripts/free_darkrp_hud.lua" );
 			
 			//Client?.RunFile( "test/patterns.lua" );
 

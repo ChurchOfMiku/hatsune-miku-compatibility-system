@@ -284,22 +284,25 @@ namespace Miku.Lua
 							continue;
 						}
 
-						if (pair.Value.Kind == ValueKind.UserFunction)
-						{
-							dict[prefix+key_str] = "CSHARP";
-						} else if (pair.Value.Kind == ValueKind.Function)
+						if (pair.Value.Kind == ValueKind.Function)
 						{
 							var func = pair.Value.CheckFunction();
-							string debug_name = func.Prototype.DebugName;
-							if ( debug_name.Contains("/glib_official/"))
+							if (func.Prototype.UserFunc != null)
 							{
-								dict[prefix + key_str] = "FP-LUA";
-							} else if ( debug_name.Contains( "/stubs.lua" ) )
-							{
-								dict[prefix + key_str] = "STUB";
+								dict[prefix + key_str] = "CSHARP";
 							} else
 							{
-								dict[prefix + key_str] = "LUA";
+								string debug_name = func.Prototype.DebugName;
+								if ( debug_name.Contains("/glib_official/"))
+								{
+									dict[prefix + key_str] = "FP-LUA";
+								} else if ( debug_name.Contains( "/stubs.lua" ) )
+								{
+									dict[prefix + key_str] = "STUB";
+								} else
+								{
+									dict[prefix + key_str] = "LUA";
+								}
 							}
 						} else if (pair.Value.Kind == ValueKind.Table)
 						{
