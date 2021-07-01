@@ -44,6 +44,10 @@ if CLIENT then
         return 0
     end
 
+    function surface.SetFont()
+
+    end
+
     render = {}
     _R.miku_debug_lib(vgui,"render")
 
@@ -95,3 +99,11 @@ _R.miku_debug_lib(game,"game")
 
 motionsensor = {}
 _R.miku_debug_lib(motionsensor,"motionsensor")
+
+-- Player stubs
+do
+    local Player = FindMetaTable("Player")
+    function Player:Team()
+        return "some team"
+    end
+end

@@ -20,7 +20,7 @@ namespace Miku.Lua
 		}
 		public override string Message => Wrapped.Message;
 	}
-	class Executor
+	partial class Executor
 	{
 		struct FrameInfo
 		{
@@ -768,7 +768,7 @@ namespace Miku.Lua
 				case OpCode.GGET:
 					{
 						var str = Func.Prototype.GetConstGC( D );
-						StackSet( A, ValueOperations.Get( ValueSlot.Table(Func.Env), str, Machine.PrimitiveMeta ) );
+						ValueOperations.Get( this, A, ValueSlot.Table( Func.Env ), str );
 						break;
 					}
 				case OpCode.GSET:
@@ -778,21 +778,17 @@ namespace Miku.Lua
 						break;
 					}
 				case OpCode.TGETV:
-					{
-						StackSet( A, ValueOperations.Get( StackGet( B ), StackGet( C ), Machine.PrimitiveMeta ) );
-						break;
-					}
+					ValueOperations.Get( this, A, StackGet( B ), StackGet( C ) );
+					break;
 				case OpCode.TGETS:
 					{
 						var str = Func.Prototype.GetConstGC( C );
-						StackSet( A, ValueOperations.Get( StackGet( B ), str, Machine.PrimitiveMeta ) );
+						ValueOperations.Get( this, A, StackGet( B ), str );
 						break;
 					}
 				case OpCode.TGETB:
-					{
-						StackSet( A, ValueOperations.Get( StackGet( B ), ValueSlot.Number(C), Machine.PrimitiveMeta ) );
-						break;
-					}
+					ValueOperations.Get( this, A, StackGet( B ), ValueSlot.Number( C ) );
+					break;
 				case OpCode.TSETV:
 					{
 						var table = StackGet( B ).CheckTable();
@@ -842,7 +838,6 @@ namespace Miku.Lua
 							arg_count += 1 + MultiRes;
 						}
 
-						int ret_base = call_base;
 						int ret_count = B - 1;
 
 						if (OP == OpCode.ITERC)

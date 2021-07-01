@@ -13,6 +13,7 @@ function FindMetaTable(name)
     if result == nil then
         result = {}
         _R[name] = result
+        _R.miku_debug_lib(result,"[class "..name.."]")
     end
     return result
 end

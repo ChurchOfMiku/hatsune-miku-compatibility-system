@@ -75,7 +75,7 @@ namespace Miku.GMod.Lib
 				return new ValueSlot[] { ValueSlot.Number( Screen.Height ) };
 			} ) );
 
-			var draw_lib = new Table();
+			/*var draw_lib = new Table();
 			draw_lib.DebugLibName = "draw";
 			env.Set( "draw", ValueSlot.Table( draw_lib ) );
 
@@ -147,11 +147,11 @@ namespace Miku.GMod.Lib
 				{
 					Log.Warning( "TODO VERTICAL ALIGN" );
 				}
-				label.Style.Transform = xform;*/
+				label.Style.Transform = xform;* /
 				ApplyFont( font_name, label.Style );
 
 				return null;
-			}));
+			}));*/
 
 			var surface_lib = new Table();
 			surface_lib.DebugLibName = "surface";
@@ -251,7 +251,6 @@ namespace Miku.GMod.Lib
 						Weight = args[2].CheckNumber()
 					};
 				}
-
 
 				return null;
 			} ) );

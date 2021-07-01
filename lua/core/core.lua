@@ -63,7 +63,7 @@ end
 
 function module(name,...)
     local tab = {}
-    _R.miku_debug_lib(tab,"[module "..name.."]")
+    _R.miku_debug_lib(tab,name)
     _G[name] = tab
     setfenv(2,tab)
 

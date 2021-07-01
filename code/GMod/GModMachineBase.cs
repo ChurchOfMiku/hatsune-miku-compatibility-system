@@ -42,8 +42,8 @@ namespace Miku.GMod
 			new Lib.Player( this );
 			SetupRealmInternalLibs();
 
-			RunFile( "glib/stubs.lua" );
 			RunFile( "glib/types.lua" );
+			RunFile( "glib/stubs.lua" );
 			RunFile( "glib/gamemode.lua" );
 
 			RunFile( "glib_official/garrysmod/lua/includes/init.lua" );
