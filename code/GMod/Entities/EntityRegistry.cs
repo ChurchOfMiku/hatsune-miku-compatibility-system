@@ -21,7 +21,7 @@ namespace Miku.GMod.Entities
 
 		//private Dictionary<string, (ScriptedEntityKind, Table)> ScriptedClasses = new Dictionary<string, (ScriptedEntityKind, Table)>();
 
-		private Dictionary<Entity, Table> Map = new Dictionary<Entity, Table>();
+		private Dictionary<Entity, UserData> Map = new Dictionary<Entity, UserData>();
 
 		public Table ClassPlayer = null;
 		public Table ClassWeapon = null;
@@ -56,29 +56,27 @@ namespace Miku.GMod.Entities
 			}
 		}*/
 
-		public Table Get(Entity ent, Table class_table = null) {
+		public UserData Get(Entity ent, Table class_table = null) {
 			{
-				if (Map.TryGetValue(ent, out Table result))
+				if (Map.TryGetValue(ent, out UserData result ))
 				{
 					return result;
 				}
 			}
 
 			{
-				var result = new Table();
-				result.UserData = ent;
-
-				if ( class_table != null)
+				if ( class_table == null)
 				{
-					result.MetaTable = class_table;
-				} else if (ent is Player)
-				{
-					result.MetaTable = ClassPlayer;
-				} else
-				{
-					throw new Exception( "can not handle " + ent );
+					if (ent is Player)
+					{
+						class_table = ClassPlayer;
+					} else
+					{
+						throw new Exception( "can not handle " + ent );
+					}
 				}
 
+				var result = new UserData((int)TypeID.Entity, ent, class_table );
 				Map[ent] = result;
 				return result;
 			}

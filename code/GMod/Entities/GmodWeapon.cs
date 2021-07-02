@@ -28,16 +28,6 @@ namespace Miku.GMod.Entities
 			Log.Info( "TODO client setup for sweps" );
 		}
 
-		public override Entity Owner {
-			get => base.Owner;
-			set {
-				// TODO use an __index function for this.
-				var owner_tab = GModGlobal.GetMachine().Ents.Get( value );
-				LuaTable.Set( "Owner", ValueSlot.Table( owner_tab ) );
-				base.Owner = value;
-			}
-		}
-
 		public override void AttackPrimary()
 		{
 			/*if (LuaTable != null)

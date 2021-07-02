@@ -14,46 +14,44 @@ namespace Miku.GMod.Lib
 
 		public Player(GModMachineBase machine)
 		{
-			var class_player = new Table();
-			class_player.DebugLibName = "[class Player]";
+			var class_player = machine.DefineClass( "Player" );
 			machine.Ents.ClassPlayer = class_player;
-			machine.Registry.Set( "Player", ValueSlot.Table( class_player ) );
 
-			class_player.Set( "Health", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
-				var ply = args[0].CheckTable().UserData as Sandbox.Player;
-				return new ValueSlot[] { ValueSlot.Number( ply.Health ) };
-			} ));
+			class_player.DefineFunc( "Health", ( Executor ex ) => {
+				var ply = (Sandbox.Player)ex.GetArg( 0 ).CheckUserData().Reference;
+				return ply.Health;
+			} );
 
-			class_player.Set( "Nick", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
-				var ply = args[0].CheckTable().UserData as Sandbox.Player;
+			class_player.DefineFunc( "Nick", ( Executor ex ) => {
+				var ply = (Sandbox.Player)ex.GetArg( 0 ).CheckUserData().Reference;
 				var client = ply.GetClientOwner();
-				return new ValueSlot[] { ValueSlot.String( client.Name ) };
-			} ) );
+				return client.Name;
+			} );
 
-			class_player.Set( "GetShootPos", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
-				var ply = args[0].CheckTable().UserData as Sandbox.Player;
+			class_player.DefineFunc( "GetShootPos", ( Executor ex ) => {
+				var ply = (Sandbox.Player)ex.GetArg( 0 ).CheckUserData().Reference;
 				var pos = ply.EyePos; // PROBABLY EXTREMELY WRONG!
-				return new ValueSlot[] { machine.Vector(pos) };
-			} ) );
+				return machine.Vector(pos);
+			} );
 
-			class_player.Set( "GetAimVector", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
-				var ply = args[0].CheckTable().UserData as Sandbox.Player;
+			class_player.DefineFunc( "GetAimVector", ( Executor ex ) => {
+				var ply = (Sandbox.Player)ex.GetArg( 0 ).CheckUserData().Reference;
 				var pos = ply.EyeRot.Forward; // PROBABLY EXTREMELY WRONG!
-				return new ValueSlot[] { machine.Vector( pos ) };
-			} ) );
+				return machine.Vector( pos );
+			} );
 
-			class_player.Set( "FireBullets", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
-				var ply = args[0].CheckTable().UserData as Sandbox.Player;
+			class_player.DefineFunc( "FireBullets", ( Executor ex ) => {
+				var ply = (Sandbox.Player)ex.GetArg( 0 ).CheckUserData().Reference;
 				Log.Info( "FireBullets" );
 				return null;
-			} ) );
+			} );
 
 			if (machine.IsClient)
 			{
-				machine.Env.Set( "LocalPlayer", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
+				machine.Env.DefineFunc( "LocalPlayer", ( Executor ex ) => {
 					var result = machine.Ents.Get( Local.Pawn );
-					return new ValueSlot[] { ValueSlot.Table( result ) };
-				}));
+					return result;
+				} );
 			}
 		}
 	}

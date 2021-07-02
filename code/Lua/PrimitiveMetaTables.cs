@@ -22,6 +22,11 @@ namespace Miku.Lua
 				var tab = value.CheckTable();
 				return tab.MetaTable;
 			}
+			if (value.Kind == ValueKind.UserData)
+			{
+				var ud = value.CheckUserData();
+				return ud.MetaTable;
+			}
 			if (value.Kind == ValueKind.String)
 			{
 				return MetaString;

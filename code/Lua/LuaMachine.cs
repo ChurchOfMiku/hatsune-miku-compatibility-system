@@ -37,8 +37,9 @@ namespace Miku.Lua
 
 		public LuaMachine()
 		{
-			// Set up global table.
+			// Set up global table and registry.
 			Env.DebugLibName = "_G";
+			Registry.DebugLibName = "_R";
 			Env.Set( "_G", ValueSlot.Table( Env ) );
 			Env.Set( "_R", ValueSlot.Table( Registry ) );
 
@@ -49,8 +50,8 @@ namespace Miku.Lua
 
 			new CoreLib.Globals( this );
 
-			Registry.Set( "miku_require", ValueSlot.UserFunction( (ValueSlot[] args, Executor ex ) => {
-				string mod_name = args[0].CheckString();
+			Registry.DefineFunc( "miku_require", ( Executor ex ) => {
+				string mod_name = ex.GetArg(0).CheckString();
 
 				var file_name = "glib_official/garrysmod/lua/includes/modules/" + mod_name + ".lua";
 				if ( CompileFunction != null && CheckFile( file_name ) )
@@ -62,15 +63,15 @@ namespace Miku.Lua
 
 				// NOTE: Uses original env, which I assume is what we want?
 				var res = BootstrapRequire( mod_name );
-				return new[] {res};
-			}));
+				return res;
+			});
 
-			Registry.Set( "miku_debug_lib", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
-				var tab = args[0].CheckTable();
-				var name = args[1].CheckString();
+			Registry.DefineFunc( "miku_debug_lib", ( Executor ex ) => {
+				var tab = ex.GetArg( 0 ).CheckTable();
+				var name = ex.GetArg( 1 ).CheckString();
 				tab.DebugLibName = name;
 				return null;
-			}));
+			});
 
 			BootstrapRequire( "core" );
 			CompileFunction = BootstrapRequire( "lang.compile" ).CheckTable().Get( "string" ).CheckFunction();
@@ -141,6 +142,14 @@ namespace Miku.Lua
 		{
 			string fullname = GetFilePath( filename );
 			return FileSystem.Mounted.FileExists( fullname );
+		}
+
+		public Table DefineClass(string name)
+		{
+			var table = new Table();
+			table.DebugLibName = "[class "+name+"]";
+			Registry.Set( name, table );
+			return table;
 		}
 	}
 }

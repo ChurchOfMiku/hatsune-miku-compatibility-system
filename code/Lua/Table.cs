@@ -12,7 +12,6 @@ namespace Miku.Lua
 		private Dictionary<ValueSlot, ValueSlot>? Dict = null;
 		private List<ValueSlot>? Array = null;
 
-		public object? UserData = null;
 		public Table? MetaTable = null;
 		public string? DebugLibName = null;
 

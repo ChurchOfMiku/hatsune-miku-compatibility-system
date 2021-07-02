@@ -15,7 +15,8 @@ namespace Miku.Lua
 		String,
 		Table,
 		Function,
-		ProtoFunction
+		ProtoFunction,
+		UserData
 	}
 
 	struct ValueSlot
@@ -77,33 +78,11 @@ namespace Miku.Lua
 			return new ValueSlot( ValueKind.Function, x );
 		}
 
-		public static ValueSlot UserFunction( UserFunctionOld inner_func )
-		{
-			// TODO factor this junk out!
-			var wrapper = new ProtoFunction();
-			wrapper.DebugName = "? (LEGACY USER FUNCTION)";
-			wrapper.UserFunc = ( Executor exec ) =>
-			{
-				var args = new ValueSlot[exec.GetArgCount()];
-				for ( int i = 0; i < args.Length; i++ )
-				{
-					args[i] = exec.GetArg( i );
-				}
-				var results = inner_func( args, exec );
-				if ( results != null )
-				{
-					for ( int i = 0; i < results.Length; i++ )
-					{
-						exec.Return( results[i] );
-					}
-				}
-				return null;
-			};
-
-			var func = new Function( wrapper, null! );
-
-			return Function(func);
-		}
+		// TODO use more implicit operators like this:
+		public static implicit operator ValueSlot( UserData x ) => new ValueSlot(ValueKind.UserData, x);
+		public static implicit operator ValueSlot( double x ) => new ValueSlot( ValueKind.Number, null, x );
+		public static implicit operator ValueSlot( string x ) => new ValueSlot( ValueKind.String, x );
+		public static implicit operator ValueSlot( Table x ) => new ValueSlot( ValueKind.Table, x );
 
 		public bool IsTruthy()
 		{
@@ -167,6 +146,15 @@ namespace Miku.Lua
 				return (Function)Reference!;
 			}
 			throw new Exception( $"{this} is not a function." );
+		}
+
+		public UserData CheckUserData()
+		{
+			if ( Kind == ValueKind.UserData )
+			{
+				return (UserData)Reference!;
+			}
+			throw new Exception( $"{this} is not user data." );
 		}
 
 		public ValueSlot CloneCheck()

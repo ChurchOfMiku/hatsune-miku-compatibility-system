@@ -110,20 +110,18 @@ namespace Miku.Lua.CoreLib
 	{
 		public String( LuaMachine machine )
 		{
-			var lib = new Table();
-			lib.DebugLibName = "string";
-			machine.Env.Set( "string", ValueSlot.Table( lib ) );
+			var lib = machine.Env.DefineLib( "string" );
 
 			// Set string metatable.
 			machine.PrimitiveMeta.MetaString = new Table();
 			machine.PrimitiveMeta.MetaString.Set( "__index", ValueSlot.Table(lib) );
 
-			lib.Set( "byte", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
-				var str = args[0].CheckString();
+			lib.DefineFunc( "byte", ( Executor ex ) => {
+				var str = ex.GetArg( 0 ).CheckString();
 				int index = 0;
-				if ( args.Length > 1 )
+				if ( ex.GetArgCount() > 1 )
 				{
-					index = (int)args[1].CheckNumber() - 1;
+					index = (int)ex.GetArg( 1 ).CheckNumber() - 1;
 				}
 
 				{
@@ -136,32 +134,32 @@ namespace Miku.Lua.CoreLib
 					{
 						throw new Exception( "string.byte got non-byte result, this could be a problem" );
 					}
-					return new ValueSlot[] { ValueSlot.Number( result ) };
+					return ValueSlot.Number( result );
 				}
-			} ) );
+			} );
 
-			lib.Set( "char", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
-				char c = (char)args[0].CheckNumber();
-				return new[] { ValueSlot.String( c.ToString() ) };
-			} ) );
+			lib.DefineFunc( "char", ( Executor ex ) => {
+				char c = (char)ex.GetArg( 0 ).CheckNumber();
+				return ValueSlot.String( c.ToString() );
+			} );
 
-			lib.Set( "lower", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
-				var str = args[0].CheckString();
-				return new ValueSlot[] { ValueSlot.String( str.ToLower() ) };
-			} ) );
+			lib.DefineFunc( "lower", ( Executor ex ) => {
+				var str = ex.GetArg(0).CheckString();
+				return ValueSlot.String( str.ToLower() );
+			} );
 
-			lib.Set( "sub", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
+			lib.DefineFunc( "sub", ( Executor ex ) => {
 				// TODO: see how this is actually implemented in lua, there is no way this is totally consistent
-				var str = args[0].CheckString();
-				int start = (int)args[1].CheckNumber() - 1;
+				var str = ex.GetArg( 0 ).CheckString();
+				int start = (int)ex.GetArg( 1 ).CheckNumber() - 1;
 				int length = str.Length;
 				if ( start < 0 )
 				{
 					start = str.Length + start + 1;
 				}
-				if ( args.Length > 2 )
+				if ( ex.GetArgCount() > 2 )
 				{
-					int arg2 = (int)args[2].CheckNumber();
+					int arg2 = (int)ex.GetArg( 2 ).CheckNumber();
 					if ( arg2 >= 0 )
 					{
 						length = arg2 - start;
@@ -174,14 +172,14 @@ namespace Miku.Lua.CoreLib
 				start = Math.Max( start, 0 );
 				length = Math.Max( length, 0 );
 				length = Math.Min( length, str.Length - start );
-				return new ValueSlot[] { ValueSlot.String( str.Substring( start, length ) ) };
-			} ) );
+				return ValueSlot.String( str.Substring( start, length ) );
+			} );
 
-			lib.Set( "find", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) =>
+			lib.DefineFunc( "find", ( Executor ex ) =>
 			{
-				var str = args[0].CheckString();
-				var pattern = args[1].CheckString();
-				if ( args.Length > 2 )
+				var str = ex.GetArg( 0 ).CheckString();
+				var pattern = ex.GetArg( 1 ).CheckString();
+				if ( ex.GetArgCount() > 2 )
 				{
 					throw new Exception( "string.find offset/noPatterns NYI" );
 				}
@@ -199,13 +197,14 @@ namespace Miku.Lua.CoreLib
 					throw new Exception( "string.find groups" );
 				}
 
-				return new[] { ValueSlot.Number(match.Index + 1), ValueSlot.Number(match.Index + match.Length) };
-			} ) );
+				ex.Return( ValueSlot.Number( match.Index + 1 ) );
+				return ValueSlot.Number(match.Index + match.Length);
+			} );
 
-			lib.Set( "match", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
-				var str = args[0].CheckString();
-				var pattern = args[1].CheckString();
-				if (args.Length > 2)
+			lib.DefineFunc( "match", ( Executor ex ) => {
+				var str = ex.GetArg( 0 ).CheckString();
+				var pattern = ex.GetArg( 1 ).CheckString();
+				if ( ex.GetArgCount() > 2 )
 				{
 					throw new Exception( "string.match offset NYI" );
 				}
@@ -225,20 +224,20 @@ namespace Miku.Lua.CoreLib
 					var results = new ValueSlot[match.Groups.Count - 1];
 					for (int i=1;i<match.Groups.Count;i++ )
 					{
-						results[i - 1] = ValueSlot.String( match.Groups[i].Value );
+						ex.Return( ValueSlot.String( match.Groups[i].Value ) );
 					}
-					return results;
+					return null;
 				}
 
-				return new[] { ValueSlot.String( match.Value ) };
-			} ) );
+				return ValueSlot.String( match.Value );
+			} );
 
-			lib.Set( "gsub", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) =>
+			lib.DefineFunc( "gsub", ( Executor ex ) =>
 			{
-				var str = args[0].CheckString();
-				var pattern = args[1].CheckString();
-				var replace = args[2];
-				if ( args.Length > 3 )
+				var str = ex.GetArg( 0 ).CheckString();
+				var pattern = ex.GetArg( 1 ).CheckString();
+				var replace = ex.GetArg( 2 );
+				if ( ex.GetArgCount() > 3 )
 				{
 					throw new Exception( "string.gsub maxReplaces NYI" );
 				}
@@ -247,17 +246,17 @@ namespace Miku.Lua.CoreLib
 				if (replace.Kind == ValueKind.String)
 				{
 					var result = regex.Replace( str, replace.CheckString() );
-					return new[] { ValueSlot.String( result ) };
+					return ValueSlot.String( result );
 				} else
 				{
 					throw new Exception( "string.gsub replace = " + replace );
 				}
 
-			} ) );
+			} );
 
 			var format_regex = new Regex(@"%([\-+ #0]*)(\d*)(\.\d*)?([\w%])");
-			lib.Set( "format", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
-				string format = args[0].CheckString();
+			lib.DefineFunc( "format", ( Executor ex ) => {
+				string format = ex.GetArg( 0 ).CheckString();
 
 				// TODO escape {'s
 				var format_params = new List<object>();
@@ -274,7 +273,7 @@ namespace Miku.Lua.CoreLib
 					Assert.True( precision.Length == 0 );
 
 					int spec_index = format_params.Count;
-					ValueSlot val = args[spec_index + 1];
+					ValueSlot val = ex.GetArg(spec_index + 1);
 
 					if ( spec == "s" )
 					{
@@ -290,9 +289,8 @@ namespace Miku.Lua.CoreLib
 				} );
 
 				var result = string.Format( converted_format, format_params.ToArray() );
-
-				return new[] { ValueSlot.String( result ) };
-			} ) );
+				return ValueSlot.String( result );
+			} );
 		}
 	}
 }
