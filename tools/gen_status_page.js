@@ -87,6 +87,13 @@ function makeSection(section_name_pretty,prefix,elems,force_open) {
                 status = status_s;
             }
         }
+
+        let space_index = status.indexOf(" ");
+        if (space_index != -1) {
+            notes = status.substr(space_index+1);
+            status = status.substr(0,space_index);
+            //console.log(`[${status}][${notes}]`)
+        }
     
         counts[status]=(counts[status]||0)+1;
     

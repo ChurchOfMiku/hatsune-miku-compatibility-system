@@ -55,7 +55,7 @@ namespace Miku.Lua
 			Env.Set( "_R", ValueSlot.Table( Registry ) );
 
 			// Load libraries: TODO all should use: new CoreLib.X( this );
-			CoreLib.Bit.Init(Env);
+			new CoreLib.Bit(this);
 			new CoreLib.String(this);
 			new CoreLib.Misc(this);
 

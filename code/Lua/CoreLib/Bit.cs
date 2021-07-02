@@ -4,58 +4,59 @@ namespace Miku.Lua.CoreLib
 {
 	class Bit
 	{
-		public static void Init(Table env)
+		public Bit(LuaMachine machine)
 		{
-			var lib = new Table();
-			lib.DebugLibName = "bit";
-			env.Set( "bit", ValueSlot.Table( lib ) );
+			var env = machine.Env;
 
-			lib.Set( "band", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
-				int x = (int)args[0].CheckNumber();
-				int y = (int)args[1].CheckNumber();
-				return new ValueSlot[] { ValueSlot.Number( x & y ) };
-			} ) );
+			var lib = env.DefineLib( "bit" );
 
-			lib.Set( "bor", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
-				int x = (int)args[0].CheckNumber();
-				int y = (int)args[1].CheckNumber();
-				return new ValueSlot[] { ValueSlot.Number( x | y ) };
-			} ) );
+			lib.DefineFunc( "band", ( Executor ex ) => {
+				int x = (int)ex.GetArg( 0 ).CheckNumber();
+				int y = (int)ex.GetArg( 1 ).CheckNumber();
+				return ValueSlot.Number( x & y );
+			} );
 
-			lib.Set( "rshift", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
-				uint x = (uint)args[0].CheckNumber(); // LOGICAL SHIFT = uint !!!
-				int y = (int)args[1].CheckNumber();
-				return new ValueSlot[] { ValueSlot.Number( x >> y ) };
-			} ) );
+			lib.DefineFunc( "bor", ( Executor ex ) => {
+				int x = (int)ex.GetArg( 0 ).CheckNumber();
+				int y = (int)ex.GetArg( 1 ).CheckNumber();
+				return ValueSlot.Number( x | y );
+			} );
 
-			lib.Set( "lshift", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
-				int x = (int)args[0].CheckNumber();
-				int y = (int)args[1].CheckNumber();
-				return new ValueSlot[] { ValueSlot.Number( x << y ) };
-			} ) );
+			lib.DefineFunc( "rshift", ( Executor ex ) => {
+				uint x = (uint)ex.GetArg( 0 ).CheckNumber(); // LOGICAL SHIFT = uint !!!
+				int y = (int)ex.GetArg( 1 ).CheckNumber();
+				return ValueSlot.Number( x >> y );
+			} );
 
-			lib.Set( "bnot", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
-				int x = (int)args[0].CheckNumber();
-				return new ValueSlot[] { ValueSlot.Number( ~x ) };
-			} ) );
+			lib.DefineFunc( "lshift", ( Executor ex ) => {
+				int x = (int)ex.GetArg( 0 ).CheckNumber();
+				int y = (int)ex.GetArg( 1 ).CheckNumber();
+				return ValueSlot.Number( x << y );
+			} );
+
+			lib.DefineFunc( "bnot", ( Executor ex ) => {
+				int x = (int)ex.GetArg( 0 ).CheckNumber();
+				return ValueSlot.Number( ~x );
+			} );
 
 			// HACK: used by parser
-			lib.Set( "get_double_parts", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
-				double x = args[0].CheckNumber();
+			lib.DefineFunc( "get_double_parts", ( Executor ex ) => {
+				double x = ex.GetArg( 0 ).CheckNumber();
 				long bits = BitConverter.DoubleToInt64Bits( x );
 				int high = (int)(bits >> 32);
 				int low = (int)bits;
-				return new ValueSlot[] { ValueSlot.Number( low ), ValueSlot.Number( high ) };
-			} ) );
+				ex.Return( ValueSlot.Number( low ) );
+				return ValueSlot.Number( high );
+			} );
 
 			// HACK: used by parser
-			lib.Set( "make_double", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
-				long low = (uint)args[0].CheckNumber();
-				long high = (uint)args[1].CheckNumber();
+			lib.DefineFunc( "make_double", ( Executor ex ) => {
+				long low = (uint)ex.GetArg( 0 ).CheckNumber();
+				long high = (uint)ex.GetArg( 1 ).CheckNumber();
 				long merged = low | (high << 32);
 				double d = BitConverter.Int64BitsToDouble( merged );
-				return new[] { ValueSlot.Number( d ) };
-			} ) );
+				return ValueSlot.Number( d );
+			} );
 		}
 	}
 }

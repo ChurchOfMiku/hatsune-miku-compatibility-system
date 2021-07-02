@@ -156,24 +156,24 @@ namespace Miku.GMod.Lib
 				return null;
 			} );
 
-			surface_lib.Set( "SetDrawColor", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) =>
+			surface_lib.DefineFunc( "SetDrawColor", ( Executor ex ) =>
 			{
-				CurrentColor = ColorFromTable( args[0].CheckTable() );
+				CurrentColor = ColorFromTable( ex.GetArg( 0 ).CheckTable() );
 				return null;
-			} ) );
+			} );
 
-			surface_lib.Set( "SetMaterial", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) =>
+			surface_lib.DefineFunc( "SetMaterial", ( Executor ex ) =>
 			{
-				CurrentMaterial = args[0].CheckString();
+				CurrentMaterial = ex.GetArg(0).CheckString();
 				return null;
-			} ) );
+			} );
 
-			surface_lib.Set( "DrawRect", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) =>
+			surface_lib.DefineFunc( "DrawRect", ( Executor ex ) =>
 			{
-				double x = args[0].CheckNumber();
-				double y = args[1].CheckNumber();
-				double w = args[2].CheckNumber();
-				double h = args[3].CheckNumber();
+				double x = ex.GetArg( 0 ).CheckNumber();
+				double y = ex.GetArg( 1 ).CheckNumber();
+				double w = ex.GetArg( 2 ).CheckNumber();
+				double h = ex.GetArg( 3 ).CheckNumber();
 
 				var panel = Local.Hud.AddChild<Sandbox.UI.Panel>();
 				panel.Style.Position = PositionMode.Absolute;
@@ -185,14 +185,14 @@ namespace Miku.GMod.Lib
 				panel.Style.BackgroundColor = CurrentColor;
 
 				return null;
-			} ) );
+			} );
 
-			surface_lib.Set( "DrawTexturedRect", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) =>
+			surface_lib.DefineFunc( "DrawTexturedRect", ( Executor ex ) =>
 			{
-				double x = args[0].CheckNumber();
-				double y = args[1].CheckNumber();
-				double w = args[2].CheckNumber();
-				double h = args[3].CheckNumber();
+				double x = ex.GetArg( 0 ).CheckNumber();
+				double y = ex.GetArg( 1 ).CheckNumber();
+				double w = ex.GetArg( 2 ).CheckNumber();
+				double h = ex.GetArg( 3 ).CheckNumber();
 
 				var panel = Local.Hud.AddChild<Sandbox.UI.Image>();
 				panel.Style.Position = PositionMode.Absolute;
@@ -204,15 +204,15 @@ namespace Miku.GMod.Lib
 				panel.SetTexture("/img/"+CurrentMaterial);
 
 				return null;
-			} ) );
+			} );
 
-			surface_lib.Set( "DrawOutlinedRect", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) =>
+			surface_lib.DefineFunc( "DrawOutlinedRect", ( Executor ex ) =>
 			{
-				double x = args[0].CheckNumber();
-				double y = args[1].CheckNumber();
-				double w = args[2].CheckNumber();
-				double h = args[3].CheckNumber();
-				double border_w = args.Length > 4 ? args[4].CheckNumber() : 1;
+				double x = ex.GetArg( 0 ).CheckNumber();
+				double y = ex.GetArg( 1 ).CheckNumber();
+				double w = ex.GetArg( 2 ).CheckNumber();
+				double h = ex.GetArg( 3 ).CheckNumber();
+				double border_w = ex.GetArgCount() > 4 ? ex.GetArg( 4 ).CheckNumber() : 1;
 
 				var panel = Local.Hud.AddChild<Sandbox.UI.Panel>();
 				panel.Style.Position = PositionMode.Absolute;
@@ -225,14 +225,14 @@ namespace Miku.GMod.Lib
 				panel.Style.BorderWidth = Length.Pixels( (float)border_w );
 
 				return null;
-			} ) );
+			} );
 
-			surface_lib.Set( "CreateFont", ValueSlot.UserFunction( ( ValueSlot[] args, Executor ex ) => {
+			surface_lib.DefineFunc( "CreateFont", ( Executor ex ) => {
 
-				if (args[1].Kind == ValueKind.Table)
+				if ( ex.GetArg( 1 ).Kind == ValueKind.Table)
 				{
-					var name = args[0].CheckString();
-					var settings = args[1].CheckTable();
+					var name = ex.GetArg( 0 ).CheckString();
+					var settings = ex.GetArg( 1 ).CheckTable();
 
 					FontRegistry[name] = new Font()
 					{
@@ -242,17 +242,17 @@ namespace Miku.GMod.Lib
 					};
 				} else
 				{
-					var name = args[5].CheckString();
+					var name = ex.GetArg( 5 ).CheckString();
 
 					FontRegistry[name] = new Font() {
-						Family = args[0].CheckString(),
-						Size = args[1].CheckNumber(),
-						Weight = args[2].CheckNumber()
+						Family = ex.GetArg( 0 ).CheckString(),
+						Size = ex.GetArg( 1 ).CheckNumber(),
+						Weight = ex.GetArg( 2 ).CheckNumber()
 					};
 				}
 
 				return null;
-			} ) );
+			} );
 		}
 	}
 }

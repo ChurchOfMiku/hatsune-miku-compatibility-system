@@ -323,12 +323,18 @@ namespace Miku.Lua
 						if (pair.Value.Kind == ValueKind.Function)
 						{
 							var func = pair.Value.CheckFunction();
+							string debug_name = func.Prototype.DebugName;
 							if (func.Prototype.UserFunc != null)
 							{
-								dict[prefix + key_str] = "CSHARP";
+								if (debug_name.StartsWith("?"))
+								{
+									dict[prefix + key_str] = "ERROR Legacy C# function decl.";
+								} else
+								{
+									dict[prefix + key_str] = "CSHARP";
+								}
 							} else
 							{
-								string debug_name = func.Prototype.DebugName;
 								if ( debug_name.Contains("/glib_official/"))
 								{
 									dict[prefix + key_str] = "FP-LUA";

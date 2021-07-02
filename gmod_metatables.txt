@@ -1,8 +1,10 @@
 This information comes mainly from dinking around in Gmod. Take it with several grains of salt.
 
-Some metamathods can be found at:
-    https://github.com/Facepunch/garrysmod/tree/master/garrysmod/lua/includes/extensions
+Entity tables are accessed by calling ENT:GetTable(). These tables are built by merging prototypes rather than using index chains.
 
-Most userdata's keys are accessed by calling X:GetTable(). These tables seem to mostly be built by merging prototypes together rather than by using metamethods.
+Entities also have a __newindex method defined in C.
 
-At the moment Miku does NOT try to emulate this behavior perfectly, and uses alternative methods. A better effort might be made to emulate this behavior in the future, if and when it becomes a problem.
+Metatables contain:
+- MetaID = the type id
+- MetaName = the pretty name of the class
+- MetaBaseClass = the parent classes metatable, or nil

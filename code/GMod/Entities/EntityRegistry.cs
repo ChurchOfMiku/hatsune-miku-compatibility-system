@@ -18,11 +18,6 @@ namespace Miku.GMod.Entities
 
 	class EntityRegistry
 	{
-
-		//private Dictionary<string, (ScriptedEntityKind, Table)> ScriptedClasses = new Dictionary<string, (ScriptedEntityKind, Table)>();
-
-		private Dictionary<Entity, Table> Map = new Dictionary<Entity, Table>();
-
 		public Table ClassPlayer = null;
 		public Table ClassWeapon = null;
 
@@ -58,13 +53,6 @@ namespace Miku.GMod.Entities
 
 		public Table Get(Entity ent, Table class_table = null) {
 			{
-				if (Map.TryGetValue(ent, out Table result))
-				{
-					return result;
-				}
-			}
-
-			{
 				var result = new Table();
 				result.UserData = ent;
 
@@ -79,7 +67,6 @@ namespace Miku.GMod.Entities
 					throw new Exception( "can not handle " + ent );
 				}
 
-				Map[ent] = result;
 				return result;
 			}
 		}
