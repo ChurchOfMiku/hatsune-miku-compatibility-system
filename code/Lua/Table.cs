@@ -160,14 +160,16 @@ namespace Miku.Lua
 		{
 
 		}
-		public ValueSlot[]? Next(ValueSlot prev_key)
+		public void Next(ValueSlot prev_key, Executor ex)
 		{
 			// Start enumeration.
 			if (prev_key.Kind == ValueKind.Nil)
 			{
 				if (Array != null && Array.Count > 0)
 				{
-					return new[] { ValueSlot.Number( 1 ), ArrayGet(1) };
+					ex.Return( ValueSlot.Number( 1 ) );
+					ex.Return( ArrayGet( 1 ) );
+					return;
 				}
 				if (Dict != null && Dict.Count > 0)
 				{
@@ -175,7 +177,9 @@ namespace Miku.Lua
 					CachedEnumerator.MoveNext();
 
 					var pair = CachedEnumerator.Current;
-					return new[] { pair.Key, pair.Value };
+					ex.Return( pair.Key );
+					ex.Return( pair.Value );
+					return;
 				}
 			} else
 			{
@@ -188,7 +192,9 @@ namespace Miku.Lua
 						int i = (int)i_dbl;
 						if ( i_dbl == i && i >= 1 && i <= Array.Count )
 						{
-							return new[] { ValueSlot.Number( i ), ArrayGet( i ) };
+							ex.Return( ValueSlot.Number( i ) );
+							ex.Return( ArrayGet( i ) );
+							return;
 						}
 					}
 				}
@@ -200,17 +206,19 @@ namespace Miku.Lua
 						if (CachedEnumerator.MoveNext())
 						{
 							var pair = CachedEnumerator.Current;
-							return new[] { pair.Key, pair.Value };
+							ex.Return( pair.Key );
+							ex.Return( pair.Value );
+							return;
 						} else
 						{
-							return null;
+							return;
 						}
 					}
 					throw new Exception( "cached enumerator miss" );
 				}
 			}
 
-			return null;
+			return;
 		}
 
 		public Table CloneProto()

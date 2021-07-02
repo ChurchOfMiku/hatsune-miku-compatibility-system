@@ -70,7 +70,10 @@
         .bar div {
             display: inline-block;
             height: 100%;
-            border-right: 1px dotted grey;
+            box-sizing: border-box;
+        }
+        .bar div:not(:first-child) {
+            border-left: 1px dotted grey;
         }
         .bar span {
             width: 100%;
@@ -83,7 +86,7 @@
 </head>
 <body>
     <h1>Hatsune Miku Compatibility System API Status</h1>
-    <p><i>Generated @ Thu Jul 01 2021 23:00:30 GMT-0600 (Mountain Daylight Time)</i></p><div class='bar' style='width: 1000px; height: 100px; font-size: 100px;'><div style='width: 1.2557077625570776%;' class='st-menu'></div><div style='width: 0.6563926940639269%;' class='st-csharp'></div><div style='width: 0.3710045662100456%;' class='st-lua'></div><div style='width: 18.46461187214612%;' class='st-fp-lua'></div><div style='width: 0.3995433789954338%;' class='st-stub'></div><div style='width: 78.02511415525115%;' class='st-nyi'></div><div style='width: 0.8276255707762556%;' class='st-error'></div><span>20.7%</span></div><ul><li><span class='st-menu'>44 MENU</span></li><li><span class='st-csharp'>23 CSHARP</span></li><li><span class='st-lua'>13 LUA</span></li><li><span class='st-fp-lua'>647 FP-LUA</span></li><li><span class='st-stub'>14 STUB</span></li><li><span class='st-nyi'>2734 NYI</span></li><li><span class='st-error'>29 ERROR</span></li></ul>
+    <p><i>Generated @ Fri Jul 02 2021 11:40:22 GMT-0600 (Mountain Daylight Time)</i></p><div class='bar' style='width: 1000px; height: 100px; font-size: 100px;'><div style='width: 1.2557077625570776%;' class='st-menu'></div><div style='width: 0.9988584474885844%;' class='st-csharp'></div><div style='width: 0.3710045662100456%;' class='st-lua'></div><div style='width: 18.46461187214612%;' class='st-fp-lua'></div><div style='width: 0.3995433789954338%;' class='st-stub'></div><div style='width: 78.02511415525115%;' class='st-nyi'></div><div style='width: 0.48515981735159813%;' class='st-error'></div><span>21.1%</span></div><ul><li><span class='st-menu'>44 MENU</span></li><li><span class='st-csharp'>35 CSHARP</span></li><li><span class='st-lua'>13 LUA</span></li><li><span class='st-fp-lua'>647 FP-LUA</span></li><li><span class='st-stub'>14 STUB</span></li><li><span class='st-nyi'>2734 NYI</span></li><li><span class='st-error'>17 ERROR</span></li></ul>
     <button onclick="toggleAll()">Toggle All</button>
     <p>Not listed:</p>
     <ul>
@@ -94,7 +97,7 @@
     <h1>Libraries</h1>
     <div>
     <h2>Global</h2>
-    <div class='bar' style='width: 400px; height: 30px; font-size: 30px;'><div style='width: 11.11111111111111%;' class='st-menu'></div><div style='width: 0.7407407407407408%;' class='st-csharp'></div><div style='width: 2.5925925925925926%;' class='st-lua'></div><div style='width: 21.11111111111111%;' class='st-fp-lua'></div><div style='width: 2.5925925925925926%;' class='st-stub'></div><div style='width: 57.03703703703704%;' class='st-nyi'></div><div style='width: 4.814814814814815%;' class='st-error'></div><span>35.6%</span></div>
+    <div class='bar' style='width: 400px; height: 30px; font-size: 30px;'><div style='width: 11.11111111111111%;' class='st-menu'></div><div style='width: 4.814814814814815%;' class='st-csharp'></div><div style='width: 2.5925925925925926%;' class='st-lua'></div><div style='width: 21.11111111111111%;' class='st-fp-lua'></div><div style='width: 2.5925925925925926%;' class='st-stub'></div><div style='width: 57.03703703703704%;' class='st-nyi'></div><div style='width: 0.7407407407407408%;' class='st-error'></div><span>39.6%</span></div>
     <button onclick="showTable('section_0')">Toggle Details</button>
     <table id="section_0" >
         <tr><td class='rc rs rm '>Shared</td><td>AccessorFunc</td><td class='st-fp-lua'>FP-LUA</td><td></td></tr>
@@ -173,7 +176,7 @@
 <tr><td class='rc rs '>Shared</td><td>EmitSound</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rm '>Client</td><td>EndTooltip</td><td class='st-fp-lua'>FP-LUA</td><td></td></tr>
 <tr><td class='rc rs '>Shared</td><td>Entity</td><td class='st-nyi'>NYI</td><td></td></tr>
-<tr><td class='rc rs rm '>Shared</td><td>error</td><td class='st-error'>ERROR</td><td>Legacy C# function decl.</td></tr>
+<tr><td class='rc rs rm '>Shared</td><td>error</td><td class='st-csharp'>CSHARP</td><td></td></tr>
 <tr><td class='rc rs rm '>Shared</td><td>ErrorNoHalt</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rs rm '>Shared</td><td>ErrorNoHaltWithStack</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc '>Client</td><td>EyeAngles</td><td class='st-nyi'>NYI</td><td></td></tr>
@@ -206,7 +209,7 @@
 <tr><td class='rm '>Menu</td><td>GetLoadPanel</td><td class='st-menu'>MENU</td><td></td></tr>
 <tr><td class='rm '>Menu</td><td>GetLoadStatus</td><td class='st-menu'>MENU</td><td></td></tr>
 <tr><td class='rm '>Menu</td><td>GetMapList</td><td class='st-menu'>MENU</td><td></td></tr>
-<tr><td class='rc rs rm '>Shared</td><td>getmetatable</td><td class='st-error'>ERROR</td><td>Legacy C# function decl.</td></tr>
+<tr><td class='rc rs rm '>Shared</td><td>getmetatable</td><td class='st-csharp'>CSHARP</td><td></td></tr>
 <tr><td class='rm '>Menu</td><td>GetOverlayPanel</td><td class='st-menu'>MENU</td><td></td></tr>
 <tr><td class='rc rs '>Shared</td><td>GetPredictionPlayer</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc '>Client</td><td>GetRenderTarget</td><td class='st-nyi'>NYI</td><td></td></tr>
@@ -217,7 +220,7 @@
 <tr><td class='rc rs rm '>Shared</td><td>HSLToColor</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rs rm '>Shared</td><td>HSVToColor</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rs rm '>Shared</td><td>HTTP</td><td class='st-nyi'>NYI</td><td></td></tr>
-<tr><td class='rc rs rm '>Shared</td><td>include</td><td class='st-error'>ERROR</td><td>Legacy C# function decl.</td></tr>
+<tr><td class='rc rs rm '>Shared</td><td>include</td><td class='st-csharp'>CSHARP</td><td></td></tr>
 <tr><td class='rc rs rm '>Shared</td><td>IncludeCS</td><td class='st-fp-lua'>FP-LUA</td><td></td></tr>
 <tr><td class='rc rs rm '>Shared</td><td>ipairs</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rs rm '>Shared</td><td>isangle</td><td class='st-nyi'>NYI</td><td></td></tr>
@@ -265,7 +268,7 @@
 <tr><td class='rc rs rm '>Shared</td><td>MsgN</td><td class='st-stub'>STUB</td><td></td></tr>
 <tr><td class='rc '>Client</td><td>NamedColor</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rs rm '>Shared</td><td>newproxy</td><td class='st-nyi'>NYI</td><td></td></tr>
-<tr><td class='rc rs rm '>Shared</td><td>next</td><td class='st-error'>ERROR</td><td>Legacy C# function decl.</td></tr>
+<tr><td class='rc rs rm '>Shared</td><td>next</td><td class='st-csharp'>CSHARP</td><td></td></tr>
 <tr><td class='rm '>Menu</td><td>NumDownloadables</td><td class='st-menu'>MENU</td><td></td></tr>
 <tr><td class='rc '>Client</td><td>NumModelSkins</td><td class='st-fp-lua'>FP-LUA</td><td></td></tr>
 <tr><td class='rc '>Client</td><td>OnModelLoaded</td><td class='st-fp-lua'>FP-LUA</td><td></td></tr>
@@ -277,14 +280,14 @@
 <tr><td class='rc rs '>Shared</td><td>ParticleEffectAttach</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc '>Client</td><td>ParticleEmitter</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rs '>Server</td><td>Path</td><td class='st-nyi'>NYI</td><td></td></tr>
-<tr><td class='rc rs rm '>Shared</td><td>pcall</td><td class='st-error'>ERROR</td><td>Legacy C# function decl.</td></tr>
+<tr><td class='rc rs rm '>Shared</td><td>pcall</td><td class='st-csharp'>CSHARP</td><td></td></tr>
 <tr><td class='rc rs '>Shared</td><td>Player</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc '>Client</td><td>PositionSpawnIcon</td><td class='st-fp-lua'>FP-LUA</td><td></td></tr>
 <tr><td class='rc rs '>Shared</td><td>PrecacheParticleSystem</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rs '>Server</td><td>PrecacheScene</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rs '>Shared</td><td>PrecacheSentenceFile</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rs '>Server</td><td>PrecacheSentenceGroup</td><td class='st-nyi'>NYI</td><td></td></tr>
-<tr><td class='rc rs rm '>Shared</td><td>print</td><td class='st-error'>ERROR</td><td>Legacy C# function decl.</td></tr>
+<tr><td class='rc rs rm '>Shared</td><td>print</td><td class='st-csharp'>CSHARP</td><td></td></tr>
 <tr><td class='rs '>Server</td><td>PrintMessage</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rs rm '>Shared</td><td>PrintTable</td><td class='st-fp-lua'>FP-LUA</td><td></td></tr>
 <tr><td class='rc '>Client</td><td>ProjectedTexture</td><td class='st-nyi'>NYI</td><td></td></tr>
@@ -323,7 +326,7 @@
 <tr><td class='rc rs '>Shared</td><td>SentenceDuration</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rs '>Server</td><td>ServerLog</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rm '>Client</td><td>SetClipboardText</td><td class='st-nyi'>NYI</td><td></td></tr>
-<tr><td class='rc rs rm '>Shared</td><td>setfenv</td><td class='st-error'>ERROR</td><td>Legacy C# function decl.</td></tr>
+<tr><td class='rc rs rm '>Shared</td><td>setfenv</td><td class='st-csharp'>CSHARP</td><td></td></tr>
 <tr><td class='rc rs '>Shared</td><td>SetGlobalAngle</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rs '>Shared</td><td>SetGlobalBool</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rs '>Shared</td><td>SetGlobalEntity</td><td class='st-nyi'>NYI</td><td></td></tr>
@@ -331,7 +334,7 @@
 <tr><td class='rc rs '>Shared</td><td>SetGlobalInt</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rs '>Shared</td><td>SetGlobalString</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rs '>Shared</td><td>SetGlobalVector</td><td class='st-nyi'>NYI</td><td></td></tr>
-<tr><td class='rc rs rm '>Shared</td><td>setmetatable</td><td class='st-error'>ERROR</td><td>Legacy C# function decl.</td></tr>
+<tr><td class='rc rs rm '>Shared</td><td>setmetatable</td><td class='st-csharp'>CSHARP</td><td></td></tr>
 <tr><td class='rc rs '>Shared</td><td>SetPhysConstraintSystem</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rs rm '>Shared</td><td>SortedPairs</td><td class='st-fp-lua'>FP-LUA</td><td></td></tr>
 <tr><td class='rc rs rm '>Shared</td><td>SortedPairsByMemberValue</td><td class='st-fp-lua'>FP-LUA</td><td></td></tr>
@@ -349,10 +352,10 @@
 <tr><td class='rc rs rm '>Shared</td><td>TimedSin</td><td class='st-fp-lua'>FP-LUA</td><td></td></tr>
 <tr><td class='rc rs rm '>Shared</td><td>tobool</td><td class='st-fp-lua'>FP-LUA</td><td></td></tr>
 <tr><td class='rm '>Menu</td><td>ToggleFavourite</td><td class='st-menu'>MENU</td><td></td></tr>
-<tr><td class='rc rs rm '>Shared</td><td>tonumber</td><td class='st-error'>ERROR</td><td>Legacy C# function decl.</td></tr>
-<tr><td class='rc rs rm '>Shared</td><td>tostring</td><td class='st-error'>ERROR</td><td>Legacy C# function decl.</td></tr>
+<tr><td class='rc rs rm '>Shared</td><td>tonumber</td><td class='st-csharp'>CSHARP</td><td></td></tr>
+<tr><td class='rc rs rm '>Shared</td><td>tostring</td><td class='st-csharp'>CSHARP</td><td></td></tr>
 <tr><td class='rm '>Menu</td><td>TranslateDownloadableName</td><td class='st-menu'>MENU</td><td></td></tr>
-<tr><td class='rc rs rm '>Shared</td><td>type</td><td class='st-error'>ERROR</td><td>Legacy C# function decl.</td></tr>
+<tr><td class='rc rs rm '>Shared</td><td>type</td><td class='st-csharp'>CSHARP</td><td></td></tr>
 <tr><td class='rc rs '>Shared</td><td>TypeID</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rs rm '>Shared</td><td>unpack</td><td class='st-nyi'>NYI</td><td></td></tr>
 <tr><td class='rc rs rm '>Shared</td><td>UnPredictedCurTime</td><td class='st-nyi'>NYI</td><td></td></tr>
@@ -1787,7 +1790,7 @@
 
     </table></div><div>
     <h2>table</h2>
-    <div class='bar' style='width: 400px; height: 30px; font-size: 30px;'><div style='width: 80.48780487804879%;' class='st-fp-lua'></div><div style='width: 17.073170731707318%;' class='st-nyi'></div><div style='width: 2.4390243902439024%;' class='st-error'></div><span>80.5%</span></div>
+    <div class='bar' style='width: 400px; height: 30px; font-size: 30px;'><div style='width: 2.4390243902439024%;' class='st-csharp'></div><div style='width: 80.48780487804879%;' class='st-fp-lua'></div><div style='width: 17.073170731707318%;' class='st-nyi'></div><span>82.9%</span></div>
     <button onclick="showTable('section_78')">Toggle Details</button>
     <table id="section_78" >
         <tr><td class='rc rs rm '>Shared</td><td>table.Add</td><td class='st-fp-lua'>FP-LUA</td><td></td></tr>
@@ -1813,7 +1816,7 @@
 <tr><td class='rc rs rm '>Shared</td><td>table.GetWinningKey</td><td class='st-fp-lua'>FP-LUA</td><td></td></tr>
 <tr><td class='rc rs rm '>Shared</td><td>table.HasValue</td><td class='st-fp-lua'>FP-LUA</td><td></td></tr>
 <tr><td class='rc rs rm '>Shared</td><td>table.Inherit</td><td class='st-fp-lua'>FP-LUA</td><td></td></tr>
-<tr><td class='rc rs rm '>Shared</td><td>table.insert</td><td class='st-error'>ERROR</td><td>Legacy C# function decl.</td></tr>
+<tr><td class='rc rs rm '>Shared</td><td>table.insert</td><td class='st-csharp'>CSHARP</td><td></td></tr>
 <tr><td class='rc rs rm '>Shared</td><td>table.IsEmpty</td><td class='st-fp-lua'>FP-LUA</td><td></td></tr>
 <tr><td class='rc rs rm '>Shared</td><td>table.IsSequential</td><td class='st-fp-lua'>FP-LUA</td><td></td></tr>
 <tr><td class='rc rs rm '>Shared</td><td>table.KeyFromValue</td><td class='st-fp-lua'>FP-LUA</td><td></td></tr>

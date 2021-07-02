@@ -18,18 +18,6 @@ namespace Miku.Lua
 	{
 		protected bool DoBaseClassReplacement = false;
 
-		public static string Concat( ValueSlot[] args )
-		{
-			var builder = new StringBuilder();
-			foreach ( var arg in args )
-			{
-				// incompatible: glua fails to concat nil, possibly others for whatever reason
-				builder.Append( arg.ToString() );
-				builder.Append( "\t" );
-			}
-			return builder.ToString();
-		}
-
 		public ValueSlot BootstrapRequire(string name)
 		{
 			string filename = name.Replace('.','/');

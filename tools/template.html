@@ -70,7 +70,10 @@
         .bar div {
             display: inline-block;
             height: 100%;
-            border-right: 1px dotted grey;
+            box-sizing: border-box;
+        }
+        .bar div:not(:first-child) {
+            border-left: 1px dotted grey;
         }
         .bar span {
             width: 100%;
