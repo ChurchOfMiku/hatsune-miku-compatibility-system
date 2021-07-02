@@ -78,7 +78,7 @@ namespace Miku.Lua.CoreLib
 				var table = ex.GetArg( 0 ).CheckTable();
 				var metatable = ex.GetArg( 1 ).CheckTable();
 				table.MetaTable = metatable;
-				return ValueSlot.Table( table );
+				return table;
 			} );
 
 			env.DefineFunc( "getmetatable", ( Executor ex ) => {
@@ -86,7 +86,7 @@ namespace Miku.Lua.CoreLib
 				var prim_mt = ex.Machine.PrimitiveMeta.Get( val );
 				if (prim_mt != null)
 				{
-					return ValueSlot.Table( prim_mt );
+					return prim_mt;
 				}
 				return null;
 			} );

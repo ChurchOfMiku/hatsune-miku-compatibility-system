@@ -152,7 +152,7 @@ namespace Miku.Lua
 		{
 			Machine = machine;
 
-			CallPrepare( ValueSlot.Function( func ), 0, 0 );
+			CallPrepare( func, 0, 0 );
 			for (int i=0;i<args.Length;i++ )
 			{
 				StackSet(i, args[i]);
@@ -574,7 +574,7 @@ namespace Miku.Lua
 				case OpCode.NOT:
 					{
 						bool result = !StackGet( D ).IsTruthy();
-						StackSet( A, ValueSlot.Bool( result ) );
+						StackSet( A, result );
 						break;
 					}
 				case OpCode.UNM:
@@ -748,27 +748,27 @@ namespace Miku.Lua
 							}
 						}
 						var new_func = new Function( new_proto, Func.Env, upvals );
-						StackSet( A, ValueSlot.Function( new_func ) );
+						StackSet( A, new_func );
 						break;
 					}
 				// Tables
 				case OpCode.TNEW:
 					{
 						var table = new Table();
-						StackSet( A, ValueSlot.Table( table ) );
+						StackSet( A, table );
 						break;
 					}
 				case OpCode.TDUP:
 					{
 						var table_proto = Func.Prototype.GetConstGC( D ).CheckTable();
 						var table = table_proto.CloneProto();
-						StackSet( A, ValueSlot.Table( table ) );
+						StackSet( A, table );
 						break;
 					}
 				case OpCode.GGET:
 					{
 						var str = Func.Prototype.GetConstGC( D );
-						ValueOperations.Get( this, A, ValueSlot.Table( Func.Env ), str );
+						ValueOperations.Get( this, A, Func.Env, str );
 						break;
 					}
 				case OpCode.GSET:

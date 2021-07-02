@@ -70,7 +70,7 @@ namespace Miku.Lua
 					switch (const_type)
 					{
 						case 0:
-							proto.constGC[i] = ValueSlot.ProtoFunction( protos.Pop() );
+							proto.constGC[i] = protos.Pop();
 							break;
 						case 1:
 							var size_array = reader.Read7BitEncodedInt();
@@ -98,7 +98,7 @@ namespace Miku.Lua
 								var val = ReadTableEntry( reader );
 								table.Set( key, val );
 							}
-							proto.constGC[i] = ValueSlot.Table( table );
+							proto.constGC[i] = table;
 							break;
 						default:
 							if (const_type >= 5)

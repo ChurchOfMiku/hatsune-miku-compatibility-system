@@ -114,7 +114,7 @@ namespace Miku.Lua.CoreLib
 
 			// Set string metatable.
 			machine.PrimitiveMeta.MetaString = new Table();
-			machine.PrimitiveMeta.MetaString.Set( "__index", ValueSlot.Table(lib) );
+			machine.PrimitiveMeta.MetaString.Set( "__index", lib );
 
 			lib.DefineFunc( "byte", ( Executor ex ) => {
 				var str = ex.GetArg( 0 ).CheckString();

@@ -31,7 +31,7 @@ namespace Miku.Lua
 
 		public readonly Table Env = new Table();
 		public readonly Table Registry = new Table();
-		public readonly PrimitiveMetaTables PrimitiveMeta = new PrimitiveMetaTables();
+		public readonly MetaTables PrimitiveMeta = new MetaTables();
 
 		private Function CompileFunction = null!;
 
@@ -40,8 +40,8 @@ namespace Miku.Lua
 			// Set up global table and registry.
 			Env.DebugLibName = "_G";
 			Registry.DebugLibName = "_R";
-			Env.Set( "_G", ValueSlot.Table( Env ) );
-			Env.Set( "_R", ValueSlot.Table( Registry ) );
+			Env.Set( "_G", Env );
+			Env.Set( "_R", Registry );
 
 			// Load libraries: TODO all should use: new CoreLib.X( this );
 			new CoreLib.Bit(this);

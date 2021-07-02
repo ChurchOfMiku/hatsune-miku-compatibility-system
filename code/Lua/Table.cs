@@ -120,9 +120,6 @@ namespace Miku.Lua
 			}
 		}
 
-		public void Set( string key, ValueSlot val ) { Set( ValueSlot.String( key ), val ); }
-		public void Set( int key, ValueSlot val ) { Set( ValueSlot.Number( key ), val ); }
-
 		public ValueSlot Get( ValueSlot key )
 		{
 			if (Array != null)
@@ -149,9 +146,6 @@ namespace Miku.Lua
 
 			return ValueSlot.NIL;
 		}
-
-		public ValueSlot Get( string key ) { return Get( ValueSlot.String( key ) ); }
-		public ValueSlot Get( int key ) { return Get( ValueSlot.Number( key ) ); }
 
 		// Looking at the reference source, it should be safe to not worry about disposing enumerators.
 		private Dictionary<ValueSlot,ValueSlot>.Enumerator CachedEnumerator;
@@ -272,7 +266,7 @@ namespace Miku.Lua
 			wrapper.DebugName = "[CSHARP] "+DebugLibName+"."+name;
 			wrapper.UserFunc = func;
 
-			var val = ValueSlot.Function( new Function( wrapper, null! ) );
+			var val = new Function( wrapper, null! );
 
 			Set(name, val);
 
@@ -294,7 +288,7 @@ namespace Miku.Lua
 				table.DebugLibName = DebugLibName + "." + name;
 			}
 
-			Set( name, ValueSlot.Table(table) );
+			Set( name, table );
 			return table;
 		}
 

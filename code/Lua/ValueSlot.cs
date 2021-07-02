@@ -37,6 +37,22 @@ namespace Miku.Lua
 			NumberValue = n;
 		}
 
+		public static ValueSlot Prim( int t )
+		{
+			if ( t == 1 )
+			{
+				return FALSE;
+			}
+			else if ( t == 2 )
+			{
+				return TRUE;
+			}
+			else
+			{
+				return NIL;
+			}
+		}
+
 		public static ValueSlot String(string x)
 		{
 			return new ValueSlot(ValueKind.String, x);
@@ -47,42 +63,15 @@ namespace Miku.Lua
 			return new ValueSlot( ValueKind.Number, null, x );
 		}
 
-		public static ValueSlot Bool( bool x )
-		{
-			return x ? TRUE : FALSE;
-		}
-
-		public static ValueSlot Prim(int t)
-		{
-			if ( t == 1 ) {
-				return FALSE;
-			} else if ( t == 2 ) {
-				return TRUE;
-			} else {
-				return NIL;
-			}
-		}
-
-		public static ValueSlot Table( Table x )
-		{
-			return new ValueSlot( ValueKind.Table, x );
-		}
-
-		public static ValueSlot ProtoFunction( ProtoFunction x )
-		{
-			return new ValueSlot( ValueKind.ProtoFunction, x );
-		}
-
-		public static ValueSlot Function( Function x )
-		{
-			return new ValueSlot( ValueKind.Function, x );
-		}
-
-		// TODO use more implicit operators like this:
-		public static implicit operator ValueSlot( UserData x ) => new ValueSlot(ValueKind.UserData, x);
+		// Just use implicit conversion in most places.
 		public static implicit operator ValueSlot( double x ) => new ValueSlot( ValueKind.Number, null, x );
 		public static implicit operator ValueSlot( string x ) => new ValueSlot( ValueKind.String, x );
+		public static implicit operator ValueSlot( bool x ) => x ? TRUE : FALSE;
+
 		public static implicit operator ValueSlot( Table x ) => new ValueSlot( ValueKind.Table, x );
+		public static implicit operator ValueSlot( Function x ) => new ValueSlot( ValueKind.Function, x );
+		public static implicit operator ValueSlot( ProtoFunction x ) => new ValueSlot( ValueKind.ProtoFunction, x );
+		public static implicit operator ValueSlot( UserData x ) => new ValueSlot( ValueKind.UserData, x );
 
 		public bool IsTruthy()
 		{

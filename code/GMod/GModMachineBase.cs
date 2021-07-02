@@ -21,8 +21,8 @@ namespace Miku.GMod
 			// Setup glua-specific constants.
 			// SEE https://wiki.facepunch.com/gmod/Global_Variables
 			{
-				Env.Set( "CLIENT", ValueSlot.Bool( IsClient ) );
-				Env.Set( "SERVER", ValueSlot.Bool( IsServer ) );
+				Env.Set( "CLIENT", IsClient );
+				Env.Set( "SERVER", IsServer );
 
 				Env.Set( "CLIENT_DLL", IsClient ? ValueSlot.TRUE : ValueSlot.NIL );
 				Env.Set( "GAME_DLL",   IsServer ? ValueSlot.TRUE : ValueSlot.NIL );

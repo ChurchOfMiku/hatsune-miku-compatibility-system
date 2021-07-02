@@ -17,7 +17,7 @@ namespace Miku.GMod.Entities
 		public GmodWeapon(Table class_table)
 		{
 			LuaTable = new Table();
-			LuaTable.Set( "Weapon", ValueSlot.Table(LuaTable) );
+			LuaTable.Set( "Weapon", LuaTable );
 			LuaTable.MetaTable = class_table;
 			Log.Info( "weapon created " + LuaTable );
 		}

@@ -11,7 +11,7 @@ namespace Miku.Lua
 	/// <summary>
 	/// Used to get metatables for values, and store information about primitive metatables.
 	/// </summary>
-    class PrimitiveMetaTables
+    class MetaTables
 	{
 		public Table? MetaString = null;
 
@@ -19,13 +19,11 @@ namespace Miku.Lua
 		{
 			if (value.Kind == ValueKind.Table)
 			{
-				var tab = value.CheckTable();
-				return tab.MetaTable;
+				return value.CheckTable().MetaTable;
 			}
 			if (value.Kind == ValueKind.UserData)
 			{
-				var ud = value.CheckUserData();
-				return ud.MetaTable;
+				return value.CheckUserData().MetaTable;
 			}
 			if (value.Kind == ValueKind.String)
 			{
