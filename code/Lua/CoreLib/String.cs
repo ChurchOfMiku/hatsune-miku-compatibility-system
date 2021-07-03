@@ -134,18 +134,18 @@ namespace Miku.Lua.CoreLib
 					{
 						throw new Exception( "string.byte got non-byte result, this could be a problem" );
 					}
-					return ValueSlot.Number( result );
+					return result;
 				}
 			} );
 
 			lib.DefineFunc( "char", ( Executor ex ) => {
 				char c = (char)ex.GetArg( 0 ).CheckNumber();
-				return ValueSlot.String( c.ToString() );
+				return c.ToString();
 			} );
 
 			lib.DefineFunc( "lower", ( Executor ex ) => {
 				var str = ex.GetArg(0).CheckString();
-				return ValueSlot.String( str.ToLower() );
+				return str.ToLower();
 			} );
 
 			lib.DefineFunc( "sub", ( Executor ex ) => {
@@ -172,7 +172,7 @@ namespace Miku.Lua.CoreLib
 				start = Math.Max( start, 0 );
 				length = Math.Max( length, 0 );
 				length = Math.Min( length, str.Length - start );
-				return ValueSlot.String( str.Substring( start, length ) );
+				return str.Substring( start, length );
 			} );
 
 			lib.DefineFunc( "find", ( Executor ex ) =>
@@ -197,8 +197,8 @@ namespace Miku.Lua.CoreLib
 					throw new Exception( "string.find groups" );
 				}
 
-				ex.Return( ValueSlot.Number( match.Index + 1 ) );
-				return ValueSlot.Number(match.Index + match.Length);
+				ex.Return( match.Index + 1 );
+				return match.Index + match.Length;
 			} );
 
 			lib.DefineFunc( "match", ( Executor ex ) => {
@@ -224,12 +224,12 @@ namespace Miku.Lua.CoreLib
 					var results = new ValueSlot[match.Groups.Count - 1];
 					for (int i=1;i<match.Groups.Count;i++ )
 					{
-						ex.Return( ValueSlot.String( match.Groups[i].Value ) );
+						ex.Return( match.Groups[i].Value );
 					}
 					return null;
 				}
 
-				return ValueSlot.String( match.Value );
+				return match.Value;
 			} );
 
 			lib.DefineFunc( "gsub", ( Executor ex ) =>
@@ -246,7 +246,7 @@ namespace Miku.Lua.CoreLib
 				if (replace.Kind == ValueKind.String)
 				{
 					var result = regex.Replace( str, replace.CheckString() );
-					return ValueSlot.String( result );
+					return result;
 				} else
 				{
 					throw new Exception( "string.gsub replace = " + replace );
@@ -289,7 +289,7 @@ namespace Miku.Lua.CoreLib
 				} );
 
 				var result = string.Format( converted_format, format_params.ToArray() );
-				return ValueSlot.String( result );
+				return result;
 			} );
 		}
 	}

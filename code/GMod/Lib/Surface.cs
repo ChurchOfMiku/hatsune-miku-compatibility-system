@@ -73,11 +73,11 @@ namespace Miku.GMod.Lib
 			// These have deprecated aliases in the surface library. Makes as much sense to define them here as anywhere else.
 			// The console still breaks these but they're mostly accurate now.
 			var screen_width = env.DefineFunc( "ScrW", ( Executor ex ) => {
-				return ValueSlot.Number( Screen.Width );
+				return Screen.Width;
 			} );
 
 			var screen_height = env.DefineFunc( "ScrH", ( Executor ex ) => {
-				return ValueSlot.Number( Screen.Height );
+				return Screen.Height;
 			} );
 
 			var surface_lib = env.DefineLib("surface");
@@ -134,8 +134,8 @@ namespace Miku.GMod.Lib
 					height = (int)CurrentFont.Size;
 				}
 
-				ex.Return(ValueSlot.Number(width));
-				return ValueSlot.Number(height);
+				ex.Return(width);
+				return height;
 			} );
 
 			surface_lib.DefineFunc( "DrawText", ( Executor ex ) => {

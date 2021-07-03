@@ -41,12 +41,12 @@ namespace Miku.Lua.CoreLib
 					if (str.StartsWith("0x"))
 					{
 						// TODO probably not totally sufficient
-						return ValueSlot.Number( Convert.ToInt32( str, 16 ) );
+						return Convert.ToInt32( str, 16 );
 					}
 					// WARNING: this might be locale sensitive -- last time I checked the locale-independent parsing crap wasn't whitelisted
 					if ( double.TryParse( str, out result ) )
 					{
-						return ValueSlot.Number( result );
+						return result;
 					}
 				}
 				if ( x.Kind == ValueKind.Number )
@@ -64,7 +64,7 @@ namespace Miku.Lua.CoreLib
 				{
 					return x;
 				}
-				return ValueSlot.String(x.ToString());
+				return x.ToString();
 			} );
 
 			env.DefineFunc( "next", ( Executor ex ) => {
@@ -129,13 +129,13 @@ namespace Miku.Lua.CoreLib
 				}
 				catch ( Exception e )
 				{
-					ex.Return(ValueSlot.FALSE);
-					return ValueSlot.String( e.Message );
+					ex.Return(false);
+					return e.Message;
 				}
 
 				int result_count = call_results.GetResultCount();
 
-				ex.Return( ValueSlot.TRUE );
+				ex.Return(true);
 				for ( int i = 0; i < result_count; i++ )
 				{
 					ex.Return( call_results.GetResult(i) );
@@ -160,7 +160,7 @@ namespace Miku.Lua.CoreLib
 					default:
 						throw new Exception( "typeof " + ex.GetArg( 0 ) );
 				}
-				return ValueSlot.String( result );
+				return result;
 			} );
 
 			string[] INCLUDE_PATHS = new[] {

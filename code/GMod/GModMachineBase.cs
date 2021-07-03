@@ -57,9 +57,9 @@ namespace Miku.GMod
 		public ValueSlot Vector(Vector3 vec)
 		{
 			return MakeVectorFunction.Call( this, new ValueSlot[] {
-				ValueSlot.Number(vec.x),
-				ValueSlot.Number(vec.y),
-				ValueSlot.Number(vec.z) } ).GetResult( 0 );
+				vec.x,
+				vec.y,
+				vec.z } ).GetResult( 0 );
 		}
 
 		public void LoadSWEP(string class_name, string filename)
@@ -82,7 +82,7 @@ namespace Miku.GMod
 		public Executor RunHook(string name, ValueSlot[] args)
 		{
 			var full_args = new ValueSlot[args.Length + 1];
-			full_args[0] = ValueSlot.String( name );
+			full_args[0] = name;
 			for (int i=0;i<args.Length;i++ )
 			{
 				full_args[i + 1] = args[i];

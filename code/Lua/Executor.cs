@@ -497,17 +497,17 @@ namespace Miku.Lua
 					}
 				case OpCode.ISEQN:
 					{
-						var vA = StackGet( A );
-						var vD = ValueSlot.Number( Func.Prototype.GetConstNum( D ) );
-						bool skip = !vA.Equals( vD );
+						ValueSlot lhs = StackGet( A );
+						ValueSlot rhs = Func.Prototype.GetConstNum( D );
+						bool skip = !lhs.Equals( rhs );
 						if ( skip ) { PC++; }
 						break;
 					}
 				case OpCode.ISNEN:
 					{
-						var vA = StackGet( A );
-						var vD = ValueSlot.Number( Func.Prototype.GetConstNum( D ) );
-						bool skip = vA.Equals( vD );
+						ValueSlot lhs = StackGet( A );
+						ValueSlot rhs = Func.Prototype.GetConstNum( D );
+						bool skip = lhs.Equals( rhs );
 						if ( skip ) { PC++; }
 						break;
 					}
@@ -580,7 +580,7 @@ namespace Miku.Lua
 				case OpCode.UNM:
 					{
 						double num = StackGet( D ).CheckNumber();
-						StackSet( A, ValueSlot.Number(-num) );
+						StackSet( A, -num );
 						break;
 					}
 				case OpCode.LEN:
@@ -606,7 +606,7 @@ namespace Miku.Lua
 							case OpCode.DIVVN: result = nB / nC; break;
 							case OpCode.MODVN: result = nB % nC; break;
 						}
-						StackSet( A, ValueSlot.Number( result ) );
+						StackSet( A, result );
 						break;
 					}
 				case OpCode.ADDNV:
@@ -626,7 +626,7 @@ namespace Miku.Lua
 							case OpCode.DIVNV: result = nC / nB; break;
 							case OpCode.MODNV: result = nC % nB; break;
 						}
-						StackSet( A, ValueSlot.Number( result ) );
+						StackSet( A, result );
 						break;
 					}
 				case OpCode.ADDVV:
@@ -642,7 +642,7 @@ namespace Miku.Lua
 							case OpCode.SUBVV: result = nB - nC; break;
 							case OpCode.MULVV: result = nB * nC; break;
 						}
-						StackSet( A, ValueSlot.Number( result ) );
+						StackSet( A, result );
 						break;
 					}
 				case OpCode.CAT:
@@ -653,7 +653,7 @@ namespace Miku.Lua
 							// incompatible: glua fails to concat nil, possibly others for whatever reason
 							builder.Append( StackGet( i ).ToString() );
 						}
-						StackSet( A, ValueSlot.String( builder.ToString() ) );
+						StackSet( A, builder.ToString() );
 						break;
 					}
 				// Constants
@@ -666,14 +666,14 @@ namespace Miku.Lua
 				// KCDATA: don't care
 				case OpCode.KSHORT:
 					{
-						var num = ((int)D << 16) >> 16; // TODO check!
-						StackSet( A, ValueSlot.Number( num ) );
+						var num = (D << 16) >> 16; // TODO check!
+						StackSet( A, num );
 						break;
 					}
 				case OpCode.KNUM:
 					{
 						var num = Func.Prototype.GetConstNum( D );
-						StackSet( A, ValueSlot.Number( num ) );
+						StackSet( A, num );
 						break;
 					}
 				case OpCode.KPRI:
@@ -700,7 +700,7 @@ namespace Miku.Lua
 					Func.UpValues[A].Set(StackGet(D));
 					break;
 				case OpCode.USETN:
-					Func.UpValues[A].Set( ValueSlot.Number(Func.Prototype.GetConstNum(D)) );
+					Func.UpValues[A].Set( Func.Prototype.GetConstNum(D) );
 					break;
 				case OpCode.UCLO:
 					{
@@ -787,7 +787,7 @@ namespace Miku.Lua
 						break;
 					}
 				case OpCode.TGETB:
-					ValueOperations.Get( this, A, StackGet( B ), ValueSlot.Number( C ) );
+					ValueOperations.Get( this, A, StackGet( B ), C );
 					break;
 				case OpCode.TSETV:
 					{
@@ -915,7 +915,7 @@ namespace Miku.Lua
 
 						// for loop init
 						double counter = StackGet( A ).CheckNumber();
-						StackSet( A + 3, ValueSlot.Number( counter ) );
+						StackSet( A + 3, counter );
 
 						if ( (step > 0 && counter > stop) || (step < 0 && counter < stop) )
 						{
@@ -932,7 +932,7 @@ namespace Miku.Lua
 						// for loop step
 						double counter = StackGet( A + 3 ).CheckNumber();
 						counter += step;
-						StackSet( A + 3, ValueSlot.Number( counter ) );
+						StackSet( A + 3, counter );
 
 						if ( !((step > 0 && counter > stop) || (step < 0 && counter < stop)) )
 						{

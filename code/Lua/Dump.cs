@@ -103,7 +103,7 @@ namespace Miku.Lua
 						default:
 							if (const_type >= 5)
 							{
-								proto.constGC[i] = ValueSlot.String( reader.ReadStringN( const_type - 5 ) );
+								proto.constGC[i] = reader.ReadStringN( const_type - 5 );
 							} else
 							{
 								throw new Exception( "handle const type " + const_type );
@@ -152,16 +152,16 @@ namespace Miku.Lua
 				case 2:
 					return ValueSlot.TRUE;
 				case 3:
-					return ValueSlot.Number(reader.Read7BitEncodedInt());
+					return reader.Read7BitEncodedInt();
 				case 4:
 					long low = reader.Read7BitEncodedInt64();
 					long high = reader.Read7BitEncodedInt64();
 					double res = BitConverter.Int64BitsToDouble( low | (high << 32) );
-					return ValueSlot.Number( res );
+					return res;
 				default:
 					if ( entry_type >= 5 )
 					{
-						return ValueSlot.String( reader.ReadStringN( entry_type - 5 ));
+						return reader.ReadStringN( entry_type - 5 );
 					}
 					else
 					{

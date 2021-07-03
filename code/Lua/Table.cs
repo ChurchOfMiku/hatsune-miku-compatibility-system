@@ -48,7 +48,7 @@ namespace Miku.Lua
 				i++;
 
 				ValueSlot result;
-				if ( !Dict.TryGetValue( ValueSlot.Number(i), out result ) )
+				if ( !Dict.TryGetValue( i, out result ) )
 				{
 					return;
 				}
@@ -58,7 +58,7 @@ namespace Miku.Lua
 
 		public void PushVal( ValueSlot val )
 		{
-			Set( ValueSlot.Number( GetLength() + 1 ), val );
+			Set( GetLength() + 1, val );
 		}
 
 		public void Set( ValueSlot key, ValueSlot val )
@@ -160,7 +160,7 @@ namespace Miku.Lua
 			{
 				if (Array != null && Array.Count > 0)
 				{
-					ex.Return( ValueSlot.Number( 1 ) );
+					ex.Return( 1 );
 					ex.Return( ArrayGet( 1 ) );
 					return;
 				}
@@ -185,7 +185,7 @@ namespace Miku.Lua
 						int i = (int)i_dbl;
 						if ( i_dbl == i && i >= 1 && i <= Array.Count )
 						{
-							ex.Return( ValueSlot.Number( i ) );
+							ex.Return( i );
 							ex.Return( ArrayGet( i ) );
 							return;
 						}

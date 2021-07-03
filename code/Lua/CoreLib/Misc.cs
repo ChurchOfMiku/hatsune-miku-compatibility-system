@@ -25,19 +25,19 @@ namespace Miku.Lua.CoreLib
 
 			math_lib.DefineFunc( "floor", ( Executor ex ) => {
 				double n = ex.GetArg(0).CheckNumber();
-				return ValueSlot.Number( Math.Floor( n ) );
+				return Math.Floor( n );
 			} );
 
 			math_lib.DefineFunc( "ceil", ( Executor ex ) => {
 				double n = ex.GetArg( 0 ).CheckNumber();
-				return ValueSlot.Number( Math.Ceiling( n ) );
+				return Math.Ceiling( n );
 			} );
 
 			// OS
 			var os_lib = env.DefineLib( "os" );
 			os_lib.DefineFunc( "time", ( Executor ex ) => {
 				var time = DateTimeOffset.Now.ToUnixTimeSeconds();
-				return ValueSlot.Number( time );
+				return time;
 			} );
 
 			// MISC

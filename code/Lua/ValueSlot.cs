@@ -53,16 +53,6 @@ namespace Miku.Lua
 			}
 		}
 
-		public static ValueSlot String(string x)
-		{
-			return new ValueSlot(ValueKind.String, x);
-		}
-
-		public static ValueSlot Number( double x )
-		{
-			return new ValueSlot( ValueKind.Number, null, x );
-		}
-
 		// Just use implicit conversion in most places.
 		public static implicit operator ValueSlot( double x ) => new ValueSlot( ValueKind.Number, null, x );
 		public static implicit operator ValueSlot( string x ) => new ValueSlot( ValueKind.String, x );

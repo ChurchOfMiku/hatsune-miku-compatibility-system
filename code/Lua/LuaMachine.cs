@@ -92,7 +92,7 @@ namespace Miku.Lua
 			if (dump_bytes == null)
 			{
 				Stopwatch sw_compile = Stopwatch.StartNew();
-				var results = CompileFunction.Call( this, new ValueSlot[] { ValueSlot.String(code), ValueSlot.String(name) } );
+				var results = CompileFunction.Call( this, new ValueSlot[] { code, name } );
 				time_compile = sw_compile.Elapsed.TotalMilliseconds;
 
 
