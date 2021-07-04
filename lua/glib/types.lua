@@ -3,8 +3,16 @@ function isstring(x)
     return type(x) == "string"
 end
 
+function isnumber(x)
+    return type(x) == "number"
+end
+
 function isfunction(x)
     return type(x) == "function"
+end
+
+function istable(x)
+    return type(x) == "table"
 end
 
 function FindMetaTable(name)

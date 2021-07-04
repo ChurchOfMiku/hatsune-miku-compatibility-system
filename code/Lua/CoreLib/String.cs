@@ -51,7 +51,8 @@ namespace Miku.Lua.CoreLib
 					case '_':
 					case '@':
 					case '\'':
-					case '\0': // REALLY not sure about this one.
+					case '\0': // I think this is okay?
+					case '\n': // REALLY not sure about this one.
 						Result.Append( c );
 						break;
 
@@ -141,6 +142,17 @@ namespace Miku.Lua.CoreLib
 			lib.DefineFunc( "char", ( Executor ex ) => {
 				char c = (char)ex.GetArg( 0 ).CheckNumber();
 				return c.ToString();
+			} );
+
+			lib.DefineFunc( "rep", ( Executor ex ) => {
+				string str = ex.GetArg( 0 ).CheckString();
+				int reps = (int)ex.GetArg( 1 ).CheckNumber();
+				if (ex.GetArgCount() > 2)
+				{
+					throw new Exception( "string.rep sep NYI" );
+				}
+
+				return new StringBuilder().Insert(0,str,reps).ToString();
 			} );
 
 			lib.DefineFunc( "lower", ( Executor ex ) => {

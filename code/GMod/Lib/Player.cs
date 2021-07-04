@@ -18,30 +18,30 @@ namespace Miku.GMod.Lib
 			machine.Ents.ClassPlayer = class_player;
 
 			class_player.DefineFunc( "Health", ( Executor ex ) => {
-				var ply = (Sandbox.Player)ex.GetArg( 0 ).CheckUserData().Reference;
+				var ply = (Sandbox.Player)ex.GetArg( 0 ).CheckUserData().CheckEntity().Entity;
 				return ply.Health;
 			} );
 
 			class_player.DefineFunc( "Nick", ( Executor ex ) => {
-				var ply = (Sandbox.Player)ex.GetArg( 0 ).CheckUserData().Reference;
+				var ply = (Sandbox.Player)ex.GetArg( 0 ).CheckUserData().CheckEntity().Entity;
 				var client = ply.GetClientOwner();
 				return client.Name;
 			} );
 
 			class_player.DefineFunc( "GetShootPos", ( Executor ex ) => {
-				var ply = (Sandbox.Player)ex.GetArg( 0 ).CheckUserData().Reference;
+				var ply = (Sandbox.Player)ex.GetArg( 0 ).CheckUserData().CheckEntity().Entity;
 				var pos = ply.EyePos; // PROBABLY EXTREMELY WRONG!
 				return machine.Vector(pos);
 			} );
 
 			class_player.DefineFunc( "GetAimVector", ( Executor ex ) => {
-				var ply = (Sandbox.Player)ex.GetArg( 0 ).CheckUserData().Reference;
+				var ply = (Sandbox.Player)ex.GetArg( 0 ).CheckUserData().CheckEntity().Entity;
 				var pos = ply.EyeRot.Forward; // PROBABLY EXTREMELY WRONG!
 				return machine.Vector( pos );
 			} );
 
 			class_player.DefineFunc( "FireBullets", ( Executor ex ) => {
-				var ply = (Sandbox.Player)ex.GetArg( 0 ).CheckUserData().Reference;
+				var ply = (Sandbox.Player)ex.GetArg( 0 ).CheckUserData().CheckEntity().Entity;
 				Log.Info( "FireBullets" );
 				return null;
 			} );
@@ -50,7 +50,7 @@ namespace Miku.GMod.Lib
 			{
 				machine.Env.DefineFunc( "LocalPlayer", ( Executor ex ) => {
 					var result = machine.Ents.Get( Local.Pawn );
-					return result;
+					return result.LuaValue;
 				} );
 			}
 		}

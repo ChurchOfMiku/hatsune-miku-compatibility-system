@@ -151,63 +151,79 @@ namespace Miku.Lua
 		private Dictionary<ValueSlot,ValueSlot>.Enumerator CachedEnumerator;
 		private void SetupEnumerator( ValueSlot prev_key )
 		{
-
+			if (Dict == null)
+			{
+				throw new Exception("dict should never be null here");
+			}
+			CachedEnumerator = Dict.GetEnumerator();
+			throw new Exception( "RETRY" );
 		}
 		public void Next(ValueSlot prev_key, Executor ex)
 		{
 			// Start enumeration.
-			if (prev_key.Kind == ValueKind.Nil)
+			if ( prev_key.Kind == ValueKind.Nil )
 			{
-				if (Array != null && Array.Count > 0)
+				if (Dict != null)
+				{
+					CachedEnumerator = Dict.GetEnumerator();
+				}
+				if ( Array != null && Array.Count > 0 )
 				{
 					ex.Return( 1 );
 					ex.Return( ArrayGet( 1 ) );
 					return;
 				}
-				if (Dict != null && Dict.Count > 0)
-				{
-					CachedEnumerator = Dict.GetEnumerator();
-					CachedEnumerator.MoveNext();
-
-					var pair = CachedEnumerator.Current;
-					ex.Return( pair.Key );
-					ex.Return( pair.Value );
-					return;
-				}
-			} else
+			}
 			{
+				bool prev_key_in_array = false;
 				// Try the next array slot.
 				if ( Array != null )
 				{
 					if ( prev_key.Kind == ValueKind.Number )
 					{
-						var i_dbl = prev_key.CheckNumber() + 1;
+						var i_dbl = prev_key.CheckNumber();
 						int i = (int)i_dbl;
 						if ( i_dbl == i && i >= 1 && i <= Array.Count )
 						{
-							ex.Return( i );
-							ex.Return( ArrayGet( i ) );
-							return;
+							prev_key_in_array = true;
+							if (i+1 <= Array.Count)
+							{
+								ex.Return( i );
+								ex.Return( ArrayGet( i ) );
+								return;
+							}
 						}
 					}
 				}
+				// Try using our cached enumerator
 				if (Dict != null)
 				{
-					// TODO: the enumerator might be totally invalid, check for exceptions
-					if (CachedEnumerator.Current.Key.Equals(prev_key))
+					if ( prev_key_in_array )
 					{
-						if (CachedEnumerator.MoveNext())
+						CachedEnumerator = Dict.GetEnumerator();
+					}
+					for (int i=0;i<2;i++ )
+					{
+						if (CachedEnumerator.Current.Key.Equals(prev_key) || prev_key_in_array)
 						{
-							var pair = CachedEnumerator.Current;
-							ex.Return( pair.Key );
-							ex.Return( pair.Value );
-							return;
+							if (CachedEnumerator.MoveNext())
+							{
+								var pair = CachedEnumerator.Current;
+								ex.Return( pair.Key );
+								ex.Return( pair.Value );
+								return;
+							} else
+							{
+								return;
+							}
+						} else if (i == 0)
+						{
+							SetupEnumerator( prev_key );
 						} else
 						{
-							return;
+							throw new Exception( "enumerator retry failed?" );
 						}
 					}
-					throw new Exception( "cached enumerator miss" );
 				}
 			}
 

@@ -8,6 +8,8 @@ namespace Miku.GMod
 	abstract class GModMachineBase : Lua.LuaMachine
 	{
 		Function RunHookFunction;
+		Function RegisterWeaponFunction;
+
 		Function MakeVectorFunction;
 		public EntityRegistry Ents = new EntityRegistry();
 
@@ -44,10 +46,12 @@ namespace Miku.GMod
 
 			RunFile( "glib/types.lua" );
 			RunFile( "glib/stubs.lua" );
+			RunFile( "glib/globals.lua" );
 			RunFile( "glib/gamemode.lua" );
 
 			RunFile( "glib_official/garrysmod/lua/includes/init.lua" );
 			RunHookFunction = Env.Get( "hook" ).CheckTable().Get( "Run" ).CheckFunction();
+			RegisterWeaponFunction = Env.Get( "weapons" ).CheckTable().Get( "Register" ).CheckFunction();
 
 			//MakeVectorFunction = Env.Get( "Vector" ).CheckFunction();
 		}
@@ -62,21 +66,38 @@ namespace Miku.GMod
 				vec.z } ).GetResult( 0 );
 		}
 
-		public void LoadSWEP(string class_name, string filename)
+		private string GetEntityName(string path)
 		{
-			// TODO use a dirname instead!
+			var parts = path.Split( '/' );
+			int i = parts.Length - 1;
+			while (parts[i] == "")
+			{
+				i--;
+			}
+			return parts[i];
+		}
+
+		public void LoadSWEP(string path)
+		{
+			var name = GetEntityName( path );
+
+			string init_path = path + (IsServer ? "/init.lua" : "/cl_init.lua");
+			if (!CheckFile(init_path))
+			{
+				init_path = path + "/shared.lua";
+			}
 			
-			/*var swep_table = new Table();
-			Env.Set( "SWEP", ValueSlot.Table(swep_table) );
+			var swep_table = new Table();
+			Env.Set( "SWEP", swep_table );
+			swep_table.Set( "Primary", new Table() );
+			swep_table.Set( "Secondary", new Table() );
 
-			swep_table.Set( "Primary", ValueSlot.Table( new Table() ) );
-			swep_table.Set( "Secondary", ValueSlot.Table( new Table() ) );
-
-			RunFile( filename );
+			RunFile( init_path );
 
 			Env.Set( "SWEP", ValueSlot.NIL );
 
-			Ents.RegisterClass( class_name, ScriptedEntityKind.Weapon, swep_table );*/
+			RegisterWeaponFunction.Call( this, new ValueSlot[] { swep_table, path } );
+			RunString( "PrintTable(weapons.GetList())", "yeet" );
 		}
 
 		public Executor RunHook(string name, ValueSlot[] args)

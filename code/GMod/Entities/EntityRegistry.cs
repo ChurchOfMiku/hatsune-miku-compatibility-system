@@ -1,4 +1,5 @@
-﻿
+﻿#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,21 +11,26 @@ using Miku.Lua;
 
 namespace Miku.GMod.Entities
 {
-	public enum ScriptedEntityKind
+	class EntityData
 	{
-		Entity,
-		Weapon
+		public Entity Entity;
+		public UserData LuaValue;
+		public Table LuaTable;
+
+		public EntityData(Entity ent, UserData ud, Table? tab = null)
+		{
+			Entity = ent;
+			LuaValue = ud;
+			LuaTable = tab ?? new Table();
+		}
 	}
 
 	class EntityRegistry
 	{
+		private Dictionary<Entity, EntityData> Map = new Dictionary<Entity, EntityData>();
 
-		//private Dictionary<string, (ScriptedEntityKind, Table)> ScriptedClasses = new Dictionary<string, (ScriptedEntityKind, Table)>();
-
-		private Dictionary<Entity, UserData> Map = new Dictionary<Entity, UserData>();
-
-		public Table ClassPlayer = null;
-		public Table ClassWeapon = null;
+		public Table? ClassPlayer = null;
+		public Table? ClassWeapon = null;
 
 		/*public void RegisterClass(string name, ScriptedEntityKind kind, Table table)
 		{
@@ -56,29 +62,33 @@ namespace Miku.GMod.Entities
 			}
 		}*/
 
-		public UserData Get(Entity ent, Table class_table = null) {
+		public EntityData Get(Entity ent) {
 			{
-				if (Map.TryGetValue(ent, out UserData result ))
+				if (Map.TryGetValue(ent, out EntityData? result))
 				{
 					return result;
 				}
 			}
 
+			Table? class_table = null;
+			if (ent is Player)
 			{
-				if ( class_table == null)
-				{
-					if (ent is Player)
-					{
-						class_table = ClassPlayer;
-					} else
-					{
-						throw new Exception( "can not handle " + ent );
-					}
-				}
+				class_table = ClassPlayer;
+			}
 
-				var result = new UserData((int)TypeID.Entity, ent, class_table );
-				Map[ent] = result;
-				return result;
+			if (class_table == null)
+			{
+				throw new Exception( "no class table for " + ent );
+			}
+
+			{
+				// There's a gross cycle here:
+				var ud = new UserData((int)TypeID.Entity, null, class_table );
+				var ent_data = new EntityData(ent, ud);
+				ud.Reference = ent_data;
+
+				Map[ent] = ent_data;
+				return ent_data;
 			}
 		}
 	}

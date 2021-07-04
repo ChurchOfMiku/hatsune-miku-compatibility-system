@@ -65,6 +65,7 @@ end
 local MODULE_CACHE = {}
 MODULE_CACHE.ffi = ffi
 MODULE_CACHE.bit = bit
+MODULE_CACHE.jit = jit
 
 function require(name)
     -- Check cache
