@@ -36,7 +36,8 @@ namespace Miku.GMod
 			return Server;
 		}
 
-		[Event( "hotloaded" )]
+		// Don't hotload for now, re-initializing everything takes too damn long.
+		//[Event( "hotloaded" )]
 		public static void Init()
 		{
 			if ( Host.IsServer )
@@ -64,7 +65,8 @@ namespace Miku.GMod
 			Client?.RunString( "team.SetUp(1,'some team',Color(255,0,0))", "blah" );
 			Client?.RunFile( "scripts/free_darkrp_hud.lua" );
 
-			Client?.LoadSWEP( "glib_official/garrysmod/gamemodes/base/entities/weapons/weapon_base" );
+			Client?.LoadWeapon( "glib_official/garrysmod/gamemodes/base/entities/weapons/weapon_base" );
+			Server?.LoadWeapon( "glib_official/garrysmod/gamemodes/base/entities/weapons/weapon_base" );
 
 			//Client?.RunFile( "test/patterns.lua" );
 

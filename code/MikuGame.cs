@@ -18,9 +18,9 @@ namespace Miku
 	/// as your game addon. If it isn't then we won't be able to find it.
 	/// </summary>
 	[Library( "hatsune-miku-compatibility-system" )]
-	public partial class MinimalGame : Sandbox.Game
+	public partial class MikuGame : Sandbox.Game
 	{
-		public MinimalGame()
+		public MikuGame()
 		{
 			GMod.GModGlobal.Init();
 		}
@@ -31,6 +31,26 @@ namespace Miku
 			GMod.GModGlobal.Client.Frame();
 		}
 
+		int N = 0;
+
+		[Event.Tick]
+		void Tick()
+		{
+			if (IsServer)
+			{
+				if (N == 0)
+				{
+					var crate = new ModelEntity();
+					crate.SetModel( "models/citizen_props/cardboardbox01.vmdl" );
+					crate.Position = new Vector3( 500, 500, 500 );
+					crate.SetupPhysicsFromModel( PhysicsMotionType.Dynamic, false );
+					crate.Health = 1000;
+					//ragdoll.PhysicsGroup.Velocity = EyeRot.Forward * 1000;
+				}
+				N = (N + 1) % 100;
+			}
+		}
+
 		/// <summary>
 		/// A client has joined the server. Make them a pawn to play with
 		/// </summary>
@@ -38,7 +58,7 @@ namespace Miku
 		{
 			base.ClientJoined( client );
 
-			var player = new MinimalPlayer();
+			var player = new MikuPlayer();
 			client.Pawn = player;
 
 			player.Respawn();

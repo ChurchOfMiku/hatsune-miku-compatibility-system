@@ -253,7 +253,7 @@ namespace Miku.Lua
 			return result;
 		}
 
-		/*public void Log()
+		public void Log()
 		{
 			Sandbox.Log.Info( $"LEN = {GetLength()}" );
 			if (Array != null)
@@ -270,7 +270,7 @@ namespace Miku.Lua
 					Sandbox.Log.Info( $"[{pair.Key}] = {pair.Value}" );
 				}
 			}
-		}*/
+		}
 
 		public ValueSlot DefineFunc(string name, Func<Executor, ValueSlot?> func)
 		{

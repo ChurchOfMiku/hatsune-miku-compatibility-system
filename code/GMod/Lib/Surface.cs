@@ -35,16 +35,6 @@ namespace Miku.GMod.Lib
 			public double Weight;
 		}
 
-		private static Color ColorFromTable( Table t )
-		{
-			int R = (int)t.Get( "r" ).CheckNumber();
-			int G = (int)t.Get( "g" ).CheckNumber();
-			int B = (int)t.Get( "b" ).CheckNumber();
-			int A = (int)t.Get( "a" ).CheckNumber();
-
-			return Color.FromBytes( R, G, B, A );
-		}
-
 		private void ApplyFont(Font? font, PanelStyle style)
 		{
 			if ( font != null )
@@ -158,7 +148,7 @@ namespace Miku.GMod.Lib
 
 			surface_lib.DefineFunc( "SetDrawColor", ( Executor ex ) =>
 			{
-				CurrentColor = ColorFromTable( ex.GetArg( 0 ).CheckTable() );
+				CurrentColor = machine.ColorFromValue( ex.GetArg( 0 ) );
 				return null;
 			} );
 

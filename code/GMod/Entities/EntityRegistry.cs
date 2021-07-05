@@ -17,7 +17,7 @@ namespace Miku.GMod.Entities
 		public UserData LuaValue;
 		public Table LuaTable;
 
-		public EntityData(Entity ent, UserData ud, Table? tab = null)
+		public EntityData(Entity ent, UserData ud, Table tab)
 		{
 			Entity = ent;
 			LuaValue = ud;
@@ -62,10 +62,14 @@ namespace Miku.GMod.Entities
 			}
 		}*/
 
-		public EntityData Get(Entity ent) {
+		public EntityData Get(Entity ent, Table? table = null) {
 			{
 				if (Map.TryGetValue(ent, out EntityData? result))
 				{
+					if (table != null)
+					{
+						result.LuaTable = table;
+					}
 					return result;
 				}
 			}
@@ -74,6 +78,9 @@ namespace Miku.GMod.Entities
 			if (ent is Player)
 			{
 				class_table = ClassPlayer;
+			} else if (ent is BaseWeapon)
+			{
+				class_table = ClassWeapon;
 			}
 
 			if (class_table == null)
@@ -84,7 +91,7 @@ namespace Miku.GMod.Entities
 			{
 				// There's a gross cycle here:
 				var ud = new UserData((int)TypeID.Entity, null, class_table );
-				var ent_data = new EntityData(ent, ud);
+				var ent_data = new EntityData(ent, ud, table ?? new Table());
 				ud.Reference = ent_data;
 
 				Map[ent] = ent_data;

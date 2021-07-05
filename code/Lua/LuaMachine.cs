@@ -123,7 +123,7 @@ namespace Miku.Lua
 			Stopwatch sw_exec = Stopwatch.StartNew();
 			new_func.Call( this );
 			string time_compile_str = time_compile > 0 ? time_compile + " ms" : "CACHED";
-			Log.Info( $"Finished {name}; C = {time_compile_str}; E = {sw_exec.Elapsed.TotalMilliseconds} ms" );
+			//Log.Info( $"Finished {name}; C = {time_compile_str}; E = {sw_exec.Elapsed.TotalMilliseconds} ms" );
 		}
 
 		private static string GetFilePath(string filename)

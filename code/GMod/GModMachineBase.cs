@@ -9,6 +9,7 @@ namespace Miku.GMod
 	{
 		Function RunHookFunction;
 		Function RegisterWeaponFunction;
+		Function MakeWeaponFunction;
 
 		Function MakeVectorFunction;
 		public EntityRegistry Ents = new EntityRegistry();
@@ -41,7 +42,9 @@ namespace Miku.GMod
 				RunFile( "glib/enums_server.lua" );
 			}
 
+			new Lib.Entity( this );
 			new Lib.Player( this );
+			new Lib.Weapon( this );
 			SetupRealmInternalLibs();
 
 			RunFile( "glib/types.lua" );
@@ -52,8 +55,10 @@ namespace Miku.GMod
 			RunFile( "glib_official/garrysmod/lua/includes/init.lua" );
 			RunHookFunction = Env.Get( "hook" ).CheckTable().Get( "Run" ).CheckFunction();
 			RegisterWeaponFunction = Env.Get( "weapons" ).CheckTable().Get( "Register" ).CheckFunction();
+			MakeWeaponFunction = Env.Get( "weapons" ).CheckTable().Get( "Get" ).CheckFunction();
 
-			//MakeVectorFunction = Env.Get( "Vector" ).CheckFunction();
+			// STUPID:
+			MakeVectorFunction = Env.Get( "Vector" ).CheckFunction();
 		}
 
 		protected abstract void SetupRealmInternalLibs();
@@ -64,6 +69,27 @@ namespace Miku.GMod
 				vec.x,
 				vec.y,
 				vec.z } ).GetResult( 0 );
+		}
+
+		public Vector3 VectorFromValue( ValueSlot v )
+		{
+			var t = v.CheckTable();
+			var x = (float)t.Get( "x" ).CheckNumber();
+			var y = (float)t.Get( "y" ).CheckNumber();
+			var z = (float)t.Get( "z" ).CheckNumber();
+
+			return new Vector3( x, y, z );
+		}
+
+		public Color ColorFromValue( ValueSlot v )
+		{
+			var t = v.CheckTable();
+			int R = (int)t.Get( "r" ).CheckNumber();
+			int G = (int)t.Get( "g" ).CheckNumber();
+			int B = (int)t.Get( "b" ).CheckNumber();
+			int A = (int)t.Get( "a" ).CheckNumber();
+
+			return Color.FromBytes( R, G, B, A );
 		}
 
 		private string GetEntityName(string path)
@@ -77,7 +103,7 @@ namespace Miku.GMod
 			return parts[i];
 		}
 
-		public void LoadSWEP(string path)
+		public void LoadWeapon(string path)
 		{
 			var name = GetEntityName( path );
 
@@ -96,8 +122,14 @@ namespace Miku.GMod
 
 			Env.Set( "SWEP", ValueSlot.NIL );
 
-			RegisterWeaponFunction.Call( this, new ValueSlot[] { swep_table, path } );
-			RunString( "PrintTable(weapons.GetList())", "yeet" );
+			Log.Info( "Register weapon: " + name );
+			RegisterWeaponFunction.Call( this, new ValueSlot[] { swep_table, name } );
+		}
+
+		public Table MakeTableWeapon(string name)
+		{
+			var res = MakeWeaponFunction.Call( this, new ValueSlot[] { name } );
+			return res.GetResult( 0 ).CheckTable();
 		}
 
 		public Executor RunHook(string name, ValueSlot[] args)

@@ -32,6 +32,7 @@ local REGISTRY = _R
 function debug.getregistry()
     return REGISTRY
 end
+debug.getmetatable = getmetatable
 
 -- PACKAGE
 function package.seeall(mod)

@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Miku
 {
-	partial class MinimalPlayer : Player
+	partial class MikuPlayer : Player
 	{
 		public override void Respawn()
 		{
@@ -26,15 +26,8 @@ namespace Miku
 			Camera = new ThirdPersonCamera();
 
 			Inventory = new BaseInventory(this);
-			/*if (GMod.GModGlobal.Server == null)
-			{
-				throw new Exception( "lol" );
-			}
-			var swep = GMod.GModGlobal.GModServer.Ents.Create( "weapon_base" );
-			if (swep != null)
-			{
-				Inventory.Add( swep, true );
-			}*/
+			var swep = new GMod.Entities.GmodWeapon("weapon_base");
+			Inventory.Add( swep, true );
 
 			EnableAllCollisions = true;
 			EnableDrawing = true;

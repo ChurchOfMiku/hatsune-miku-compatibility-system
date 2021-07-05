@@ -1,39 +1,3 @@
-local function quick_sort(tbl, start, stop, sorter)
-    if stop <= start then return end
-    local pivot_i = math.floor((start+stop)/2)
-    if pivot_i < start or pivot_i > stop then error("pivot bad") end
-    local pivot = tbl[pivot_i]
-    
-    i = start - 1
-    j = stop + 1
-    while true do
-        repeat
-            i = i+1
-        until not sorter(tbl[i],pivot)
-        repeat
-            j = j-1
-        until not sorter(pivot,tbl[j])
-        if i >= j then break end
-        local tmp = tbl[i]
-        tbl[i] = tbl[j]
-        tbl[j] = tmp
-    end
-
-    quick_sort(tbl,start,j-1,sorter)
-    quick_sort(tbl,j+1,stop,sorter)
-end
-
-function table.sort(tbl, sorter)
-    quick_sort(tbl,1,#tbl,sorter or function(a,b) return a<b end)
-end
-
---[[local t = {6,3,2,567,2,1}
-table.sort(t)
-for i=1,#t do
-    print(i,t[i])
-end
-error("x")]]
-
 net = {}
 
 function Material(name)
@@ -134,6 +98,8 @@ do
         return 0
     end
 
+    function Player:ViewPunch( ang ) end
+
     -- DARKRP
     function Player:isWanted()
         return false
@@ -144,6 +110,27 @@ do
         if var == "money" then return 10 end
         print("var",var)
     end
+end
+
+-- Weapon stubs
+do
+    local Weapon = FindMetaTable("Weapon")
+    function Weapon:Clip1() return 10 end
+
+    function Weapon:SetClip1(x) end
+
+    function Weapon:Clip2() return 10 end
+
+    function Weapon:SetClip2(x) end
+
+    function Weapon:ShootEffects() end
+end
+
+-- Entity
+do
+    local Entity = FindMetaTable("Entity")
+    function Entity:EmitSound() end
+    function Entity:IsNPC() return false end
 end
 
 -- DARKRP

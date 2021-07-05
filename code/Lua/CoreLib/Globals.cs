@@ -76,6 +76,11 @@ namespace Miku.Lua.CoreLib
 
 			env.DefineFunc( "setmetatable", ( Executor ex ) => {
 				var table = ex.GetArg( 0 ).CheckTable();
+				if ( ex.GetArgCount() == 1 || ex.GetArg( 1 ).Kind == ValueKind.Nil)
+				{
+					table.MetaTable = null;
+					return table;
+				}
 				var metatable = ex.GetArg( 1 ).CheckTable();
 				table.MetaTable = metatable;
 				return table;

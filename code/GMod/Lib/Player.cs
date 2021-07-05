@@ -40,12 +40,6 @@ namespace Miku.GMod.Lib
 				return machine.Vector( pos );
 			} );
 
-			class_player.DefineFunc( "FireBullets", ( Executor ex ) => {
-				var ply = (Sandbox.Player)ex.GetArg( 0 ).CheckUserData().CheckEntity().Entity;
-				Log.Info( "FireBullets" );
-				return null;
-			} );
-
 			if (machine.IsClient)
 			{
 				machine.Env.DefineFunc( "LocalPlayer", ( Executor ex ) => {
