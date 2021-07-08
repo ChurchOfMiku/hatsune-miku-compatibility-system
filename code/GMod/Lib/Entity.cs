@@ -27,6 +27,14 @@ namespace Miku.GMod.Lib
 				return owner_info.LuaValue;
 			} );
 
+			class_entity.DefineFunc( "EmitSound", ( Executor ex ) =>
+			{
+				var ent_info = ex.GetArg( 0 ).CheckUserData().CheckEntity();
+				var sound_name = ex.GetArg( 1 ).CheckString();
+				ent_info.Entity.PlaySound( sound_name );
+				return null;
+			} );
+
 			class_entity.DefineFunc( "FireBullets", ( Executor ex ) => {
 				// TODO the spread isn't consistentent between CL and SV.
 				// TODO a bunch of settings aren't supported
@@ -49,7 +57,7 @@ namespace Miku.GMod.Lib
 				bool InWater = Physics.TestPointContents( src, CollisionLayer.Water );
 
 				var dir_rot = Rotation.LookAt( base_dir );
-				var SPREAD_MUL = 50f;
+				var SPREAD_MUL = 57.2957795131f; // radians to degrees, probably
 
 				for (int i=0;i<num;i++ )
 				{

@@ -1,4 +1,5 @@
 ﻿
+
 using Sandbox;
 using System;
 //
@@ -22,6 +23,7 @@ namespace Miku
 	{
 		public MikuGame()
 		{
+			GMod.Assets.SoundRegistry.ParseSoundScript( "lua/glib_official/garrysmod/scripts/sounds/hl2_game_sounds_weapons.txt" );
 			GMod.GModGlobal.Init();
 		}
 

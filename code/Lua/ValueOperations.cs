@@ -63,13 +63,13 @@ namespace Miku.Lua
 					ex.StackSet( out_slot, ValueSlot.NIL );
 					// Print debug info, but only if this is the first lookup in the meta chain.
 					//if (orig_arg == null)
-					{
+					/*{
 						var table = arg.CheckTable();
 						if (table.DebugLibName != null)
 						{
 							Log.Warning( "GET " + table.DebugLibName + "." + key );
 						}
-					}
+					}*/
 				} else
 				{
 					throw new Exception( "Attempt to index " + arg );

@@ -129,7 +129,6 @@ end
 -- Entity
 do
     local Entity = FindMetaTable("Entity")
-    function Entity:EmitSound() end
     function Entity:IsNPC() return false end
 end
 
