@@ -43,9 +43,9 @@ namespace Miku
 				if (N == 0)
 				{
 					var crate = new ModelEntity();
-					crate.SetModel( "models/citizen_props/cardboardbox01.vmdl" );
+					crate.SetModel( "assets/models/gman.vmdl" );
 					crate.Position = new Vector3( 500, 500, 500 );
-					crate.SetupPhysicsFromModel( PhysicsMotionType.Dynamic, false );
+					crate.SetupPhysicsFromOBB( PhysicsMotionType.Dynamic, new Vector3( -10, -10, -10 ), new Vector3( 10, 10, 10 ) );
 					crate.Health = 1000;
 					//ragdoll.PhysicsGroup.Velocity = EyeRot.Forward * 1000;
 				}
