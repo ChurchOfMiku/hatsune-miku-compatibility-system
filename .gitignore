@@ -4,6 +4,8 @@ code/Properties/launchSettings.json
 .intermediate
 tools_asset_info.bin
 
-/lua/scripts/
-/assets/
 node_modules/
+/lua/scripts/
+/asset_src/
+/sounds/
+/models/

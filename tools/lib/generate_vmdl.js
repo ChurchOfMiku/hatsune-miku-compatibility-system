@@ -62,19 +62,4 @@ function generate(model,base_path) {
 }`;
 }
 
-/*    <!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:modeldoc29:version{3cec427c-1b0e-4d48-a90a-0436f33a6041} -->
-CVModel CVModel_0
-{
-    CVmeshList m_meshList = CVmeshList
-    {
-        CVmesh[] m_meshList = [${meshes}]
-    }
-    CVMaterialRemapList m_pMaterialRemapList = CVMaterialRemapList{
-        CVMaterialRemap[] m_vMaterialRemapList = [${material_fixups}]
-    }
-}`;
-}*/
-
-
-
 module.exports = generate;
