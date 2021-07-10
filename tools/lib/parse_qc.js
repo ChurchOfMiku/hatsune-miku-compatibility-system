@@ -4,7 +4,7 @@ function new_line() {
     return line;
 }
 
-function parse_qc_inner(text,i,terminator) {
+function parse_studio_inner(text,i,terminator) {
     let block = [];
     block.type = "block";
     let line = new_line();
@@ -64,7 +64,7 @@ function parse_qc_inner(text,i,terminator) {
                     line = new_line();
                 }
 
-                let res = parse_qc_inner(text,i,'}');
+                let res = parse_studio_inner(text,i,'}');
                 block.push(res.block);
                 i = res.i;
                 break;
@@ -91,20 +91,13 @@ function parse_qc_inner(text,i,terminator) {
     }
 }
 
-function find_line(block, key) {
-    for (let i=0;i<block.length;i++) {
-        let line = block[i];
-        if (line.type == "line" && line[0] == key) {
-            return line;
-        }
-    }
-    return null;
+function parse_studio(text) {
+    return parse_studio_inner(text,0,"<EOF>").block;
 }
 
 function parse_qc(text) {
-    let res = parse_qc_inner(text,0,"<EOF>");
-    let block = res.block;
-    let model = {groups:{},models:{}};
+    let block = parse_studio(text);
+    let model = {groups:{},models:{},material_paths:[]};
     let i=0;
     function get_next_block() {
         let sub_block = block[i+1];
@@ -137,6 +130,8 @@ function parse_qc(text) {
                     throw new Error("bad bodygroup: "+x[0]);
                 });
                 model.groups[line[1]] = group_opts;
+            } else if (cmd == "$cdmaterials") {
+                model.material_paths.push(line[1]);
             } else if (cmd == "$texturegroup") {
                 if (model.skins != null) {
                     throw new Error("multiple $texturegroup's");

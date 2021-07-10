@@ -3,7 +3,7 @@ const fs = require("fs-extra");
 const path = require("path");
 
 const parse_qc = require("./lib/parse_qc.js");
-const generate_s2 = require("./lib/generate_s2.js");
+const generate_vmdl = require("./lib/generate_vmdl.js");
 
 const ASSET_BASE = path.join(__dirname,"../assets/");
 const GMOD_BASE = "C:/Program Files (x86)/Steam/steamapps/common/GarrysMod/";
@@ -41,7 +41,7 @@ function import_model(content_path,model_name) {
 
     let model_info = parse_qc(qc);
     console.log(model_info);
-    let s2_text = generate_s2(model_info,"assets/model_src/"+model_name);
+    let s2_text = generate_vmdl(model_info,"assets/model_src/"+model_name);
     console.log(s2_text);
 
     let out_file = ASSET_PATH("models/"+model_name+".vmdl");
