@@ -54,11 +54,22 @@ function import_model(model_name) {
         "-p",MIKU_PATH("asset_src/models/"+model_name+".mdl"),
         "-o",MIKU_PATH("asset_src/model_src/"+model_name)
     ]).toString();
-    //console.log(res);
 
     let qc = fs.readFileSync(MIKU_PATH("asset_src/model_src/"+model_name+"/"+model_name_short+".qc")).toString();
 
     let model_info = parse_qc(qc);
+    // Resolve material paths:
+    model_info.skins.forEach(skin => {
+        for (let key in skin) {
+            for (let i=0;i<model_info.material_paths.length;i++) {
+                let mat_path = path.join("materials",model_info.material_paths[i],key);
+                if (fs.existsSync(MIKU_PATH("asset_src/"+mat_path+".vmt"))) {
+                    skin[key] = mat_path;
+                    break;
+                }
+            }
+        }
+    });
     console.log(model_info);
     let vmdl_text = generate_vmdl(model_info,"asset_src/model_src/"+model_name);
     console.log(vmdl_text);

@@ -1,3 +1,7 @@
+function fix_path(path) {
+    return path.replace(/\\/g,'/');
+}
+
 function generate(model,base_path) {
 
     let meshes = "";
@@ -7,7 +11,7 @@ function generate(model,base_path) {
                     {
                         _class = "RenderMeshFile"
                         name = "${model_name}"
-                        filename = "${base_path}/${model_path}"
+                        filename = "${fix_path(base_path+'/'+model_path)}"
                     },`;
     }
     for (let group_name in model.groups) {
@@ -21,7 +25,7 @@ function generate(model,base_path) {
                     {
                         _class = "RenderMeshFile"
                         name = "bg_${group_name}_${i}"
-                        filename = "${base_path}/${group_meshes[i]}"
+                        filename = "${fix_path(base_path+'/'+group_meshes[i])}"
                     },`;
         }
     }
@@ -33,7 +37,7 @@ function generate(model,base_path) {
             material_fixups += `
                             {
                                 from = "${source}.vmat"
-                                to = "${target}.vmat"
+                                to = "${fix_path(target+".vmat")}"
                             },`;
         }
     }
