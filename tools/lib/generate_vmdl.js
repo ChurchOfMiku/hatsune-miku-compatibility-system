@@ -28,12 +28,12 @@ function generate(model,base_path) {
 
     let material_fixups = "";
     for (let i=0;i<model.skins.length;i++) {
-        for (let j=0;j<model.skins[i].length;j++) {
-            let mat_name = model.skins[i][j];
+        for (let source in model.skins[i]) {
+            let target = model.skins[i][source];
             material_fixups += `
                             {
-                                from = "${mat_name}.vmat"
-                                to = "materials/default/white.vmat"
+                                from = "${source}.vmat"
+                                to = "${target}.vmat"
                             },`;
         }
     }

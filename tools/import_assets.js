@@ -6,6 +6,9 @@ const path = require("path");
 const parse_qc = require("./lib/parse_qc.js");
 const generate_vmdl = require("./lib/generate_vmdl.js");
 
+const parse_vmt = require("./lib/parse_vmt.js");
+const generate_vmat = require("./lib/generate_vmat");
+
 const ASSET_SOURCE = path.join(__dirname,"../asset_src/");
 const GMOD_BASE = "C:/Program Files (x86)/Steam/steamapps/common/GarrysMod/";
 
@@ -65,10 +68,24 @@ function import_model(model_name) {
     fs.writeFileSync(out_file,vmdl_text);
 }
 
+function import_material(material_name) {
+    let mat_src = fs.readFileSync(MIKU_PATH("asset_src/materials/"+material_name+".vmt")).toString();
+    
+    let material = parse_vmt(mat_src);
+    console.log(material);
+    let mat_text = generate_vmat(material);
+    console.log(mat_text);
+
+    let out_file = MIKU_PATH("materials/"+material_name+".vmat");
+    fs.ensureDirSync(path.dirname(out_file));
+    fs.writeFileSync(out_file,mat_text);
+}
+
 if (true) {
 
     //import_model(GMOD_PATH("sourceengine/hl2_misc_dir"),"weapons/w_pistol");
     import_model("gman");
+    //import_material("models/gman/gman_sheet");
 }
 
 console.log("DONE");
