@@ -2,6 +2,8 @@ const parse_studio = require("./parse_studio");
 
 const SHADER_WHITELIST = {
     VertexLitGeneric: true,
+    Teeth: true,
+    eyes: true
 }
 
 function parse_vmt(text) {

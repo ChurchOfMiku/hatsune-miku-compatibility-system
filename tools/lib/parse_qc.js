@@ -20,6 +20,9 @@ function parse_qc(text) {
                     throw new Error("bad model = "+line[1]+", "+line[2]);
                 }
                 model.models[line[1]] = line[2];
+            } else if (cmd == "$collisionmodel") {
+                // we currently ignore the extra settings
+                model.physics_hull = line[1];
             } else if (cmd == "$bodygroup") {
                 let sub_block = get_next_block(cmd);
                 group_opts = sub_block.map(x=>{

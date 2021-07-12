@@ -42,6 +42,31 @@ function generate(model,base_path) {
         }
     }
 
+    let physics_shapes = "";
+    if (model.physics_hull != null) {
+        physics_shapes += `
+                        {
+                            _class = "PhysicsHullFile"
+                            name = "physics"
+                            parent_bone = ""
+                            surface_prop = "default"
+                            collision_prop = "default"
+                            recenter_on_parent_bone = false
+                            offset_origin = [ 0.0, 0.0, 0.0 ]
+                            offset_angles = [ 0.0, 0.0, 0.0 ]
+                            filename = "${fix_path(base_path+'/'+model.physics_hull)}"
+                            import_scale = 1.0
+                            faceMergeAngle = 10.0
+                            maxHullVertices = 0
+                            import_mode = "SingleHull"
+                            optimization_algorithm = "QEM"
+                            import_filter = 
+                            {
+                                exclude_by_default = false
+                                exception_list = [  ]
+                            }
+                        },`;
+    }
 
     return `<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:modeldoc29:version{3cec427c-1b0e-4d48-a90a-0436f33a6041} -->
 {
@@ -60,7 +85,11 @@ function generate(model,base_path) {
                         remaps = [${material_fixups}]
                     }
                 ]
-            }
+            },
+            {
+                _class = "PhysicsShapeList"
+                children = [${physics_shapes}]
+            },
         ]
     }
 }`;

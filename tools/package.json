@@ -2,6 +2,9 @@
   "dependencies": {
     "@crokita/merge-dirs": "^0.3.1",
     "cheerio": "^1.0.0-rc.10",
-    "fs-extra": "^10.0.0"
+    "fs-extra": "^10.0.0",
+    "tga": "^1.0.4",
+    "vtflib": "^1.0.1",
+    "dxt-js": "0.0.3"
   }
 }
