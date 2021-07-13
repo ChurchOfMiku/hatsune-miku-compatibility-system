@@ -120,7 +120,7 @@ function import_model_and_materials(name) {
 
 if (true) {
 
-    //import_model_and_materials("weapons/w_pistol");
+    import_model_and_materials("weapons/w_pistol");
     import_model_and_materials("weapons/v_pistol");
 }
 

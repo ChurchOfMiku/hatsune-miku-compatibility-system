@@ -79,7 +79,7 @@ namespace Miku.GMod.Lib
 					// Show effects
 					if (ent.IsClient)
 					{
-						DebugOverlay.Line( tr.StartPos, tr.EndPos, ent.IsServer ? new Color(0,1,1,0.5f) : new Color( 1, 1, 0, 0.5f ), 0.5f );
+						//DebugOverlay.Line( tr.StartPos, tr.EndPos, ent.IsServer ? new Color(0,1,1,0.5f) : new Color( 1, 1, 0, 0.5f ), 0.5f );
 						tr.Surface.DoBulletImpact( tr );
 					}
 					if (ent.IsServer)

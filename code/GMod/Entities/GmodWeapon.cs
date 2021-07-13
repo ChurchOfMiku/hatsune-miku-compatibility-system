@@ -6,13 +6,50 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
+using Miku.GMod.Assets;
 
 using Miku.Lua;
 
 namespace Miku.GMod.Entities
 {
+	class GmodViewModel : BaseViewModel
+	{
+		public override void PostCameraSetup( ref CameraSetup camSetup )
+		{
+			Rotation = camSetup.Rotation;
+			// Hardcoding an offset is probably dumb and wrong but it's my best guess for now.
+			Position = camSetup.Position + Rotation.Forward * 0 + Rotation.Down * 65;
+
+			camSetup.ViewModel.FieldOfView = FieldOfView;
+		}
+	}
+
 	partial class GmodWeapon : BaseWeapon
 	{
+		// View Models
+		public override string ViewModelPath {
+			get {
+				return AssetUtil.FixModelName( GetTable().Get( "ViewModel" ).CheckString() );
+			}
+		}
+
+		public override void CreateViewModel()
+		{
+			Host.AssertClient();
+
+			string view_model = ViewModelPath;
+
+			if ( string.IsNullOrEmpty( view_model ) )
+				return;
+
+			ViewModelEntity = new GmodViewModel();
+			ViewModelEntity.Position = Position;
+			ViewModelEntity.Owner = Owner;
+			ViewModelEntity.EnableViewmodelRendering = true;
+			ViewModelEntity.SetModel( view_model );
+			ViewModelEntity.FieldOfView = (float)GetTable().Get( "ViewModelFOV" ).CheckNumber();
+		}
+
 		[Net, OnChangedCallback]
 		private string LuaClassName { get; set; }
 		public GmodWeapon(string class_name)
@@ -27,6 +64,7 @@ namespace Miku.GMod.Entities
 			//Log.Info( "CL INIT ");
 		}
 
+		// DO NOT DELETE: Used for clientside setup.
 		private void OnLuaClassNameChanged()
 		{
 			SetupLua();
@@ -51,6 +89,13 @@ namespace Miku.GMod.Entities
 			return CanAttack( InputButton.Attack2, "Secondary" );
 		}
 
+		private Table GetTable()
+		{
+			var machine = GModGlobal.GetMachine();
+			var ent_info = machine.Ents.Get( this );
+			return ent_info.LuaTable;
+		}
+
 		private bool CanAttack(InputButton button, string name)
 		{
 			if ( !Owner.IsValid() ) return false;
@@ -58,10 +103,8 @@ namespace Miku.GMod.Entities
 			{
 				return false;
 			}
-			// Semi-automatics only fire
-			var machine = GModGlobal.GetMachine();
-			var ent_info = machine.Ents.Get( this );
-			var is_automatic = ent_info.LuaTable.Get( name ).CheckTable().Get( "Automatic" ).IsTruthy();
+			// Semi-automatics only fire if the fire button has just been pressed
+			var is_automatic = GetTable().Get( name ).CheckTable().Get( "Automatic" ).IsTruthy();
 			if ( !is_automatic && !Input.Pressed( button ) )
 			{
 				return false;
@@ -77,6 +120,7 @@ namespace Miku.GMod.Entities
 			var ent_info = machine.Ents.Get( this );
 			var func = ent_info.LuaTable.Get( "PrimaryAttack" ).CheckFunction();
 			func.Call(machine, new ValueSlot[] { ent_info.LuaValue } );
+			Log.Info( "??? " + ViewModelEntity );
 		}
 
 		public override void AttackSecondary()
