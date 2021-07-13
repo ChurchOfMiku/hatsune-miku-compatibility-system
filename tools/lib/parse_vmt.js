@@ -1,8 +1,8 @@
 const parse_studio = require("./parse_studio");
 
 const SHADER_WHITELIST = {
-    VertexLitGeneric: true,
-    Teeth: true,
+    vertexlitgeneric: true,
+    teeth: true,
     eyes: true
 }
 
@@ -16,7 +16,7 @@ function parse_vmt(text) {
     }
 
     let shader = shader_line[0];
-    if (!SHADER_WHITELIST[shader]) {
+    if (!SHADER_WHITELIST[shader.toLowerCase()]) {
         throw new Error("bad shader: "+shader);
     }
 

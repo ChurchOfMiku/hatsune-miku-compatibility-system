@@ -11,7 +11,6 @@ const generate_vmat = require("./lib/generate_vmat.js");
 
 const convert_texture = require("./lib/convert_texture.js");
 
-const ASSET_SOURCE = path.join(__dirname,"../asset_src/");
 const GMOD_BASE = "C:/Program Files (x86)/Steam/steamapps/common/GarrysMod/";
 
 function GMOD_PATH(name) {
@@ -32,12 +31,12 @@ function extractVPK(file) {
     if (dir == file) {
         throw new Error("Failed to trim extension from: "+file);
     }
-    merge_dirs(dir,ASSET_SOURCE,"overwrite");
+    merge_dirs(dir,MIKU_PATH(".asset_src"),"overwrite");
 }
 
 if (false) {
     console.log("Extracting packages...");
-    fs.removeSync(ASSET_SOURCE);
+    fs.removeSync(MIKU_PATH(".asset_src"));
     extractVPK(GMOD_PATH("sourceengine/hl2_misc_dir.vpk"));
     extractVPK(GMOD_PATH("sourceengine/hl2_sound_misc_dir.vpk"));
     extractVPK(GMOD_PATH("sourceengine/hl2_textures_dir.vpk"));
@@ -45,7 +44,7 @@ if (false) {
 
 if (false) {
     console.log("Copy sounds...");
-    fs.copySync(MIKU_PATH("asset_src/sound"),MIKU_PATH("sounds"));
+    fs.copySync(MIKU_PATH(".asset_src/sound"),MIKU_PATH("sounds"));
     throw "x";
 }
 
@@ -53,11 +52,11 @@ function import_model(model_name) {
     let model_name_short = path.basename(model_name);
 
     let res = cp.execFileSync(CROWBAR,[
-        "-p",MIKU_PATH("asset_src/models/"+model_name+".mdl"),
-        "-o",MIKU_PATH("asset_src/model_src/"+model_name)
+        "-p",MIKU_PATH(".asset_src/models/"+model_name+".mdl"),
+        "-o",MIKU_PATH(".asset_src/model_src/"+model_name)
     ]).toString();
 
-    let qc = fs.readFileSync(MIKU_PATH("asset_src/model_src/"+model_name+"/"+model_name_short+".qc")).toString();
+    let qc = fs.readFileSync(MIKU_PATH(".asset_src/model_src/"+model_name+"/"+model_name_short+".qc")).toString();
 
     let materials = [];
 
@@ -67,7 +66,7 @@ function import_model(model_name) {
         for (let key in skin) {
             for (let i=0;i<model_info.material_paths.length;i++) {
                 let mat_path = path.join(model_info.material_paths[i],key);
-                if (fs.existsSync(MIKU_PATH("asset_src/materials/"+mat_path+".vmt"))) {
+                if (fs.existsSync(MIKU_PATH(".asset_src/materials/"+mat_path+".vmt"))) {
                     skin[key] = "materials/"+mat_path;
                     materials.push(mat_path);
                     break;
@@ -76,7 +75,7 @@ function import_model(model_name) {
         }
     });
     console.log(model_info);
-    let vmdl_text = generate_vmdl(model_info,"asset_src/model_src/"+model_name);
+    let vmdl_text = generate_vmdl(model_info,".asset_src/model_src/"+model_name);
     console.log(vmdl_text);
 
     let out_file = MIKU_PATH("models/"+model_name+".vmdl");
@@ -87,7 +86,7 @@ function import_model(model_name) {
 }
 
 function import_material(material_name) {
-    let mat_src = fs.readFileSync(MIKU_PATH("asset_src/materials/"+material_name+".vmt")).toString();
+    let mat_src = fs.readFileSync(MIKU_PATH(".asset_src/materials/"+material_name+".vmt")).toString();
     
     let material = parse_vmt(mat_src);
     console.log(material);
@@ -107,7 +106,7 @@ function import_material(material_name) {
 
 function import_texture(texture_name) {
     convert_texture(
-        MIKU_PATH("asset_src/materials/"+texture_name+".vtf"),
+        MIKU_PATH(".asset_src/materials/"+texture_name+".vtf"),
         MIKU_PATH("materials/"+texture_name+".tga"));
 }
 
@@ -121,7 +120,8 @@ function import_model_and_materials(name) {
 
 if (true) {
 
-    import_model_and_materials("weapons/w_pistol");
+    //import_model_and_materials("weapons/w_pistol");
+    import_model_and_materials("weapons/v_pistol");
 }
 
 console.log("DONE");

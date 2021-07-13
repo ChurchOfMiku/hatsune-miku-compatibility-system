@@ -6,7 +6,7 @@ tools_asset_info.bin
 
 node_modules/
 /lua/scripts/
-/asset_src/
+/.asset_src/
 /sounds/
 /models/
 /materials/

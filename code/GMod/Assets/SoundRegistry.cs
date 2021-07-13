@@ -172,7 +172,7 @@ namespace Miku.GMod.Assets
 			{
 				throw new Exception( "bad file extension on sound? " + path );
 			}
-			return "assets/sound/" + path;
+			return "sounds/" + path;
 		}
 	}
 }

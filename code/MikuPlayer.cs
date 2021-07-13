@@ -23,7 +23,7 @@ namespace Miku
 			//
 			// Use ThirdPersonCamera (you can make your own Camera for 100% control)
 			//
-			Camera = new ThirdPersonCamera();
+			Camera = new FirstPersonCamera();
 
 			Inventory = new BaseInventory(this);
 			var swep = new GMod.Entities.GmodWeapon("weapon_base");
