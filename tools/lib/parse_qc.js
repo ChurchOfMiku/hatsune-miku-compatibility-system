@@ -2,7 +2,7 @@ const parse_studio = require("./parse_studio");
 
 function parse_qc(text) {
     let block = parse_studio(text);
-    let model = {groups:{},models:{},material_paths:[]};
+    let model = {groups:{},models:{},bones:{},material_paths:[]};
     let i=0;
     function get_next_block() {
         let sub_block = block[i+1];
@@ -11,6 +11,7 @@ function parse_qc(text) {
         }
         return null;
     }
+    let all_bones = {};
     for (;i<block.length;i++) {
         let line = block[i];
         if (line.type == "line") {
@@ -23,6 +24,32 @@ function parse_qc(text) {
             } else if (cmd == "$collisionmodel") {
                 // we currently ignore the extra settings
                 model.physics_hull = line[1];
+            } else if (cmd == "$definebone") {
+                let parent_name = line[2];
+                let bone = {
+                    name: line[1],
+                    x: +line[3],
+                    y: +line[4],
+                    z: +line[5],
+                    xr: +line[6],
+                    yr: +line[7],
+                    zr: +line[8],
+                    children: {}
+                };
+                if (line[9] != 0 || line[10] != 0 || line[11] != 0 || line[12] != 0 || line[13] != 0 || line[14] != 0) {
+                    console.log(line);
+                    throw new Error("fixup");
+                }
+                all_bones[bone.name] = bone;
+                if (parent_name == "") {
+                    model.bones[bone.name] = bone;
+                } else {
+                    let parent = all_bones[parent_name];
+                    if (parent == null) {
+                        throw new Error("no parent for "+bone.name);
+                    }
+                    parent.children[bone.name] = bone;
+                }
             } else if (cmd == "$bodygroup") {
                 let sub_block = get_next_block(cmd);
                 group_opts = sub_block.map(x=>{

@@ -45,28 +45,47 @@ function generate(model,base_path) {
     let physics_shapes = "";
     if (model.physics_hull != null) {
         physics_shapes += `
+                    {
+                        _class = "PhysicsHullFile"
+                        name = "physics"
+                        parent_bone = ""
+                        surface_prop = "default"
+                        collision_prop = "default"
+                        recenter_on_parent_bone = false
+                        offset_origin = [ 0.0, 0.0, 0.0 ]
+                        offset_angles = [ 0.0, 0.0, 0.0 ]
+                        filename = "${fix_path(base_path+'/'+model.physics_hull)}"
+                        import_scale = 1.0
+                        faceMergeAngle = 10.0
+                        maxHullVertices = 0
+                        import_mode = "SingleHull"
+                        optimization_algorithm = "QEM"
+                        import_filter = 
                         {
-                            _class = "PhysicsHullFile"
-                            name = "physics"
-                            parent_bone = ""
-                            surface_prop = "default"
-                            collision_prop = "default"
-                            recenter_on_parent_bone = false
-                            offset_origin = [ 0.0, 0.0, 0.0 ]
-                            offset_angles = [ 0.0, 0.0, 0.0 ]
-                            filename = "${fix_path(base_path+'/'+model.physics_hull)}"
-                            import_scale = 1.0
-                            faceMergeAngle = 10.0
-                            maxHullVertices = 0
-                            import_mode = "SingleHull"
-                            optimization_algorithm = "QEM"
-                            import_filter = 
-                            {
-                                exclude_by_default = false
-                                exception_list = [  ]
-                            }
-                        },`;
+                            exclude_by_default = false
+                            exception_list = [  ]
+                        }
+                    },`;
     }
+
+    function generateBones(bones,indent) {
+        let result = "";
+        for (let key in bones) {
+            let bone = bones[key];
+            result += `
+                {
+                    _class = "Bone"
+                    name = "${bone.name.split('.').pop()}"
+                    origin = [ ${bone.x}, ${bone.y}, ${bone.z} ]
+                    angles = [ ${bone.xr}, ${bone.yr}, ${bone.zr} ]
+                    do_not_discard = true
+                    children = [${generateBones(bone.children,indent)}]
+                },`;
+        }
+        return result.replace(/\n/g,"\n    ");
+    }
+
+    let bones = "";//generateBones(model.bones,0);
 
     return `<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:modeldoc29:version{3cec427c-1b0e-4d48-a90a-0436f33a6041} -->
 {
@@ -90,9 +109,37 @@ function generate(model,base_path) {
                 _class = "PhysicsShapeList"
                 children = [${physics_shapes}]
             },
+            {
+                _class = "Skeleton"
+                children = [${bones}]
+            }
         ]
     }
 }`;
 }
+
+/*
+				_class = "Skeleton"
+				children = 
+				[
+					{
+						_class = "Bone"
+						name = "butthole"
+						children = 
+						[
+							{
+								_class = "Bone"
+								name = "hole_butt"
+								origin = [ 0.0, 0.0, 0.0 ]
+								angles = [ 0.0, 0.0, 0.0 ]
+								do_not_discard = true
+							},
+						]
+						origin = [ 0.0, 0.0, 0.0 ]
+						angles = [ 0.0, 0.0, 0.0 ]
+						do_not_discard = true
+					},
+				]
+                */
 
 module.exports = generate;
