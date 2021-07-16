@@ -87,6 +87,31 @@ function generate(model,base_path) {
 
     let bones = "";//generateBones(model.bones,0);
 
+    let anims = "";
+    for (let anim_name in model.sequences) {
+        anims += `
+                    {
+                        _class = "AnimFile"
+                        name = "${anim_name}"
+                        activity_name = ""
+                        activity_weight = 1
+                        weight_list_name = ""
+                        fade_in_time = 0.2
+                        fade_out_time = 0.2
+                        looping = true
+                        delta = false
+                        worldSpace = false
+                        hidden = false
+                        anim_markup_ordered = false
+                        disable_compression = false
+                        source_filename = "${fix_path(base_path+'/'+model.sequences[anim_name])}"
+                        start_frame = -1
+                        end_frame = -1
+                        framerate = -1.0
+                        reverse = false
+                    },`;
+    }
+
     return `<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:modeldoc29:version{3cec427c-1b0e-4d48-a90a-0436f33a6041} -->
 {
     rootNode = {
@@ -112,7 +137,12 @@ function generate(model,base_path) {
             {
                 _class = "Skeleton"
                 children = [${bones}]
-            }
+            },
+            {
+                _class = "AnimationList"
+                children = [${anims}]
+                default_root_bone_name = ""
+            },
         ]
     }
 }`;

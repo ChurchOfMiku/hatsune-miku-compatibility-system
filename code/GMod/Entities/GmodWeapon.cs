@@ -12,13 +12,13 @@ using Miku.Lua;
 
 namespace Miku.GMod.Entities
 {
+	// Not sure if we actually need a separate viewmodel class.
 	class GmodViewModel : BaseViewModel
 	{
 		public override void PostCameraSetup( ref CameraSetup camSetup )
 		{
 			Rotation = camSetup.Rotation;
-			// Hardcoding an offset is probably dumb and wrong but it's my best guess for now.
-			Position = camSetup.Position + Rotation.Forward * 0 + Rotation.Down * 65;
+			Position = camSetup.Position;
 
 			camSetup.ViewModel.FieldOfView = FieldOfView;
 		}
@@ -120,7 +120,6 @@ namespace Miku.GMod.Entities
 			var ent_info = machine.Ents.Get( this );
 			var func = ent_info.LuaTable.Get( "PrimaryAttack" ).CheckFunction();
 			func.Call(machine, new ValueSlot[] { ent_info.LuaValue } );
-			Log.Info( "??? " + ViewModelEntity );
 		}
 
 		public override void AttackSecondary()

@@ -2,7 +2,7 @@ const parse_studio = require("./parse_studio");
 
 function parse_qc(text) {
     let block = parse_studio(text);
-    let model = {groups:{},models:{},bones:{},material_paths:[]};
+    let model = {groups:{},models:{},bones:{},sequences:{},material_paths:[]};
     let i=0;
     function get_next_block() {
         let sub_block = block[i+1];
@@ -50,6 +50,15 @@ function parse_qc(text) {
                     }
                     parent.children[bone.name] = bone;
                 }
+            } else if (cmd == "$sequence") {
+                // note: this is very dumb
+                let seq_name = line[1];
+                let sub_block = get_next_block(cmd);
+                let seq_path = sub_block[0][0];
+                if (!seq_path.endsWith(".smd")) {
+                    throw new Error("no path for sequence");
+                }
+                model.sequences[seq_name] = seq_path;
             } else if (cmd == "$bodygroup") {
                 let sub_block = get_next_block(cmd);
                 group_opts = sub_block.map(x=>{
