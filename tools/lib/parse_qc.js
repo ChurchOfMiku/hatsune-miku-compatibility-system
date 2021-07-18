@@ -51,14 +51,28 @@ function parse_qc(text) {
                     parent.children[bone.name] = bone;
                 }
             } else if (cmd == "$sequence") {
-                // note: this is very dumb
-                let seq_name = line[1];
+                let seq = {name: line[1], activity: "", loop: false};
                 let sub_block = get_next_block(cmd);
-                let seq_path = sub_block[0][0];
-                if (!seq_path.endsWith(".smd")) {
-                    throw new Error("no path for sequence");
-                }
-                model.sequences[seq_name] = seq_path;
+                sub_block.forEach(line=>{
+                    if (line.type != "line") {
+                        return;
+                    }
+                    if (line[0].endsWith(".smd")) {
+                        // note: this is very dumb
+                        if (seq.path != null) {
+                            throw new Error("multiple sequence paths: ",seq.name);
+                        }
+                        seq.path = line[0];
+                    } else if (line[0] == "activity") {
+                        if (seq.activity != "") {
+                            throw new Error("multiple sequence activities: ",seq.name);
+                        }
+                        seq.activity = line[1];
+                    } else if (line[0] == "loop") {
+                        seq.loop = true;
+                    }
+                });
+                model.sequences[seq.name] = seq;
             } else if (cmd == "$bodygroup") {
                 let sub_block = get_next_block(cmd);
                 group_opts = sub_block.map(x=>{

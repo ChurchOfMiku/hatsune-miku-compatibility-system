@@ -308,6 +308,20 @@ namespace Miku.Lua
 			return table;
 		}
 
+		/// <summary>
+		/// Forces the dictionary to exist and returns a reference.
+		/// Currently just used to read enums back out of the VM, which is probably a dumb idea.
+		/// </summary>
+		/// <returns></returns>
+		public Dictionary<ValueSlot,ValueSlot> GetDictionary()
+		{
+			if (Dict == null)
+			{
+				Dict = new Dictionary<ValueSlot, ValueSlot>();
+			}
+			return Dict;
+		}
+
 		// Used to generate the status pages that tell us how much of the API is implemented.
 		public void Dump(string filename)
 		{

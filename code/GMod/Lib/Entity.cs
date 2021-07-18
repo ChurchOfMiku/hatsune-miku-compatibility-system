@@ -40,7 +40,7 @@ namespace Miku.GMod.Lib
 				// TODO a bunch of settings aren't supported
 				var ent = ex.GetArg( 0 ).CheckUserData().CheckEntity().Entity;
 				var bullet_info = ex.GetArg( 1 ).CheckTable();
-				bullet_info.Log();
+				//bullet_info.Log();
 				if ( ex.GetArg( 2 ).IsTruthy() )
 				{
 					throw new Exception( "supress host events?" );

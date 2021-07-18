@@ -89,22 +89,23 @@ function generate(model,base_path) {
 
     let anims = "";
     for (let anim_name in model.sequences) {
+        let anim = model.sequences[anim_name];
         anims += `
                     {
                         _class = "AnimFile"
                         name = "${anim_name}"
-                        activity_name = ""
+                        activity_name = "${anim.activity}"
                         activity_weight = 1
                         weight_list_name = ""
                         fade_in_time = 0.2
                         fade_out_time = 0.2
-                        looping = true
+                        looping = ${anim.loop}
                         delta = false
                         worldSpace = false
                         hidden = false
                         anim_markup_ordered = false
                         disable_compression = false
-                        source_filename = "${fix_path(base_path+'/'+model.sequences[anim_name])}"
+                        source_filename = "${fix_path(base_path+'/'+anim.path)}"
                         start_frame = -1
                         end_frame = -1
                         framerate = -1.0

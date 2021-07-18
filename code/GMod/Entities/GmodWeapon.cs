@@ -46,6 +46,7 @@ namespace Miku.GMod.Entities
 			ViewModelEntity.Position = Position;
 			ViewModelEntity.Owner = Owner;
 			ViewModelEntity.EnableViewmodelRendering = true;
+			ViewModelEntity.UseAnimGraph = false;
 			ViewModelEntity.SetModel( view_model );
 			ViewModelEntity.FieldOfView = (float)GetTable().Get( "ViewModelFOV" ).CheckNumber();
 		}
@@ -127,6 +128,14 @@ namespace Miku.GMod.Entities
 			var machine = GModGlobal.GetMachine();
 			var ent_info = machine.Ents.Get( this );
 			var func = ent_info.LuaTable.Get( "SecondaryAttack" ).CheckFunction();
+			func.Call( machine, new ValueSlot[] { ent_info.LuaValue } );
+		}
+
+		public override void Reload()
+		{
+			var machine = GModGlobal.GetMachine();
+			var ent_info = machine.Ents.Get( this );
+			var func = ent_info.LuaTable.Get( "Reload" ).CheckFunction();
 			func.Call( machine, new ValueSlot[] { ent_info.LuaValue } );
 		}
 	}
