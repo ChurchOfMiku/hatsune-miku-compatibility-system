@@ -68,6 +68,9 @@ namespace Miku.GMod
 			Client?.LoadWeapon( "glib_official/garrysmod/gamemodes/base/entities/weapons/weapon_base" );
 			Server?.LoadWeapon( "glib_official/garrysmod/gamemodes/base/entities/weapons/weapon_base" );
 
+			Client?.RunFile("scripts/H0L-D4/lua/autorun/holohud.lua");
+			Server?.RunFile("scripts/H0L-D4/lua/autorun/holohud.lua");
+
 			//Client?.RunFile( "test/patterns.lua" );
 
 			//GModServer?.LoadSWEP( "weapon_base", "test/Best of Toybox/lua/weapons/weapon_base/init.lua" );

@@ -185,6 +185,22 @@ namespace Miku.Lua
 			return null;
 		}
 
+		/// <summary>
+		/// Get the function at the bottom of the call stack
+		/// </summary>
+		/// <returns></returns>
+		public Function GetBaseFunction()
+		{
+			if (CallStack.Count > 0)
+			{
+				var entry = CallStack.Reverse().First();
+				return entry.Func;
+			} else
+			{
+				return Func;
+			}
+		}
+
 		// TODO pull function from stack, simplify all calls
 		// NOTE ret_base is now a LOCAL stack offset
 		private void CallPrepare( ValueSlot new_func, int ret_base = 0, int ret_count = 0, bool replace = false )
@@ -970,7 +986,14 @@ namespace Miku.Lua
 
 		public string? GetDirectory(int level)
 		{
-			var func = GetFunctionAtLevel(level);
+			Function? func;
+			if (level == -1)
+			{
+				func = GetBaseFunction();
+			} else
+			{
+				func = GetFunctionAtLevel( level );
+			}
 			if (func == null)
 			{
 				return null;
