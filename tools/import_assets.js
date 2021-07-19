@@ -34,20 +34,6 @@ function extractVPK(file) {
     merge_dirs(dir,MIKU_PATH(".asset_src"),"overwrite");
 }
 
-if (false) {
-    console.log("Extracting packages...");
-    fs.removeSync(MIKU_PATH(".asset_src"));
-    extractVPK(GMOD_PATH("sourceengine/hl2_misc_dir.vpk"));
-    extractVPK(GMOD_PATH("sourceengine/hl2_sound_misc_dir.vpk"));
-    extractVPK(GMOD_PATH("sourceengine/hl2_textures_dir.vpk"));
-}
-
-if (false) {
-    console.log("Copy sounds...");
-    fs.copySync(MIKU_PATH(".asset_src/sound"),MIKU_PATH("sounds"));
-    throw "x";
-}
-
 function import_model(model_name) {
     let model_name_short = path.basename(model_name);
 
@@ -118,7 +104,42 @@ function import_model_and_materials(name) {
     });
 }
 
+function import_material_dir(dir_name) {
+    let full_path = MIKU_PATH(".asset_src/materials/"+dir_name);
+    let files = fs.readdirSync(full_path,{withFileTypes:true});
+    files.forEach(file=>{
+        if (file.isFile() && file.name.endsWith(".vmt")) {
+            let mat_name = (dir_name+"/"+file.name).replace(/\/\//g,"/").replace(/\.vmt/,"");
+            import_material(mat_name).forEach(import_texture);
+        } else if (file.isDirectory()) {
+            import_material_dir(dir_name+"/"+file.name);
+        }
+    });
+}
+
+if (false) {
+    console.log("Extracting packages...");
+    fs.removeSync(MIKU_PATH(".asset_src"));
+    extractVPK(GMOD_PATH("sourceengine/hl2_misc_dir.vpk"));
+    extractVPK(GMOD_PATH("sourceengine/hl2_sound_misc_dir.vpk"));
+    extractVPK(GMOD_PATH("sourceengine/hl2_textures_dir.vpk"));
+}
+
+if (false) {
+    console.log("Copy sounds...");
+    fs.copySync(MIKU_PATH(".asset_src/sound"),MIKU_PATH("sounds"));
+    throw "x";
+}
+
+if (false) {
+    merge_dirs(MIKU_PATH("lua/scripts/H0L-D4/materials"),MIKU_PATH(".asset_src/materials"),"overwrite");
+}
+
 if (true) {
+    import_material_dir("holohud");
+}
+
+if (false) {
 
     import_model_and_materials("weapons/w_pistol");
     import_model_and_materials("weapons/v_pistol");

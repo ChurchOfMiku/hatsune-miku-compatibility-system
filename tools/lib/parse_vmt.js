@@ -1,6 +1,11 @@
 const parse_studio = require("./parse_studio");
 
 const SHADER_WHITELIST = {
+
+    // probably for UI
+    unlitgeneric: true,
+
+    // for models
     vertexlitgeneric: true,
     teeth: true,
     eyes: true
