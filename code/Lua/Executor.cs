@@ -769,6 +769,7 @@ namespace Miku.Lua
 						StackSet( A, builder.ToString() );
 						break;
 					}
+
 				// Constants
 				case OpCode.KSTR:
 					{
@@ -776,24 +777,29 @@ namespace Miku.Lua
 						StackSet( A, str );
 						break;
 					}
+
 				// KCDATA: don't care
+
 				case OpCode.KSHORT:
 					{
-						var num = (D << 16) >> 16; // TODO check!
-						StackSet( A, num );
+						// TODO check!
+						StackSet( A, (short)D );
 						break;
 					}
+
 				case OpCode.KNUM:
 					{
 						var num = Func.Prototype.GetConstNum( D );
 						StackSet( A, num );
 						break;
 					}
+
 				case OpCode.KPRI:
 					{
 						StackSet( A, ValueSlot.Prim( D ) );
 						break;
 					}
+
 				case OpCode.KNIL:
 					{
 						for ( int i = A; i <= D; i++ )
@@ -802,6 +808,7 @@ namespace Miku.Lua
 						}
 						break;
 					}
+
 				// Upvalues and Function Init
 				case OpCode.UGET:
 					{
