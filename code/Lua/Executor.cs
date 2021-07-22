@@ -717,6 +717,30 @@ namespace Miku.Lua
 						StackSet( A, nB * nC );
 						break;
 					}
+
+				case OpCode.DIVVV:
+					{
+						double nB = StackGet( B ).CheckNumber();
+						double nC = StackGet( C ).CheckNumber();
+						StackSet( A, nB / nC );
+						break;
+					}
+
+				case OpCode.MODVV:
+					{
+						double nB = StackGet( B ).CheckNumber();
+						double nC = StackGet( C ).CheckNumber();
+						StackSet( A, nB % nC );
+						break;
+					}
+
+				case OpCode.POW:
+					{
+						double nB = StackGet( B ).CheckNumber();
+						double nC = StackGet( C ).CheckNumber();
+						StackSet( A, Math.Pow( nB, nC ) );
+						break;
+					}
 				#endregion Arithmetic - *VV
 
 				case OpCode.CAT:
