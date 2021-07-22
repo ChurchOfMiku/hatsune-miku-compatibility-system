@@ -1,11 +1,9 @@
-#nullable enable
+﻿#nullable enable
 
 using System;
 
 namespace Miku.Lua
 {
-	using UserFunctionOld = Func<ValueSlot[], Executor, ValueSlot[]?>;
-
 	enum ValueKind
 	{
 		Nil,
