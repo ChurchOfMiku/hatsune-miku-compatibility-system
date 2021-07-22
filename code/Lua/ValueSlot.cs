@@ -204,7 +204,8 @@ namespace Miku.Lua
 						{
 							return val.Reference == null;
 						}
-						return this.Reference.Equals( val.Reference );
+						return ReferenceEquals( Reference, val.Reference )
+							   || this.Reference.Equals( val.Reference );
 					}
 				}
 			}
