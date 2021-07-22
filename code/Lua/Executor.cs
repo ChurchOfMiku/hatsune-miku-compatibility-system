@@ -211,7 +211,7 @@ namespace Miku.Lua
 			{
 				FrameBase = FrameTop;
 			}
-			
+
 			// Make sure the stack has plenty of slots.
 			while ( ValueStack.Count < FrameTop + STACK_MARGIN )
 			{
@@ -409,12 +409,12 @@ namespace Miku.Lua
 				Log.Info( "^^^--- " + Func.Prototype.DebugName );
 			}*/
 			Log.Info( "======= FRAME =======" );
-			for (int i=FrameBase;i<FrameTop;i++ )
+			for ( int i = FrameBase; i < FrameTop; i++ )
 			{
 				Log.Info( $"> {i}: {ValueStack[i]}" );
 			}
 			Log.Info( "======= CODE =======" );
-			for (int i=0;i<Func.Prototype.code.Length;i++ )
+			for ( int i = 0; i < Func.Prototype.code.Length; i++ )
 			{
 				uint instr = Func.Prototype.code[i];
 				var OP = (OpCode)(instr & 0xFF);
@@ -423,11 +423,11 @@ namespace Miku.Lua
 				var C = (instr >> 16) & 0xFF;
 				var D = (instr >> 16) & 0xFFFF;
 				string arrow = "";
-				if (PC == i)
+				if ( PC == i )
 				{
 					arrow = "<--------------";
 				}
-				Log.Info( $"> {i}: {OP} {A} {B} {C} {D} {arrow}" ); 
+				Log.Info( $"> {i}: {OP} {A} {B} {C} {D} {arrow}" );
 			}
 		}
 
@@ -436,33 +436,51 @@ namespace Miku.Lua
 			uint instr = Func.Prototype.code[PC];
 			var OP = (OpCode)(instr & 0xFF);
 
-			Profiler.Update(OP,Func.Prototype.DebugName);
+			Profiler.Update( OP, Func.Prototype.DebugName );
 			int A = (int)((instr >> 8) & 0xFF);
 			int B = (int)((instr >> 24) & 0xFF);
 			int C = (int)((instr >> 16) & 0xFF);
 			int D = (int)((instr >> 16) & 0xFFFF);
 
-			switch (OP)
+			switch ( OP )
 			{
 				// Comparisons
 				case OpCode.ISLT:
+					{
+						var lhs = StackGet( A ).CheckNumber();
+						var rhs = StackGet( D ).CheckNumber();
+						if ( !(lhs < rhs) )
+							PC++;
+						break;
+					}
+
 				case OpCode.ISGE:
+					{
+						var lhs = StackGet( A ).CheckNumber();
+						var rhs = StackGet( D ).CheckNumber();
+						if ( !(lhs >= rhs) )
+							PC++;
+						break;
+					}
+
 				case OpCode.ISLE:
+					{
+						var lhs = StackGet( A ).CheckNumber();
+						var rhs = StackGet( D ).CheckNumber();
+						if ( !(lhs <= rhs) )
+							PC++;
+						break;
+					}
+
 				case OpCode.ISGT:
 					{
 						double lhs = StackGet( A ).CheckNumber();
 						double rhs = StackGet( D ).CheckNumber();
-						bool skip = false;
-						switch (OP)
-						{
-							case OpCode.ISLT: skip = !(lhs < rhs); break;
-							case OpCode.ISGE: skip = !(lhs >= rhs); break;
-							case OpCode.ISLE: skip = !(lhs <= rhs); break;
-							case OpCode.ISGT: skip = !(lhs > rhs); break;
-						}
-						if (skip) { PC++; }
+						if ( !(lhs > rhs) )
+							PC++;
 						break;
 					}
+
 				case OpCode.ISEQV:
 					{
 						var vA = StackGet( A );
@@ -483,7 +501,7 @@ namespace Miku.Lua
 					{
 						var vA = StackGet( A );
 						var vD = Func.Prototype.GetConstGC( D );
-						bool skip = !vA.Equals(vD);
+						bool skip = !vA.Equals( vD );
 						if ( skip ) { PC++; }
 						break;
 					}
@@ -531,10 +549,11 @@ namespace Miku.Lua
 				case OpCode.ISTC:
 					{
 						var val = StackGet( D );
-						if (val.IsTruthy())
+						if ( val.IsTruthy() )
 						{
 							StackSet( A, val );
-						} else
+						}
+						else
 						{
 							PC++;
 						}
@@ -588,67 +607,122 @@ namespace Miku.Lua
 						StackSet( A, ValueOperations.Len( StackGet( D ) ) );
 						break;
 					}
+
 				// Binary Ops
+				#region Arithmetic - *NV
 				case OpCode.ADDVN:
+					{
+						double nB = StackGet( B ).CheckNumber();
+						double nC = Func.Prototype.GetConstNum( C );
+						StackSet( A, nB + nC );
+						break;
+					}
+
 				case OpCode.SUBVN:
+					{
+						double nB = StackGet( B ).CheckNumber();
+						double nC = Func.Prototype.GetConstNum( C );
+						StackSet( A, nB - nC );
+						break;
+					}
+
 				case OpCode.MULVN:
+					{
+						double nB = StackGet( B ).CheckNumber();
+						double nC = Func.Prototype.GetConstNum( C );
+						StackSet( A, nB * nC );
+						break;
+					}
+
 				case OpCode.DIVVN:
+					{
+						double nB = StackGet( B ).CheckNumber();
+						double nC = Func.Prototype.GetConstNum( C );
+						StackSet( A, nB / nC );
+						break;
+					}
+
 				case OpCode.MODVN:
 					{
 						double nB = StackGet( B ).CheckNumber();
 						double nC = Func.Prototype.GetConstNum( C );
-						double result = 0;
-						switch (OP)
-						{
-							case OpCode.ADDVN: result = nB + nC; break;
-							case OpCode.SUBVN: result = nB - nC; break;
-							case OpCode.MULVN: result = nB * nC; break;
-							case OpCode.DIVVN: result = nB / nC; break;
-							case OpCode.MODVN: result = nB % nC; break;
-						}
-						StackSet( A, result );
+						StackSet( A, nB % nC );
 						break;
 					}
+				#endregion Arithmetic - *NV
+
+				#region Arithmetic - *NV
 				case OpCode.ADDNV:
+					{
+						double nB = StackGet( B ).CheckNumber();
+						double nC = Func.Prototype.GetConstNum( C );
+						StackSet( A, nC + nB );
+						break;
+					}
+
 				case OpCode.SUBNV:
+					{
+						double nB = StackGet( B ).CheckNumber();
+						double nC = Func.Prototype.GetConstNum( C );
+						StackSet( A, nC - nB );
+						break;
+					}
+
 				case OpCode.MULNV:
+					{
+						double nB = StackGet( B ).CheckNumber();
+						double nC = Func.Prototype.GetConstNum( C );
+						StackSet( A, nC * nB );
+						break;
+					}
+
 				case OpCode.DIVNV:
+					{
+						double nB = StackGet( B ).CheckNumber();
+						double nC = Func.Prototype.GetConstNum( C );
+						StackSet( A, nC / nB );
+						break;
+					}
+
 				case OpCode.MODNV:
 					{
 						double nB = StackGet( B ).CheckNumber();
 						double nC = Func.Prototype.GetConstNum( C );
-						double result = 0;
-						switch ( OP )
-						{
-							case OpCode.ADDNV: result = nC + nB; break;
-							case OpCode.SUBNV: result = nC - nB; break;
-							case OpCode.MULNV: result = nC * nB; break;
-							case OpCode.DIVNV: result = nC / nB; break;
-							case OpCode.MODNV: result = nC % nB; break;
-						}
-						StackSet( A, result );
+						StackSet( A, nC % nB );
 						break;
 					}
+				#endregion Arithmetic - *NV
+
+				#region Arithmetic - *VV
 				case OpCode.ADDVV:
+					{
+						double nB = StackGet( B ).CheckNumber();
+						double nC = StackGet( C ).CheckNumber();
+						StackSet( A, nB + nC );
+						break;
+					}
+
 				case OpCode.SUBVV:
+					{
+						double nB = StackGet( B ).CheckNumber();
+						double nC = StackGet( C ).CheckNumber();
+						StackSet( A, nB - nC );
+						break;
+					}
+
 				case OpCode.MULVV:
 					{
 						double nB = StackGet( B ).CheckNumber();
 						double nC = StackGet( C ).CheckNumber();
-						double result = 0;
-						switch (OP)
-						{
-							case OpCode.ADDVV: result = nB + nC; break;
-							case OpCode.SUBVV: result = nB - nC; break;
-							case OpCode.MULVV: result = nB * nC; break;
-						}
-						StackSet( A, result );
+						StackSet( A, nB * nC );
 						break;
 					}
+				#endregion Arithmetic - *VV
+
 				case OpCode.CAT:
 					{
 						var builder = new StringBuilder();
-						for (int i = B; i<=C;i++ )
+						for ( int i = B; i <= C; i++ )
 						{
 							// incompatible: glua fails to concat nil, possibly others for whatever reason
 							builder.Append( StackGet( i ).ToString() );
@@ -660,7 +734,7 @@ namespace Miku.Lua
 				case OpCode.KSTR:
 					{
 						var str = Func.Prototype.GetConstGC( D );
-						StackSet( A,  str );
+						StackSet( A, str );
 						break;
 					}
 				// KCDATA: don't care
@@ -678,12 +752,12 @@ namespace Miku.Lua
 					}
 				case OpCode.KPRI:
 					{
-						StackSet( A, ValueSlot.Prim(D) );
+						StackSet( A, ValueSlot.Prim( D ) );
 						break;
 					}
 				case OpCode.KNIL:
 					{
-						for (int i=A;i<=D;i++)
+						for ( int i = A; i <= D; i++ )
 						{
 							StackSet( i, ValueSlot.NIL );
 						}
@@ -697,18 +771,18 @@ namespace Miku.Lua
 						break;
 					}
 				case OpCode.USETV:
-					Func.UpValues[A].Set(StackGet(D));
+					Func.UpValues[A].Set( StackGet( D ) );
 					break;
 				case OpCode.USETN:
-					Func.UpValues[A].Set( Func.Prototype.GetConstNum(D) );
+					Func.UpValues[A].Set( Func.Prototype.GetConstNum( D ) );
 					break;
 				case OpCode.UCLO:
 					{
 						int upval_close_base = GetRealStackIndex( A );
-						for (int i= upval_close_base; i<FrameTop; i++)
+						for ( int i = upval_close_base; i < FrameTop; i++ )
 						{
 							UpValueBox uv;
-							if (OpenUpValues.TryGetValue( i, out uv! ))
+							if ( OpenUpValues.TryGetValue( i, out uv! ) )
 							{
 								uv.Value = ValueStack[i];
 								OpenUpValues.Remove( i );
@@ -720,23 +794,24 @@ namespace Miku.Lua
 					}
 				case OpCode.FNEW:
 					{
-						var new_proto = Func.Prototype.GetConstGC(D).CheckProtoFunction();
+						var new_proto = Func.Prototype.GetConstGC( D ).CheckProtoFunction();
 						var upvals = new UpValueBox[new_proto.UpValues.Length];
-						for (int i=0;i< upvals.Length; i++ )
+						for ( int i = 0; i < upvals.Length; i++ )
 						{
 							var uv_code = new_proto.UpValues[i];
 							if ( (uv_code & 0x8000) == 0 )
 							{
 								var uv_slot = uv_code & 0x3FFF;
 								var uv_box = Func.UpValues[uv_slot];
-								Assert.NotNull(uv_box);
+								Assert.NotNull( uv_box );
 								upvals[i] = uv_box;
-							} else
+							}
+							else
 							{
 								var uv_slot = uv_code & 0x3FFF;
 								int real_stack_index = GetRealStackIndex( uv_slot );
 								UpValueBox uv_box;
-								if (!OpenUpValues.TryGetValue( real_stack_index, out uv_box!) )
+								if ( !OpenUpValues.TryGetValue( real_stack_index, out uv_box! ) )
 								{
 									uv_box = new UpValueBox()
 									{
@@ -774,7 +849,7 @@ namespace Miku.Lua
 				case OpCode.GSET:
 					{
 						var str = Func.Prototype.GetConstGC( D );
-						Func.Env.Set(str, StackGet(A));
+						Func.Env.Set( str, StackGet( A ) );
 						break;
 					}
 				case OpCode.TGETV:
@@ -792,7 +867,7 @@ namespace Miku.Lua
 				case OpCode.TSETV:
 					{
 						var table = StackGet( B ).CheckTable();
-						table.Set( StackGet(C), StackGet( A ) );
+						table.Set( StackGet( C ), StackGet( A ) );
 						break;
 					}
 				case OpCode.TSETS:
@@ -813,9 +888,9 @@ namespace Miku.Lua
 						var table = StackGet( A - 1 ).CheckTable();
 						var num = Func.Prototype.GetConstNum( D );
 						var start_index = (int)BitConverter.DoubleToInt64Bits( num );
-						for (int i=0;i<MultiRes;i++ )
+						for ( int i = 0; i < MultiRes; i++ )
 						{
-							table.Set( start_index + i, StackGet(A + i) );
+							table.Set( start_index + i, StackGet( A + i ) );
 						}
 						break;
 					}
@@ -829,30 +904,30 @@ namespace Miku.Lua
 						bool is_tailcall = (OP == OpCode.CALLT || OP == OpCode.CALLMT);
 						bool is_multires = (OP == OpCode.CALLM || OP == OpCode.CALLMT);
 
-						int call_base = GetRealStackIndex(A);
-						
+						int call_base = GetRealStackIndex( A );
+
 						int arg_base = call_base + 1;
 						int arg_count = C - 1;
-						if (is_multires)
+						if ( is_multires )
 						{
 							arg_count += 1 + MultiRes;
 						}
 
 						int ret_count = B - 1;
 
-						if (OP == OpCode.ITERC)
+						if ( OP == OpCode.ITERC )
 						{
 							// A, A+1, A+2 = A-3, A-2, A-1;
-							for (int i=0;i<3;i++ )
+							for ( int i = 0; i < 3; i++ )
 							{
 								StackSet( A + i, StackGet( A - 3 + i ) );
 							}
 						}
 
-						var call_func = StackGet(A);
+						var call_func = StackGet( A );
 
 						CallPrepare( call_func, A, ret_count, is_tailcall );
-						for (int i=0;i<arg_count;i++ )
+						for ( int i = 0; i < arg_count; i++ )
 						{
 							var arg_val = ValueStack[arg_base + i];
 							StackSet( i, arg_val );
@@ -863,7 +938,7 @@ namespace Miku.Lua
 					}
 				case OpCode.VARG:
 					{
-						if (VarArgs == null)
+						if ( VarArgs == null )
 						{
 							throw new Exception( "Attempt to use varargs in non-vararg function." );
 						}
@@ -891,17 +966,17 @@ namespace Miku.Lua
 					}
 				// Returns
 				case OpCode.RETM:
-						ReturnInternal(A, D + MultiRes);
-						break;
+					ReturnInternal( A, D + MultiRes );
+					break;
 				case OpCode.RET:
-						ReturnInternal( A, D - 1 );
-						break;
+					ReturnInternal( A, D - 1 );
+					break;
 				case OpCode.RET0:
-						ReturnInternal( 0, 0 );
-						break;
+					ReturnInternal( 0, 0 );
+					break;
 				case OpCode.RET1:
-						ReturnInternal( A, 1 );
-						break;
+					ReturnInternal( A, 1 );
+					break;
 				// Loops and Branches
 				case OpCode.LOOP:
 					{
@@ -944,7 +1019,7 @@ namespace Miku.Lua
 				case OpCode.ITERL:
 					{
 						var iter_res = StackGet( A );
-						if (iter_res.Kind != ValueKind.Nil)
+						if ( iter_res.Kind != ValueKind.Nil )
 						{
 							StackSet( A - 1, iter_res );
 							Jump( D );
@@ -962,24 +1037,32 @@ namespace Miku.Lua
 			PC++;
 		}
 
-		private void Jump(int D)
+		private void Jump( int D )
 		{
 			int jump_offset = D - 0x8000;
 			PC += jump_offset;
 		}
 
-		public string? GetDirectory(int level)
+		public string? GetDirectory( int level )
 		{
-			var func = GetFunctionAtLevel(level);
-			if (func == null)
+			Function? func;
+			if ( level == -1 )
+			{
+				func = GetBaseFunction();
+			}
+			else
+			{
+				func = GetFunctionAtLevel( level );
+			}
+			if ( func == null )
 			{
 				return null;
 			}
 			var debug_name = func.Prototype.DebugName;
-			if (debug_name.StartsWith("@lua/"))
+			if ( debug_name.StartsWith( "@lua/" ) )
 			{
 				var no_prefix = debug_name.Substring( 5 );
-				var no_filename = no_prefix.Substring(0, no_prefix.LastIndexOf( '/' )+1);
+				var no_filename = no_prefix.Substring( 0, no_prefix.LastIndexOf( '/' ) + 1 );
 				return no_filename;
 			}
 			return null;
