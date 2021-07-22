@@ -122,14 +122,16 @@ do
     function Weapon:Clip2() return 10 end
 
     function Weapon:SetClip2(x) end
-
-    function Weapon:ShootEffects() end
 end
 
 -- Entity
 do
     local Entity = FindMetaTable("Entity")
     function Entity:IsNPC() return false end
+
+    function Entity:MuzzleFlash() end
+
+    function Entity:SetAnimation() end
 end
 
 -- DARKRP

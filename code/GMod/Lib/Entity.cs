@@ -40,7 +40,7 @@ namespace Miku.GMod.Lib
 				// TODO a bunch of settings aren't supported
 				var ent = ex.GetArg( 0 ).CheckUserData().CheckEntity().Entity;
 				var bullet_info = ex.GetArg( 1 ).CheckTable();
-				bullet_info.Log();
+				//bullet_info.Log();
 				if ( ex.GetArg( 2 ).IsTruthy() )
 				{
 					throw new Exception( "supress host events?" );
@@ -79,7 +79,7 @@ namespace Miku.GMod.Lib
 					// Show effects
 					if (ent.IsClient)
 					{
-						DebugOverlay.Line( tr.StartPos, tr.EndPos, ent.IsServer ? new Color(0,1,1,0.5f) : new Color( 1, 1, 0, 0.5f ), 0.5f );
+						//DebugOverlay.Line( tr.StartPos, tr.EndPos, ent.IsServer ? new Color(0,1,1,0.5f) : new Color( 1, 1, 0, 0.5f ), 0.5f );
 						tr.Surface.DoBulletImpact( tr );
 					}
 					if (ent.IsServer)

@@ -4,6 +4,31 @@ using System.Linq;
 
 namespace Miku
 {
+	class MikuCam : Camera
+	{
+		public override void Activated()
+		{
+			var pawn = Local.Pawn;
+			if ( pawn == null ) return;
+
+			Pos = pawn.EyePos;
+			Rot = pawn.EyeRot;
+		}
+
+		public override void Update()
+		{
+			var pawn = Local.Pawn;
+			if ( pawn == null ) return;
+
+			Rot = pawn.EyeRot;
+			Pos = pawn.EyePos;
+
+			FieldOfView = 80;
+
+			Viewer = pawn;
+		}
+	}
+
 	partial class MikuPlayer : Player
 	{
 		public override void Respawn()
@@ -23,7 +48,7 @@ namespace Miku
 			//
 			// Use ThirdPersonCamera (you can make your own Camera for 100% control)
 			//
-			Camera = new ThirdPersonCamera();
+			Camera = new MikuCam();
 
 			Inventory = new BaseInventory(this);
 			var swep = new GMod.Entities.GmodWeapon("weapon_base");

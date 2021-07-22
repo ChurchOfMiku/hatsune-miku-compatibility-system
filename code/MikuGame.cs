@@ -43,9 +43,10 @@ namespace Miku
 				if (N == 0)
 				{
 					var crate = new ModelEntity();
-					crate.SetModel( "models/citizen_props/cardboardbox01.vmdl" );
+					//crate.SetModel( "models/weapons/w_pistol.vmdl" );
+					crate.SetModel( "models/citizen_props/crate01.vmdl" );
 					crate.Position = new Vector3( 500, 500, 500 );
-					crate.SetupPhysicsFromModel( PhysicsMotionType.Dynamic, false );
+					crate.SetupPhysicsFromModel( PhysicsMotionType.Dynamic );
 					crate.Health = 1000;
 					//ragdoll.PhysicsGroup.Velocity = EyeRot.Forward * 1000;
 				}
