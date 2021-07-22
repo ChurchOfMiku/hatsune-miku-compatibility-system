@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using System;
+using System.Diagnostics;
 
 namespace Miku.Lua
 {
@@ -75,6 +76,8 @@ namespace Miku.Lua
 			throw new Exception( $"{this} is not a table." );
 		}
 
+		public Table UnsafeGetTable() => (Table)Reference!;
+
 		public double CheckNumber()
 		{
 			if ( Kind == ValueKind.Number )
@@ -83,6 +86,8 @@ namespace Miku.Lua
 			}
 			throw new Exception( $"{this} is not a number." );
 		}
+
+		public double UnsafeGetNumber() => NumberValue;
 
 		public ProtoFunction CheckProtoFunction()
 		{
@@ -101,6 +106,8 @@ namespace Miku.Lua
 			}
 			throw new Exception( $"{this} is not a string." );
 		}
+
+		public string UnsafeGetString() => (string)Reference!;
 
 		public string? TryGetString()
 		{
