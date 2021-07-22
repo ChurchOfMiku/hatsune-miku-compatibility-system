@@ -485,66 +485,74 @@ namespace Miku.Lua
 					{
 						var vA = StackGet( A );
 						var vD = StackGet( D );
-						bool skip = !vA.Equals( vD );
-						if ( skip ) { PC++; }
+						if ( !vA.Equals( vD ) )
+							PC++;
 						break;
 					}
+
 				case OpCode.ISNEV:
 					{
 						var vA = StackGet( A );
 						var vD = StackGet( D );
-						bool skip = vA.Equals( vD );
-						if ( skip ) { PC++; }
+						if ( vA.Equals( vD ) )
+							PC++;
 						break;
 					}
+
 				case OpCode.ISEQS:
 					{
 						var vA = StackGet( A );
 						var vD = Func.Prototype.GetConstGC( D );
-						bool skip = !vA.Equals( vD );
-						if ( skip ) { PC++; }
+						if ( !vA.Equals( vD ) )
+							PC++;
 						break;
 					}
+
 				case OpCode.ISNES:
 					{
 						var vA = StackGet( A );
 						var vD = Func.Prototype.GetConstGC( D );
-						bool skip = vA.Equals( vD );
-						if ( skip ) { PC++; }
+						if ( vA.Equals( vD ) )
+							PC++;
 						break;
 					}
+
 				case OpCode.ISEQN:
 					{
 						ValueSlot lhs = StackGet( A );
 						ValueSlot rhs = Func.Prototype.GetConstNum( D );
-						bool skip = !lhs.Equals( rhs );
-						if ( skip ) { PC++; }
+						if ( !lhs.Equals( rhs ) )
+							PC++;
 						break;
 					}
+
 				case OpCode.ISNEN:
 					{
 						ValueSlot lhs = StackGet( A );
 						ValueSlot rhs = Func.Prototype.GetConstNum( D );
-						bool skip = lhs.Equals( rhs );
-						if ( skip ) { PC++; }
+						if ( lhs.Equals( rhs ) )
+							PC++;
 						break;
 					}
+
 				case OpCode.ISEQP:
 					{
 						var vA = StackGet( A );
 						var vD = ValueSlot.Prim( D );
-						bool skip = !vA.Equals( vD );
-						if ( skip ) { PC++; }
+						if ( !vA.Equals( vD ) )
+							PC++;
 						break;
 					}
+
 				case OpCode.ISNEP:
 					{
 						var vA = StackGet( A );
 						var vD = ValueSlot.Prim( D );
-						bool skip = vA.Equals( vD );
-						if ( skip ) { PC++; }
+						if ( vA.Equals( vD ) )
+							PC++;
 						break;
 					}
+
 				// Test and Copy
 				case OpCode.ISTC:
 					{
@@ -559,6 +567,7 @@ namespace Miku.Lua
 						}
 						break;
 					}
+
 				case OpCode.ISFC:
 					{
 						var val = StackGet( D );
@@ -572,36 +581,42 @@ namespace Miku.Lua
 						}
 						break;
 					}
+
 				case OpCode.IST:
 					if ( !StackGet( D ).IsTruthy() )
 					{
 						PC++;
 					}
 					break;
+
 				case OpCode.ISF:
 					if ( StackGet( D ).IsTruthy() )
 					{
 						PC++;
 					}
 					break;
+
 				// ISEQN
 				// ISNEN
 				// Move and Unary Ops
 				case OpCode.MOV:
 					StackSet( A, StackGet( D ) );
 					break;
+
 				case OpCode.NOT:
 					{
 						bool result = !StackGet( D ).IsTruthy();
 						StackSet( A, result );
 						break;
 					}
+
 				case OpCode.UNM:
 					{
 						double num = StackGet( D ).CheckNumber();
 						StackSet( A, -num );
 						break;
 					}
+
 				case OpCode.LEN:
 					{
 						StackSet( A, ValueOperations.Len( StackGet( D ) ) );
