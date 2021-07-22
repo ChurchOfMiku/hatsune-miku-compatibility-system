@@ -558,13 +558,9 @@ namespace Miku.Lua
 					{
 						var val = StackGet( D );
 						if ( val.IsTruthy() )
-						{
 							StackSet( A, val );
-						}
 						else
-						{
 							PC++;
-						}
 						break;
 					}
 
@@ -572,28 +568,20 @@ namespace Miku.Lua
 					{
 						var val = StackGet( D );
 						if ( !val.IsTruthy() )
-						{
 							StackSet( A, val );
-						}
 						else
-						{
 							PC++;
-						}
 						break;
 					}
 
 				case OpCode.IST:
 					if ( !StackGet( D ).IsTruthy() )
-					{
 						PC++;
-					}
 					break;
 
 				case OpCode.ISF:
 					if ( StackGet( D ).IsTruthy() )
-					{
 						PC++;
-					}
 					break;
 
 				// ISEQN
