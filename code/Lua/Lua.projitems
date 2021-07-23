@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>5142ad09-93ff-4d6c-9090-7ae4bd272c62</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Miku.Lua</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)CodeCache.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CoreLib\Bit.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CoreLib\Globals.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CoreLib\Misc.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CoreLib\String.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Dump.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Executor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Function.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LuaMachine.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MetaTables.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)OpCode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Profiler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Table.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UserData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ValueOperations.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ValueSlot.cs" />
+  </ItemGroup>
+</Project>
