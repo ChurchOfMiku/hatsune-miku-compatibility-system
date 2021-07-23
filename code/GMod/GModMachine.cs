@@ -5,7 +5,7 @@ using Sandbox;
 
 namespace Miku.GMod
 {
-	abstract class GModMachineBase : Lua.LuaMachine
+	abstract class GModMachine : Lua.LuaMachine
 	{
 		Function RunHookFunction;
 		Function RegisterWeaponFunction;
@@ -17,7 +17,7 @@ namespace Miku.GMod
 		public abstract bool IsClient { get; }
 		public bool IsServer { get => !IsClient; }
 
-		public GModMachineBase()
+		public GModMachine()
 		{
 			DoBaseClassReplacement = true;
 
@@ -145,7 +145,7 @@ namespace Miku.GMod
 		}
 	}
 
-	class GmodMachineClient : GModMachineBase
+	class GmodMachineClient : GModMachine
 	{
 		public override bool IsClient => true;
 
@@ -168,7 +168,7 @@ namespace Miku.GMod
 		}
 	}
 
-	class GmodMachineServer : GModMachineBase
+	class GmodMachineServer : GModMachine
 	{
 		public override bool IsClient => false;
 

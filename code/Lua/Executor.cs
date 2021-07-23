@@ -373,6 +373,12 @@ namespace Miku.Lua
 				try
 				{
 					Step();
+					safety++;
+					if ( safety >= LIMIT )
+					{
+						//this.LogState();
+						throw new Exception( "hit safety" );
+					}
 				} catch (Exception e)
 				{
 					// TODO throw an exception that contains exectuor info, don't log anything here.
@@ -384,12 +390,6 @@ namespace Miku.Lua
 						//LogState();
 					}
 					throw new SilentExecException(e);
-				}
-				safety++;
-				if (safety >= LIMIT )
-				{
-					//this.LogState();
-					throw new Exception( "hit safety" );
 				}
 			}
 			Profiler.Stop();

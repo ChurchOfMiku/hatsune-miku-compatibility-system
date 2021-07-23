@@ -26,7 +26,7 @@ namespace Miku.GMod
 		public static GmodMachineClient Client;
 		public static GmodMachineServer Server;
 
-		public static GModMachineBase GetMachine()
+		public static GModMachine GetMachine()
 		{
 			if ( Client != null)
 			{
@@ -68,8 +68,9 @@ namespace Miku.GMod
 			Client?.LoadWeapon( "glib_official/garrysmod/gamemodes/base/entities/weapons/weapon_base" );
 			Server?.LoadWeapon( "glib_official/garrysmod/gamemodes/base/entities/weapons/weapon_base" );
 
-			Client?.RunFile("scripts/H0L-D4/lua/autorun/holohud.lua");
-			Server?.RunFile("scripts/H0L-D4/lua/autorun/holohud.lua");
+			GetMachine().RunFile("scripts/H0L-D4/lua/autorun/holohud.lua");
+
+			GetMachine().RunHook( "Initialize", new ValueSlot[0] );
 
 			//Client?.RunFile( "test/patterns.lua" );
 

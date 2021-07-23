@@ -12,7 +12,7 @@ namespace Miku.GMod.Lib
 {
     class Weapon
 	{
-		public Weapon( GModMachineBase machine )
+		public Weapon( GModMachine machine )
 		{
 			var class_weapon = machine.DefineClass( "Weapon" );
 			machine.Ents.ClassWeapon = class_weapon;

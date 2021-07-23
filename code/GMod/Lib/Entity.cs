@@ -11,7 +11,7 @@ namespace Miku.GMod.Lib
 {
 	class Entity
 	{
-		public Entity( GModMachineBase machine )
+		public Entity( GModMachine machine )
 		{
 			var class_entity = machine.DefineClass( "Entity" );
 			class_entity.DefineFunc( "GetTable", ( Executor ex ) =>

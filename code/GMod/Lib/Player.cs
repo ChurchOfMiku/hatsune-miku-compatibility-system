@@ -12,7 +12,7 @@ namespace Miku.GMod.Lib
 	class Player
 	{
 
-		public Player(GModMachineBase machine)
+		public Player(GModMachine machine)
 		{
 			var class_player = machine.DefineClass( "Player" );
 			machine.Ents.ClassPlayer = class_player;
