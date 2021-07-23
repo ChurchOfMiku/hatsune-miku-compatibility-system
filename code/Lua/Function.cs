@@ -33,16 +33,22 @@ namespace Miku.Lua
 
 	class ProtoFunction
 	{
-		public byte flags;
-		public byte numArgs;
-		public byte numSlots;
+		public byte Flags;
+		public byte NumArgs;
+		public byte NumSlots; // this is ignored by the VM
 
 		// All this is either filled in or irrelevant because we are a user function.
-		public uint[] code = null!;
+		public uint[] Code = null!;
 		public ushort[] UpValues = null!;
-		public ValueSlot[] constGC = null!;
-		public double[] constNum = null!;
+		public ValueSlot[] ConstGC = null!;
+		public double[] ConstNum = null!;
+		public string ChunkName = null!;
+		public uint[] LineInfo = null!;
 
+		/// <summary>
+		/// Used to tag User-Functions and for our crappy profiler.
+		/// Where possible, use ChunkName + LineInfo instead.
+		/// </summary>
 		public string DebugName = "? (UNNAMED)";
 
 		/// <summary>
@@ -52,17 +58,28 @@ namespace Miku.Lua
 
 		public ValueSlot GetConstGC( int index )
 		{
-			return this.constGC[this.constGC.Length - 1 - index];
+			return this.ConstGC[this.ConstGC.Length - 1 - index];
 		}
 
 		public double GetConstNum( int index )
 		{
-			return this.constNum[index];
+			return this.ConstNum[index];
 		}
 
 		public bool IsVarArg()
 		{
-			return (flags & 2) != 0;
+			return (Flags & 2) != 0;
+		}
+
+		public string GetDebugLine(int pc)
+		{
+			if (LineInfo != null)
+			{
+				return ChunkName+":"+LineInfo[pc];
+			} else
+			{
+				return DebugName;
+			}
 		}
 	}
 }

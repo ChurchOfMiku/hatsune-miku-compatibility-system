@@ -30,33 +30,38 @@ namespace Miku.Lua
 			var stream = new MemoryStream( dump );
 			var reader = new BinaryReader( stream );
 
-			Assert.True( Enumerable.SequenceEqual( reader.ReadBytes(3), DUMP_HEADER ) );
-			Assert.True( reader.ReadByte() == DUMP_VERSION );
-			Assert.True( reader.Read7BitEncodedInt64() == DUMP_FLAGS );
+			var header = reader.ReadBytes( 3 );
+			var version = reader.ReadByte();
+			var flags = reader.ReadByte();
+
+			Assert.True( Enumerable.SequenceEqual( header, DUMP_HEADER ) );
+			Assert.True( version == DUMP_VERSION );
+			Assert.True( flags == DUMP_FLAGS );
 			var chunkName = reader.ReadString();
 
 			var protos = new Stack<ProtoFunction>();
 			int proto_len;
 			while ( (proto_len = reader.Read7BitEncodedInt()) != 0 ) {
 				var proto = new ProtoFunction();
-				proto.flags = reader.ReadByte();
-				proto.numArgs = reader.ReadByte();
-				proto.numSlots = reader.ReadByte();
+				proto.Flags = reader.ReadByte();
+				proto.NumArgs = reader.ReadByte();
+				proto.NumSlots = reader.ReadByte();
 				proto.UpValues = new ushort[reader.ReadByte()];
 
-				proto.constGC = new ValueSlot[reader.Read7BitEncodedInt()];
-				proto.constNum = new double[reader.Read7BitEncodedInt()];
-				proto.code = new uint[reader.Read7BitEncodedInt()];
+				proto.ConstGC = new ValueSlot[reader.Read7BitEncodedInt()];
+				proto.ConstNum = new double[reader.Read7BitEncodedInt()];
+				proto.Code = new uint[reader.Read7BitEncodedInt()];
 
 				var debugSize = reader.Read7BitEncodedInt();
-				var debugFirstLine = reader.Read7BitEncodedInt();
+				uint debugFirstLine = (uint)reader.Read7BitEncodedInt();
 				var debugLineCount = reader.Read7BitEncodedInt();
 
 				proto.DebugName = chunkName + ":" + debugFirstLine;
+				proto.ChunkName = chunkName;
 
-				for (int i=0;i<proto.code.Length;i++)
+				for (int i=0;i<proto.Code.Length;i++)
 				{
-					proto.code[i] = reader.ReadUInt32();
+					proto.Code[i] = reader.ReadUInt32();
 				}
 
 				for ( int i = 0; i < proto.UpValues.Length; i++ )
@@ -64,13 +69,13 @@ namespace Miku.Lua
 					proto.UpValues[i] = reader.ReadUInt16();
 				}
 
-				for ( int i = 0; i < proto.constGC.Length; i++ )
+				for ( int i = 0; i < proto.ConstGC.Length; i++ )
 				{
 					var const_type = reader.Read7BitEncodedInt();
 					switch (const_type)
 					{
 						case 0:
-							proto.constGC[i] = protos.Pop();
+							proto.ConstGC[i] = protos.Pop();
 							break;
 						case 1:
 							var size_array = reader.Read7BitEncodedInt();
@@ -98,12 +103,12 @@ namespace Miku.Lua
 								var val = ReadTableEntry( reader );
 								table.Set( key, val );
 							}
-							proto.constGC[i] = table;
+							proto.ConstGC[i] = table;
 							break;
 						default:
 							if (const_type >= 5)
 							{
-								proto.constGC[i] = reader.ReadStringN( const_type - 5 );
+								proto.ConstGC[i] = reader.ReadStringN( const_type - 5 );
 							} else
 							{
 								throw new Exception( "handle const type " + const_type );
@@ -112,7 +117,7 @@ namespace Miku.Lua
 					}
 				}
 
-				for (int i = 0; i < proto.constNum.Length; i++ )
+				for (int i = 0; i < proto.ConstNum.Length; i++ )
 				{
 					var n = reader.Read7BitEncodedInt64();
 					var is_double = (n & 1) == 1;
@@ -122,15 +127,38 @@ namespace Miku.Lua
 						var m = reader.Read7BitEncodedInt64();
 						long x = (m << 32) | n;
 						double d = BitConverter.Int64BitsToDouble(x);
-						proto.constNum[i] = d;
+						proto.ConstNum[i] = d;
 					} else
 					{
-						proto.constNum[i] = (int)n;
+						proto.ConstNum[i] = (int)n;
 					}
 				}
 
 				// skip debuginfo for now
-				reader.ReadBytes(debugSize);
+				var debug_bytes = reader.ReadBytes(debugSize);
+				{
+					var debug_reader = new BinaryReader( new MemoryStream( debug_bytes ) );
+					proto.LineInfo = new uint[proto.Code.Length];
+					if (debugLineCount < 256)
+					{
+						for (int i=0;i< proto.LineInfo.Length; i++)
+						{
+							proto.LineInfo[i] = debug_reader.ReadByte() + debugFirstLine;
+						}
+					} else if (debugLineCount < 65536)
+					{
+						for (int i = 0; i < proto.LineInfo.Length; i++)
+						{
+							proto.LineInfo[i] = debug_reader.ReadUInt16() + debugFirstLine;
+						}
+					} else
+					{
+						for (int i = 0; i < proto.LineInfo.Length; i++)
+						{
+							proto.LineInfo[i] = debug_reader.ReadUInt32() + debugFirstLine;
+						}
+					}
+				}
 
 				protos.Push(proto);
 			}

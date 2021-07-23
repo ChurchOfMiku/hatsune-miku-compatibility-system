@@ -201,10 +201,13 @@ namespace Miku.Lua
 			}
 		}
 
-		// TODO pull function from stack, simplify all calls
+		// TODO consider pulling function from stack, might simplify calls
 		// NOTE ret_base is now a LOCAL stack offset
-		private void CallPrepare( ValueSlot new_func, int ret_base = 0, int ret_count = 0, bool replace = false )
+		private void CallPrepare( ValueSlot call_value, int ret_base = 0, int ret_count = 0, bool replace = false )
 		{
+			// Check function HERE to avoid messing up the stack in the case that it fails.
+			var new_func = call_value.CheckFunction();
+
 			// Push old function + PC to stack.
 			if ( Func != null && !replace )
 			{
@@ -219,7 +222,7 @@ namespace Miku.Lua
 				} );
 			}
 
-			Func = new_func.CheckFunction();
+			Func = new_func;
 			PC = -1;
 			VarArgs = null;
 
@@ -266,10 +269,10 @@ namespace Miku.Lua
 				return;
 			}
 
-			if ( args_in < Func.Prototype.numArgs )
+			if ( args_in < Func.Prototype.NumArgs )
 			{
 				// we need to clear arguments we're not using
-				for ( int i = args_in; i < Func.Prototype.numArgs; i++ )
+				for ( int i = args_in; i < Func.Prototype.NumArgs; i++ )
 				{
 					StackSet( i, ValueSlot.NIL );
 				}
@@ -277,10 +280,10 @@ namespace Miku.Lua
 
 			if ( Func.Prototype.IsVarArg() )
 			{
-				if ( args_in > Func.Prototype.numArgs )
+				if ( args_in > Func.Prototype.NumArgs )
 				{
-					int varg_base = Func.Prototype.numArgs;
-					int varg_count = args_in - Func.Prototype.numArgs;
+					int varg_base = Func.Prototype.NumArgs;
+					int varg_count = args_in - Func.Prototype.NumArgs;
 
 					VarArgs = new ValueSlot[varg_count];
 					for ( int i = 0; i < varg_count; i++ )
@@ -394,10 +397,10 @@ namespace Miku.Lua
 
 		public void LogStack()
 		{
-			Log.Info( " at " + Func.Prototype.DebugName );
+			Log.Info( " at " + Func.Prototype.GetDebugLine(PC) );
 			foreach ( var level in CallStack )
 			{
-				Log.Info( " at " + level.Func.Prototype.DebugName );
+				Log.Info( " at " + level.Func.Prototype.GetDebugLine(level.PC) );
 			}
 		}
 
@@ -430,9 +433,9 @@ namespace Miku.Lua
 				Log.Info( $"> {i}: {ValueStack[i]}" );
 			}
 			Log.Info( "======= CODE =======" );
-			for ( int i = 0; i < Func.Prototype.code.Length; i++ )
+			for ( int i = 0; i < Func.Prototype.Code.Length; i++ )
 			{
-				uint instr = Func.Prototype.code[i];
+				uint instr = Func.Prototype.Code[i];
 				var OP = (OpCode)(instr & 0xFF);
 				var A = (instr >> 8) & 0xFF;
 				var B = (instr >> 24) & 0xFF;
@@ -449,7 +452,7 @@ namespace Miku.Lua
 
 		public void Step()
 		{
-			uint instr = Func.Prototype.code[PC];
+			uint instr = Func.Prototype.Code[PC];
 			var OP = (OpCode)(instr & 0xFF);
 
 			Profiler.Update( OP, Func.Prototype.DebugName );
