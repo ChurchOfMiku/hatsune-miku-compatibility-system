@@ -47,12 +47,18 @@ function AddConsoleCommand()
 
 end
 
+function GetConVar_Internal(name)
+    return CreateConVar()
+end
+
 function AddCSLuaFile()
 
 end
 
 function CreateConVar()
-
+    return {
+        GetInt = function() return 0 end
+    }
 end
 
 sql = {}
@@ -65,11 +71,12 @@ end
 file = {}
 _R.miku_debug_lib(file,"file")
 
---local fake_file = {}
---_R.miku_debug_lib(fake_file,"[class File]")
-
 function file.Open()
     return nil
+end
+
+function file.Find()
+    return {}, {}
 end
 
 ents = {}
@@ -83,6 +90,21 @@ _R.miku_debug_lib(team,"team")
 
 game = {}
 _R.miku_debug_lib(game,"game")
+
+function game.GetAmmoID()
+    -- https://wiki.facepunch.com/gmod/Default_Ammo_Types
+    -- we can probably just implement ammo types in lua
+    return 1
+end
+
+if CLIENT then
+    input = {}
+    _R.miku_debug_lib(input,"input")
+    
+    function input.SelectWeapon()
+    
+    end
+end
 
 motionsensor = {}
 _R.miku_debug_lib(motionsensor,"motionsensor")
