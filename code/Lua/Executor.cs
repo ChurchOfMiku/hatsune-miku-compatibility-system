@@ -7,7 +7,7 @@ using System.Text;
 using System.Diagnostics;
 
 using Sandbox;
-
+using System.Runtime.CompilerServices;
 
 namespace Miku.Lua
 {
@@ -358,10 +358,11 @@ namespace Miku.Lua
 			ValueStack[real_index] = x;
 		}
 
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		private ValueSlot StackGet(int index)
 		{
 			return ValueStack[GetRealStackIndex( index )];
-		}
+		} 
 
 		public void Run()
 		{
@@ -372,7 +373,666 @@ namespace Miku.Lua
 			{
 				while (ResultCount == -1)
 				{
-					Step();
+					// This was formerly it's own method
+					#region Stepper
+					{
+						uint instr = Func.Prototype.Code[PC];
+						var OP = (OpCode)(instr & 0xFF);
+
+						Profiler.Update( OP, Func.Prototype.DebugName );
+
+						int A = (int)((instr >> 8) & 0xFF);
+						int B = (int)((instr >> 24) & 0xFF);
+						int C = (int)((instr >> 16) & 0xFF);
+						int D = (int)((instr >> 16) & 0xFFFF);
+
+						switch ( OP )
+						{
+							#region Comparisons
+							case OpCode.ISLT:
+								{
+									var lhs = StackGet( A ).CheckNumber();
+									var rhs = StackGet( D ).CheckNumber();
+									if ( !(lhs < rhs) )
+										PC++;
+									break;
+								}
+
+							case OpCode.ISGE:
+								{
+									var lhs = StackGet( A ).CheckNumber();
+									var rhs = StackGet( D ).CheckNumber();
+									if ( !(lhs >= rhs) )
+										PC++;
+									break;
+								}
+
+							case OpCode.ISLE:
+								{
+									var lhs = StackGet( A ).CheckNumber();
+									var rhs = StackGet( D ).CheckNumber();
+									if ( !(lhs <= rhs) )
+										PC++;
+									break;
+								}
+
+							case OpCode.ISGT:
+								{
+									double lhs = StackGet( A ).CheckNumber();
+									double rhs = StackGet( D ).CheckNumber();
+									if ( !(lhs > rhs) )
+										PC++;
+									break;
+								}
+
+							case OpCode.ISEQV:
+								{
+									var vA = StackGet( A );
+									var vD = StackGet( D );
+									if ( !vA.Equals( vD ) )
+										PC++;
+									break;
+								}
+
+							case OpCode.ISNEV:
+								{
+									var vA = StackGet( A );
+									var vD = StackGet( D );
+									if ( vA.Equals( vD ) )
+										PC++;
+									break;
+								}
+
+							case OpCode.ISEQS:
+								{
+									var vA = StackGet( A );
+									var vD = Func.Prototype.GetConstGC( D );
+									if ( !vA.Equals( vD ) )
+										PC++;
+									break;
+								}
+
+							case OpCode.ISNES:
+								{
+									var vA = StackGet( A );
+									var vD = Func.Prototype.GetConstGC( D );
+									if ( vA.Equals( vD ) )
+										PC++;
+									break;
+								}
+
+							case OpCode.ISEQN:
+								{
+									ValueSlot lhs = StackGet( A );
+									ValueSlot rhs = Func.Prototype.GetConstNum( D );
+									if ( !lhs.Equals( rhs ) )
+										PC++;
+									break;
+								}
+
+							case OpCode.ISNEN:
+								{
+									ValueSlot lhs = StackGet( A );
+									ValueSlot rhs = Func.Prototype.GetConstNum( D );
+									if ( lhs.Equals( rhs ) )
+										PC++;
+									break;
+								}
+
+							case OpCode.ISEQP:
+								{
+									var vA = StackGet( A );
+									var vD = ValueSlot.Prim( D );
+									if ( !vA.Equals( vD ) )
+										PC++;
+									break;
+								}
+
+							case OpCode.ISNEP:
+								{
+									var vA = StackGet( A );
+									var vD = ValueSlot.Prim( D );
+									if ( vA.Equals( vD ) )
+										PC++;
+									break;
+								}
+							#endregion
+
+							#region Test, Test and Copy
+							case OpCode.ISTC:
+								{
+									var val = StackGet( D );
+									if ( val.IsTruthy() )
+										StackSet( A, val );
+									else
+										PC++;
+									break;
+								}
+
+							case OpCode.ISFC:
+								{
+									var val = StackGet( D );
+									if ( !val.IsTruthy() )
+										StackSet( A, val );
+									else
+										PC++;
+									break;
+								}
+
+							case OpCode.IST:
+								if ( !StackGet( D ).IsTruthy() )
+									PC++;
+								break;
+
+							case OpCode.ISF:
+								if ( StackGet( D ).IsTruthy() )
+									PC++;
+								break;
+
+							// ISEQN
+							// ISNEN
+							#endregion
+
+							#region Move and Unary Ops
+							case OpCode.MOV:
+								StackSet( A, StackGet( D ) );
+								break;
+
+							case OpCode.NOT:
+								{
+									bool result = !StackGet( D ).IsTruthy();
+									StackSet( A, result );
+									break;
+								}
+
+							case OpCode.UNM:
+								{
+									double num = StackGet( D ).CheckNumber();
+									StackSet( A, -num );
+									break;
+								}
+
+							case OpCode.LEN:
+								{
+									StackSet( A, ValueOperations.Len( StackGet( D ) ) );
+									break;
+								}
+							#endregion
+
+							// Binary Ops
+							#region Arithmetic - *NV
+							case OpCode.ADDVN:
+								{
+									double nB = StackGet( B ).CheckNumber();
+									double nC = Func.Prototype.GetConstNum( C );
+									StackSet( A, nB + nC );
+									break;
+								}
+
+							case OpCode.SUBVN:
+								{
+									double nB = StackGet( B ).CheckNumber();
+									double nC = Func.Prototype.GetConstNum( C );
+									StackSet( A, nB - nC );
+									break;
+								}
+
+							case OpCode.MULVN:
+								{
+									double nB = StackGet( B ).CheckNumber();
+									double nC = Func.Prototype.GetConstNum( C );
+									StackSet( A, nB * nC );
+									break;
+								}
+
+							case OpCode.DIVVN:
+								{
+									double nB = StackGet( B ).CheckNumber();
+									double nC = Func.Prototype.GetConstNum( C );
+									StackSet( A, nB / nC );
+									break;
+								}
+
+							case OpCode.MODVN:
+								{
+									double nB = StackGet( B ).CheckNumber();
+									double nC = Func.Prototype.GetConstNum( C );
+									StackSet( A, nB % nC );
+									break;
+								}
+							#endregion Arithmetic - *NV
+
+							#region Arithmetic - *NV
+							case OpCode.ADDNV:
+								{
+									double nB = StackGet( B ).CheckNumber();
+									double nC = Func.Prototype.GetConstNum( C );
+									StackSet( A, nC + nB );
+									break;
+								}
+
+							case OpCode.SUBNV:
+								{
+									double nB = StackGet( B ).CheckNumber();
+									double nC = Func.Prototype.GetConstNum( C );
+									StackSet( A, nC - nB );
+									break;
+								}
+
+							case OpCode.MULNV:
+								{
+									double nB = StackGet( B ).CheckNumber();
+									double nC = Func.Prototype.GetConstNum( C );
+									StackSet( A, nC * nB );
+									break;
+								}
+
+							case OpCode.DIVNV:
+								{
+									double nB = StackGet( B ).CheckNumber();
+									double nC = Func.Prototype.GetConstNum( C );
+									StackSet( A, nC / nB );
+									break;
+								}
+
+							case OpCode.MODNV:
+								{
+									double nB = StackGet( B ).CheckNumber();
+									double nC = Func.Prototype.GetConstNum( C );
+									StackSet( A, nC % nB );
+									break;
+								}
+							#endregion Arithmetic - *NV
+
+							#region Arithmetic - *VV
+							case OpCode.ADDVV:
+								{
+									double nB = StackGet( B ).CheckNumber();
+									double nC = StackGet( C ).CheckNumber();
+									StackSet( A, nB + nC );
+									break;
+								}
+
+							case OpCode.SUBVV:
+								{
+									double nB = StackGet( B ).CheckNumber();
+									double nC = StackGet( C ).CheckNumber();
+									StackSet( A, nB - nC );
+									break;
+								}
+
+							case OpCode.MULVV:
+								{
+									double nB = StackGet( B ).CheckNumber();
+									double nC = StackGet( C ).CheckNumber();
+									StackSet( A, nB * nC );
+									break;
+								}
+
+							case OpCode.DIVVV:
+								{
+									double nB = StackGet( B ).CheckNumber();
+									double nC = StackGet( C ).CheckNumber();
+									StackSet( A, nB / nC );
+									break;
+								}
+
+							case OpCode.MODVV:
+								{
+									double nB = StackGet( B ).CheckNumber();
+									double nC = StackGet( C ).CheckNumber();
+									StackSet( A, nB % nC );
+									break;
+								}
+
+							case OpCode.POW:
+								{
+									double nB = StackGet( B ).CheckNumber();
+									double nC = StackGet( C ).CheckNumber();
+									StackSet( A, Math.Pow( nB, nC ) );
+									break;
+								}
+							#endregion Arithmetic - *VV
+
+							case OpCode.CAT:
+								{
+									var builder = new StringBuilder();
+									for ( int i = B; i <= C; i++ )
+									{
+										// incompatible: glua fails to concat nil, possibly others for whatever reason
+										builder.Append( StackGet( i ).ToString() );
+									}
+									StackSet( A, builder.ToString() );
+									break;
+								}
+
+							#region Constants
+							case OpCode.KSTR:
+								{
+									var str = Func.Prototype.GetConstGC( D );
+									StackSet( A, str );
+									break;
+								}
+
+							// KCDATA: don't care
+
+							case OpCode.KSHORT:
+								{
+									// TODO check!
+									StackSet( A, (short)D );
+									break;
+								}
+
+							case OpCode.KNUM:
+								{
+									var num = Func.Prototype.GetConstNum( D );
+									StackSet( A, num );
+									break;
+								}
+
+							case OpCode.KPRI:
+								{
+									StackSet( A, ValueSlot.Prim( D ) );
+									break;
+								}
+
+							case OpCode.KNIL:
+								{
+									for ( int i = A; i <= D; i++ )
+									{
+										StackSet( i, ValueSlot.NIL );
+									}
+									break;
+								}
+							#endregion
+
+							#region Upvalues and Function Init
+							case OpCode.UGET:
+								{
+									var val = Func.UpValues[D].Get();
+									StackSet( A, val );
+									break;
+								}
+							case OpCode.USETV:
+								Func.UpValues[A].Set( StackGet( D ) );
+								break;
+							case OpCode.USETN:
+								Func.UpValues[A].Set( Func.Prototype.GetConstNum( D ) );
+								break;
+							case OpCode.USETP:
+								Func.UpValues[A].Set( ValueSlot.Prim( D ) );
+								break;
+							case OpCode.UCLO:
+								{
+									int upval_close_base = GetRealStackIndex( A );
+									for ( int i = upval_close_base; i < FrameTop; i++ )
+									{
+										UpValueBox uv;
+										if ( OpenUpValues.TryGetValue( i, out uv! ) )
+										{
+											uv.Value = ValueStack[i];
+											OpenUpValues.Remove( i );
+											uv.StackSlot = null;
+										}
+									}
+									Jump( D );
+									break;
+								}
+							case OpCode.FNEW:
+								{
+									var new_proto = Func.Prototype.GetConstGC( D ).CheckProtoFunction();
+									var upvals = new UpValueBox[new_proto.UpValues.Length];
+									for ( int i = 0; i < upvals.Length; i++ )
+									{
+										var uv_code = new_proto.UpValues[i];
+										if ( (uv_code & 0x8000) == 0 )
+										{
+											var uv_slot = uv_code & 0x3FFF;
+											var uv_box = Func.UpValues[uv_slot];
+											Assert.NotNull( uv_box );
+											upvals[i] = uv_box;
+										}
+										else
+										{
+											var uv_slot = uv_code & 0x3FFF;
+											int real_stack_index = GetRealStackIndex( uv_slot );
+											UpValueBox uv_box;
+											if ( !OpenUpValues.TryGetValue( real_stack_index, out uv_box! ) )
+											{
+												uv_box = new UpValueBox()
+												{
+													StackSlot = (this, real_stack_index)
+												};
+												OpenUpValues.Add( real_stack_index, uv_box );
+											}
+											upvals[i] = uv_box;
+										}
+									}
+									var new_func = new Function( new_proto, Func.Env, upvals );
+									StackSet( A, new_func );
+									break;
+								}
+							#endregion
+
+							#region Table Ops
+							case OpCode.TNEW:
+								{
+									var table = new Table();
+									StackSet( A, table );
+									break;
+								}
+							case OpCode.TDUP:
+								{
+									var table_proto = Func.Prototype.GetConstGC( D ).CheckTable();
+									var table = table_proto.CloneProto();
+									StackSet( A, table );
+									break;
+								}
+							case OpCode.GGET:
+								{
+									var str = Func.Prototype.GetConstGC( D );
+									ValueOperations.Get( this, A, Func.Env, str );
+									break;
+								}
+							case OpCode.GSET:
+								{
+									var str = Func.Prototype.GetConstGC( D );
+									Func.Env.Set( str, StackGet( A ) );
+									break;
+								}
+							case OpCode.TGETV:
+								ValueOperations.Get( this, A, StackGet( B ), StackGet( C ) );
+								break;
+							case OpCode.TGETS:
+								{
+									var str = Func.Prototype.GetConstGC( C );
+									ValueOperations.Get( this, A, StackGet( B ), str );
+									break;
+								}
+							case OpCode.TGETB:
+								ValueOperations.Get( this, A, StackGet( B ), C );
+								break;
+							case OpCode.TSETV:
+								{
+									var table = StackGet( B ).CheckTable();
+									table.Set( StackGet( C ), StackGet( A ) );
+									break;
+								}
+							case OpCode.TSETS:
+								{
+									var table = StackGet( B ).CheckTable();
+									var str = Func.Prototype.GetConstGC( C );
+									table.Set( str, StackGet( A ) );
+									break;
+								}
+							case OpCode.TSETB:
+								{
+									var table = StackGet( B ).CheckTable();
+									table.Set( C, StackGet( A ) );
+									break;
+								}
+							case OpCode.TSETM:
+								{
+									var table = StackGet( A - 1 ).CheckTable();
+									var num = Func.Prototype.GetConstNum( D );
+									var start_index = (int)BitConverter.DoubleToInt64Bits( num );
+									for ( int i = 0; i < MultiRes; i++ )
+									{
+										table.Set( start_index + i, StackGet( A + i ) );
+									}
+									break;
+								}
+							#endregion
+
+							#region Calls, Iterators, and VARG
+							case OpCode.CALL:
+							case OpCode.CALLM:
+							case OpCode.CALLT:
+							case OpCode.CALLMT:
+							case OpCode.ITERC:
+								{
+									bool is_tailcall = (OP == OpCode.CALLT || OP == OpCode.CALLMT);
+									bool is_multires = (OP == OpCode.CALLM || OP == OpCode.CALLMT);
+
+									int call_base = GetRealStackIndex( A );
+
+									int arg_base = call_base + 1;
+									int arg_count = C - 1;
+									if ( is_multires )
+									{
+										arg_count += 1 + MultiRes;
+									}
+
+									int ret_count = B - 1;
+
+									if ( OP == OpCode.ITERC )
+									{
+										// A, A+1, A+2 = A-3, A-2, A-1;
+										for ( int i = 0; i < 3; i++ )
+										{
+											StackSet( A + i, StackGet( A - 3 + i ) );
+										}
+									}
+
+									var call_func = StackGet( A );
+
+									CallPrepare( call_func, A, ret_count, is_tailcall );
+									for ( int i = 0; i < arg_count; i++ )
+									{
+										var arg_val = ValueStack[arg_base + i];
+										StackSet( i, arg_val );
+									}
+									CallArgsReady( arg_count );
+
+									break;
+								}
+							case OpCode.VARG:
+								{
+									if ( VarArgs == null )
+									{
+										throw new Exception( "Attempt to use varargs in non-vararg function." );
+									}
+
+									// Same as call result handling:
+									int ret_count = B - 1;
+									if ( ret_count == -1 )
+									{
+										ret_count = VarArgs.Length;
+										MultiRes = ret_count;
+									}
+
+									for ( int i = 0; i < ret_count; i++ )
+									{
+										if ( i < VarArgs.Length )
+										{
+											StackSet( A + i, VarArgs[i] );
+										}
+										else
+										{
+											StackSet( A + i, ValueSlot.NIL );
+										}
+									}
+									break;
+								}
+							#endregion
+
+							#region Returns
+							case OpCode.RETM:
+								ReturnInternal( A, D + MultiRes );
+								break;
+							case OpCode.RET:
+								ReturnInternal( A, D - 1 );
+								break;
+							case OpCode.RET0:
+								ReturnInternal( 0, 0 );
+								break;
+							case OpCode.RET1:
+								ReturnInternal( A, 1 );
+								break;
+							#endregion
+
+							#region Loops and Branches
+							case OpCode.LOOP:
+								{
+									// nop
+									break;
+								}
+							case OpCode.FORI:
+								{
+									double stop = StackGet( A + 1 ).CheckNumber();
+									double step = StackGet( A + 2 ).CheckNumber();
+
+									// for loop init
+									double counter = StackGet( A ).CheckNumber();
+									StackSet( A + 3, counter );
+
+									if ( (step > 0 && counter > stop) || (step < 0 && counter < stop) )
+									{
+										// condition failed, go to end
+										Jump( D );
+									}
+									break;
+								}
+							case OpCode.FORL:
+								{
+									double stop = StackGet( A + 1 ).CheckNumber();
+									double step = StackGet( A + 2 ).CheckNumber();
+
+									// for loop step
+									double counter = StackGet( A + 3 ).CheckNumber();
+									counter += step;
+									StackSet( A + 3, counter );
+
+									if ( !((step > 0 && counter > stop) || (step < 0 && counter < stop)) )
+									{
+										// condition passed, loop to top
+										Jump( D );
+									}
+								}
+								break;
+							case OpCode.ITERL:
+								{
+									var iter_res = StackGet( A );
+									if ( iter_res.Kind != ValueKind.Nil )
+									{
+										StackSet( A - 1, iter_res );
+										Jump( D );
+									}
+									break;
+								}
+							case OpCode.JMP:
+								{
+									Jump( D );
+									break;
+								}
+							#endregion
+							default:
+								throw new Exception( $"> {OP}" );
+						}
+						PC++;
+					}
+					#endregion
+
 					safety++;
 					if ( safety >= LIMIT )
 					{
@@ -448,654 +1108,6 @@ namespace Miku.Lua
 				}
 				Log.Info( $"> {i}: {OP} {A} {B} {C} {D} {arrow}" );
 			}
-		}
-
-		public void Step()
-		{
-			uint instr = Func.Prototype.Code[PC];
-			var OP = (OpCode)(instr & 0xFF);
-
-			Profiler.Update( OP, Func.Prototype.DebugName );
-			if ( OP == OpCode.LOOP )
-			{
-				PC++;
-				return;
-			}
-			int A = (int)((instr >> 8) & 0xFF);
-			int B = (int)((instr >> 24) & 0xFF);
-			int C = (int)((instr >> 16) & 0xFF);
-			int D = (int)((instr >> 16) & 0xFFFF);
-
-			switch ( OP )
-			{
-				// Comparisons
-				case OpCode.ISLT:
-					{
-						var lhs = StackGet( A ).CheckNumber();
-						var rhs = StackGet( D ).CheckNumber();
-						if ( !(lhs < rhs) )
-							PC++;
-						break;
-					}
-
-				case OpCode.ISGE:
-					{
-						var lhs = StackGet( A ).CheckNumber();
-						var rhs = StackGet( D ).CheckNumber();
-						if ( !(lhs >= rhs) )
-							PC++;
-						break;
-					}
-
-				case OpCode.ISLE:
-					{
-						var lhs = StackGet( A ).CheckNumber();
-						var rhs = StackGet( D ).CheckNumber();
-						if ( !(lhs <= rhs) )
-							PC++;
-						break;
-					}
-
-				case OpCode.ISGT:
-					{
-						double lhs = StackGet( A ).CheckNumber();
-						double rhs = StackGet( D ).CheckNumber();
-						if ( !(lhs > rhs) )
-							PC++;
-						break;
-					}
-
-				case OpCode.ISEQV:
-					{
-						var vA = StackGet( A );
-						var vD = StackGet( D );
-						if ( !vA.Equals( vD ) )
-							PC++;
-						break;
-					}
-
-				case OpCode.ISNEV:
-					{
-						var vA = StackGet( A );
-						var vD = StackGet( D );
-						if ( vA.Equals( vD ) )
-							PC++;
-						break;
-					}
-
-				case OpCode.ISEQS:
-					{
-						var vA = StackGet( A );
-						var vD = Func.Prototype.GetConstGC( D );
-						if ( !vA.Equals( vD ) )
-							PC++;
-						break;
-					}
-
-				case OpCode.ISNES:
-					{
-						var vA = StackGet( A );
-						var vD = Func.Prototype.GetConstGC( D );
-						if ( vA.Equals( vD ) )
-							PC++;
-						break;
-					}
-
-				case OpCode.ISEQN:
-					{
-						ValueSlot lhs = StackGet( A );
-						ValueSlot rhs = Func.Prototype.GetConstNum( D );
-						if ( !lhs.Equals( rhs ) )
-							PC++;
-						break;
-					}
-
-				case OpCode.ISNEN:
-					{
-						ValueSlot lhs = StackGet( A );
-						ValueSlot rhs = Func.Prototype.GetConstNum( D );
-						if ( lhs.Equals( rhs ) )
-							PC++;
-						break;
-					}
-
-				case OpCode.ISEQP:
-					{
-						var vA = StackGet( A );
-						var vD = ValueSlot.Prim( D );
-						if ( !vA.Equals( vD ) )
-							PC++;
-						break;
-					}
-
-				case OpCode.ISNEP:
-					{
-						var vA = StackGet( A );
-						var vD = ValueSlot.Prim( D );
-						if ( vA.Equals( vD ) )
-							PC++;
-						break;
-					}
-
-				// Test and Copy
-				case OpCode.ISTC:
-					{
-						var val = StackGet( D );
-						if ( val.IsTruthy() )
-							StackSet( A, val );
-						else
-							PC++;
-						break;
-					}
-
-				case OpCode.ISFC:
-					{
-						var val = StackGet( D );
-						if ( !val.IsTruthy() )
-							StackSet( A, val );
-						else
-							PC++;
-						break;
-					}
-
-				case OpCode.IST:
-					if ( !StackGet( D ).IsTruthy() )
-						PC++;
-					break;
-
-				case OpCode.ISF:
-					if ( StackGet( D ).IsTruthy() )
-						PC++;
-					break;
-
-				// ISEQN
-				// ISNEN
-				// Move and Unary Ops
-				case OpCode.MOV:
-					StackSet( A, StackGet( D ) );
-					break;
-
-				case OpCode.NOT:
-					{
-						bool result = !StackGet( D ).IsTruthy();
-						StackSet( A, result );
-						break;
-					}
-
-				case OpCode.UNM:
-					{
-						double num = StackGet( D ).CheckNumber();
-						StackSet( A, -num );
-						break;
-					}
-
-				case OpCode.LEN:
-					{
-						StackSet( A, ValueOperations.Len( StackGet( D ) ) );
-						break;
-					}
-
-				// Binary Ops
-				#region Arithmetic - *NV
-				case OpCode.ADDVN:
-					{
-						double nB = StackGet( B ).CheckNumber();
-						double nC = Func.Prototype.GetConstNum( C );
-						StackSet( A, nB + nC );
-						break;
-					}
-
-				case OpCode.SUBVN:
-					{
-						double nB = StackGet( B ).CheckNumber();
-						double nC = Func.Prototype.GetConstNum( C );
-						StackSet( A, nB - nC );
-						break;
-					}
-
-				case OpCode.MULVN:
-					{
-						double nB = StackGet( B ).CheckNumber();
-						double nC = Func.Prototype.GetConstNum( C );
-						StackSet( A, nB * nC );
-						break;
-					}
-
-				case OpCode.DIVVN:
-					{
-						double nB = StackGet( B ).CheckNumber();
-						double nC = Func.Prototype.GetConstNum( C );
-						StackSet( A, nB / nC );
-						break;
-					}
-
-				case OpCode.MODVN:
-					{
-						double nB = StackGet( B ).CheckNumber();
-						double nC = Func.Prototype.GetConstNum( C );
-						StackSet( A, nB % nC );
-						break;
-					}
-				#endregion Arithmetic - *NV
-
-				#region Arithmetic - *NV
-				case OpCode.ADDNV:
-					{
-						double nB = StackGet( B ).CheckNumber();
-						double nC = Func.Prototype.GetConstNum( C );
-						StackSet( A, nC + nB );
-						break;
-					}
-
-				case OpCode.SUBNV:
-					{
-						double nB = StackGet( B ).CheckNumber();
-						double nC = Func.Prototype.GetConstNum( C );
-						StackSet( A, nC - nB );
-						break;
-					}
-
-				case OpCode.MULNV:
-					{
-						double nB = StackGet( B ).CheckNumber();
-						double nC = Func.Prototype.GetConstNum( C );
-						StackSet( A, nC * nB );
-						break;
-					}
-
-				case OpCode.DIVNV:
-					{
-						double nB = StackGet( B ).CheckNumber();
-						double nC = Func.Prototype.GetConstNum( C );
-						StackSet( A, nC / nB );
-						break;
-					}
-
-				case OpCode.MODNV:
-					{
-						double nB = StackGet( B ).CheckNumber();
-						double nC = Func.Prototype.GetConstNum( C );
-						StackSet( A, nC % nB );
-						break;
-					}
-				#endregion Arithmetic - *NV
-
-				#region Arithmetic - *VV
-				case OpCode.ADDVV:
-					{
-						double nB = StackGet( B ).CheckNumber();
-						double nC = StackGet( C ).CheckNumber();
-						StackSet( A, nB + nC );
-						break;
-					}
-
-				case OpCode.SUBVV:
-					{
-						double nB = StackGet( B ).CheckNumber();
-						double nC = StackGet( C ).CheckNumber();
-						StackSet( A, nB - nC );
-						break;
-					}
-
-				case OpCode.MULVV:
-					{
-						double nB = StackGet( B ).CheckNumber();
-						double nC = StackGet( C ).CheckNumber();
-						StackSet( A, nB * nC );
-						break;
-					}
-
-				case OpCode.DIVVV:
-					{
-						double nB = StackGet( B ).CheckNumber();
-						double nC = StackGet( C ).CheckNumber();
-						StackSet( A, nB / nC );
-						break;
-					}
-
-				case OpCode.MODVV:
-					{
-						double nB = StackGet( B ).CheckNumber();
-						double nC = StackGet( C ).CheckNumber();
-						StackSet( A, nB % nC );
-						break;
-					}
-
-				case OpCode.POW:
-					{
-						double nB = StackGet( B ).CheckNumber();
-						double nC = StackGet( C ).CheckNumber();
-						StackSet( A, Math.Pow( nB, nC ) );
-						break;
-					}
-				#endregion Arithmetic - *VV
-
-				case OpCode.CAT:
-					{
-						var builder = new StringBuilder();
-						for ( int i = B; i <= C; i++ )
-						{
-							// incompatible: glua fails to concat nil, possibly others for whatever reason
-							builder.Append( StackGet( i ).ToString() );
-						}
-						StackSet( A, builder.ToString() );
-						break;
-					}
-
-				// Constants
-				case OpCode.KSTR:
-					{
-						var str = Func.Prototype.GetConstGC( D );
-						StackSet( A, str );
-						break;
-					}
-
-				// KCDATA: don't care
-
-				case OpCode.KSHORT:
-					{
-						// TODO check!
-						StackSet( A, (short)D );
-						break;
-					}
-
-				case OpCode.KNUM:
-					{
-						var num = Func.Prototype.GetConstNum( D );
-						StackSet( A, num );
-						break;
-					}
-
-				case OpCode.KPRI:
-					{
-						StackSet( A, ValueSlot.Prim( D ) );
-						break;
-					}
-
-				case OpCode.KNIL:
-					{
-						for ( int i = A; i <= D; i++ )
-						{
-							StackSet( i, ValueSlot.NIL );
-						}
-						break;
-					}
-
-				// Upvalues and Function Init
-				case OpCode.UGET:
-					{
-						var val = Func.UpValues[D].Get();
-						StackSet( A, val );
-						break;
-					}
-				case OpCode.USETV:
-					Func.UpValues[A].Set( StackGet( D ) );
-					break;
-				case OpCode.USETN:
-					Func.UpValues[A].Set( Func.Prototype.GetConstNum( D ) );
-					break;
-				case OpCode.USETP:
-					Func.UpValues[A].Set( ValueSlot.Prim( D ) );
-					break;
-				case OpCode.UCLO:
-					{
-						int upval_close_base = GetRealStackIndex( A );
-						for ( int i = upval_close_base; i < FrameTop; i++ )
-						{
-							UpValueBox uv;
-							if ( OpenUpValues.TryGetValue( i, out uv! ) )
-							{
-								uv.Value = ValueStack[i];
-								OpenUpValues.Remove( i );
-								uv.StackSlot = null;
-							}
-						}
-						Jump( D );
-						break;
-					}
-				case OpCode.FNEW:
-					{
-						var new_proto = Func.Prototype.GetConstGC( D ).CheckProtoFunction();
-						var upvals = new UpValueBox[new_proto.UpValues.Length];
-						for ( int i = 0; i < upvals.Length; i++ )
-						{
-							var uv_code = new_proto.UpValues[i];
-							if ( (uv_code & 0x8000) == 0 )
-							{
-								var uv_slot = uv_code & 0x3FFF;
-								var uv_box = Func.UpValues[uv_slot];
-								Assert.NotNull( uv_box );
-								upvals[i] = uv_box;
-							}
-							else
-							{
-								var uv_slot = uv_code & 0x3FFF;
-								int real_stack_index = GetRealStackIndex( uv_slot );
-								UpValueBox uv_box;
-								if ( !OpenUpValues.TryGetValue( real_stack_index, out uv_box! ) )
-								{
-									uv_box = new UpValueBox()
-									{
-										StackSlot = (this, real_stack_index)
-									};
-									OpenUpValues.Add( real_stack_index, uv_box );
-								}
-								upvals[i] = uv_box;
-							}
-						}
-						var new_func = new Function( new_proto, Func.Env, upvals );
-						StackSet( A, new_func );
-						break;
-					}
-				// Tables
-				case OpCode.TNEW:
-					{
-						var table = new Table();
-						StackSet( A, table );
-						break;
-					}
-				case OpCode.TDUP:
-					{
-						var table_proto = Func.Prototype.GetConstGC( D ).CheckTable();
-						var table = table_proto.CloneProto();
-						StackSet( A, table );
-						break;
-					}
-				case OpCode.GGET:
-					{
-						var str = Func.Prototype.GetConstGC( D );
-						ValueOperations.Get( this, A, Func.Env, str );
-						break;
-					}
-				case OpCode.GSET:
-					{
-						var str = Func.Prototype.GetConstGC( D );
-						Func.Env.Set( str, StackGet( A ) );
-						break;
-					}
-				case OpCode.TGETV:
-					ValueOperations.Get( this, A, StackGet( B ), StackGet( C ) );
-					break;
-				case OpCode.TGETS:
-					{
-						var str = Func.Prototype.GetConstGC( C );
-						ValueOperations.Get( this, A, StackGet( B ), str );
-						break;
-					}
-				case OpCode.TGETB:
-					ValueOperations.Get( this, A, StackGet( B ), C );
-					break;
-				case OpCode.TSETV:
-					{
-						var table = StackGet( B ).CheckTable();
-						table.Set( StackGet( C ), StackGet( A ) );
-						break;
-					}
-				case OpCode.TSETS:
-					{
-						var table = StackGet( B ).CheckTable();
-						var str = Func.Prototype.GetConstGC( C );
-						table.Set( str, StackGet( A ) );
-						break;
-					}
-				case OpCode.TSETB:
-					{
-						var table = StackGet( B ).CheckTable();
-						table.Set( C, StackGet( A ) );
-						break;
-					}
-				case OpCode.TSETM:
-					{
-						var table = StackGet( A - 1 ).CheckTable();
-						var num = Func.Prototype.GetConstNum( D );
-						var start_index = (int)BitConverter.DoubleToInt64Bits( num );
-						for ( int i = 0; i < MultiRes; i++ )
-						{
-							table.Set( start_index + i, StackGet( A + i ) );
-						}
-						break;
-					}
-				// Calls and Iterators
-				case OpCode.CALL:
-				case OpCode.CALLM:
-				case OpCode.CALLT:
-				case OpCode.CALLMT:
-				case OpCode.ITERC:
-					{
-						bool is_tailcall = (OP == OpCode.CALLT || OP == OpCode.CALLMT);
-						bool is_multires = (OP == OpCode.CALLM || OP == OpCode.CALLMT);
-
-						int call_base = GetRealStackIndex( A );
-
-						int arg_base = call_base + 1;
-						int arg_count = C - 1;
-						if ( is_multires )
-						{
-							arg_count += 1 + MultiRes;
-						}
-
-						int ret_count = B - 1;
-
-						if ( OP == OpCode.ITERC )
-						{
-							// A, A+1, A+2 = A-3, A-2, A-1;
-							for ( int i = 0; i < 3; i++ )
-							{
-								StackSet( A + i, StackGet( A - 3 + i ) );
-							}
-						}
-
-						var call_func = StackGet( A );
-
-						CallPrepare( call_func, A, ret_count, is_tailcall );
-						for ( int i = 0; i < arg_count; i++ )
-						{
-							var arg_val = ValueStack[arg_base + i];
-							StackSet( i, arg_val );
-						}
-						CallArgsReady( arg_count );
-
-						break;
-					}
-				case OpCode.VARG:
-					{
-						if ( VarArgs == null )
-						{
-							throw new Exception( "Attempt to use varargs in non-vararg function." );
-						}
-
-						// Same as call result handling:
-						int ret_count = B - 1;
-						if ( ret_count == -1 )
-						{
-							ret_count = VarArgs.Length;
-							MultiRes = ret_count;
-						}
-
-						for ( int i = 0; i < ret_count; i++ )
-						{
-							if ( i < VarArgs.Length )
-							{
-								StackSet( A + i, VarArgs[i] );
-							}
-							else
-							{
-								StackSet( A + i, ValueSlot.NIL );
-							}
-						}
-						break;
-					}
-				// Returns
-				case OpCode.RETM:
-					ReturnInternal( A, D + MultiRes );
-					break;
-				case OpCode.RET:
-					ReturnInternal( A, D - 1 );
-					break;
-				case OpCode.RET0:
-					ReturnInternal( 0, 0 );
-					break;
-				case OpCode.RET1:
-					ReturnInternal( A, 1 );
-					break;
-				// Loops and Branches
-				case OpCode.LOOP:
-					{
-						// nop
-						break;
-					}
-				case OpCode.FORI:
-					{
-						double stop = StackGet( A + 1 ).CheckNumber();
-						double step = StackGet( A + 2 ).CheckNumber();
-
-						// for loop init
-						double counter = StackGet( A ).CheckNumber();
-						StackSet( A + 3, counter );
-
-						if ( (step > 0 && counter > stop) || (step < 0 && counter < stop) )
-						{
-							// condition failed, go to end
-							Jump( D );
-						}
-						break;
-					}
-				case OpCode.FORL:
-					{
-						double stop = StackGet( A + 1 ).CheckNumber();
-						double step = StackGet( A + 2 ).CheckNumber();
-
-						// for loop step
-						double counter = StackGet( A + 3 ).CheckNumber();
-						counter += step;
-						StackSet( A + 3, counter );
-
-						if ( !((step > 0 && counter > stop) || (step < 0 && counter < stop)) )
-						{
-							// condition passed, loop to top
-							Jump( D );
-						}
-					}
-					break;
-				case OpCode.ITERL:
-					{
-						var iter_res = StackGet( A );
-						if ( iter_res.Kind != ValueKind.Nil )
-						{
-							StackSet( A - 1, iter_res );
-							Jump( D );
-						}
-						break;
-					}
-				case OpCode.JMP:
-					{
-						Jump( D );
-						break;
-					}
-				default:
-					throw new Exception( $"> {OP}" );
-			}
-			PC++;
 		}
 
 		private void Jump( int D )
