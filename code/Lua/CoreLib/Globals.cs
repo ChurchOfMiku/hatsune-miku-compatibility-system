@@ -48,6 +48,7 @@ namespace Miku.Lua.CoreLib
 					{
 						return result;
 					}
+					return null;
 				}
 				if ( x.Kind == ValueKind.Number )
 				{

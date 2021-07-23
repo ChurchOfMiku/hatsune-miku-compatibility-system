@@ -83,7 +83,7 @@ namespace Miku.GMod.Assets
 
 			public void Finish()
 			{
-				Log.Info( "registering " + Name );
+				//Log.Info( "registering " + Name );
 				Sound.StaticRuntimeInit( Name );
 			}
 		}

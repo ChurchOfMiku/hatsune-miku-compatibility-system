@@ -162,87 +162,62 @@ namespace Miku.Lua
 			return ValueSlot.NIL;
 		}
 
+		public IEnumerable<(ValueSlot,ValueSlot)> Enumerate()
+		{
+			if (Array != null)
+			{
+				for (int i=0;i<Array.Count;i++ )
+				{
+					yield return (i, Array[i]);
+				}
+			}
+			if (Dict != null)
+			{
+				foreach (var pair in Dict)
+				{
+					yield return (pair.Key, pair.Value);
+				}
+			}
+		}
+
 		// Looking at the reference source, it should be safe to not worry about disposing enumerators.
-		private Dictionary<ValueSlot,ValueSlot>.Enumerator CachedEnumerator;
+		private IEnumerator<(ValueSlot, ValueSlot)> CachedEnumerator;
 		private void SetupEnumerator( ValueSlot prev_key )
 		{
 			if (Dict == null)
 			{
 				throw new Exception("dict should never be null here");
 			}
-			CachedEnumerator = Dict.GetEnumerator();
+			CachedEnumerator = Enumerate().GetEnumerator();
 			throw new Exception( "RETRY" );
 		}
 		public void Next(ValueSlot prev_key, Executor ex)
 		{
-			// Start enumeration.
+			// Start or restart enumeration.
 			if ( prev_key.Kind == ValueKind.Nil )
 			{
-				if (Dict != null)
+				CachedEnumerator = Enumerate().GetEnumerator();
+				if ( CachedEnumerator.MoveNext() )
 				{
-					CachedEnumerator = Dict.GetEnumerator();
+					var pair = CachedEnumerator.Current;
+					ex.Return( pair.Item1 );
+					ex.Return( pair.Item2 );
 				}
-				if ( Array != null && Array.Count > 0 )
-				{
-					ex.Return( 1 );
-					ex.Return( ArrayGet( 1 ) );
-					return;
-				}
-			}
-			{
-				bool prev_key_in_array = false;
-				// Try the next array slot.
-				if ( Array != null )
-				{
-					if ( prev_key.Kind == ValueKind.Number )
-					{
-						var i_dbl = prev_key.CheckNumber();
-						int i = (int)i_dbl;
-						if ( i_dbl == i && i >= 1 && i <= Array.Count )
-						{
-							prev_key_in_array = true;
-							if (i+1 <= Array.Count)
-							{
-								ex.Return( i );
-								ex.Return( ArrayGet( i ) );
-								return;
-							}
-						}
-					}
-				}
-				// Try using our cached enumerator
-				if (Dict != null)
-				{
-					if ( prev_key_in_array )
-					{
-						CachedEnumerator = Dict.GetEnumerator();
-					}
-					for (int i=0;i<2;i++ )
-					{
-						if (CachedEnumerator.Current.Key.Equals(prev_key) || prev_key_in_array)
-						{
-							if (CachedEnumerator.MoveNext())
-							{
-								var pair = CachedEnumerator.Current;
-								ex.Return( pair.Key );
-								ex.Return( pair.Value );
-								return;
-							} else
-							{
-								return;
-							}
-						} else if (i == 0)
-						{
-							SetupEnumerator( prev_key );
-						} else
-						{
-							throw new Exception( "enumerator retry failed?" );
-						}
-					}
-				}
+				return;
 			}
 
-			return;
+			if ( CachedEnumerator.Current.Item1.Equals( prev_key ) )
+			{
+				if ( CachedEnumerator.MoveNext() )
+				{
+					var pair = CachedEnumerator.Current;
+					ex.Return( pair.Item1 );
+					ex.Return( pair.Item2 );
+				}
+				return;
+			}
+
+			throw new Exception( "enumeration failed" );
 		}
 
 		public Table CloneProto()
@@ -321,20 +296,6 @@ namespace Miku.Lua
 
 			Set( name, table );
 			return table;
-		}
-
-		/// <summary>
-		/// Forces the dictionary to exist and returns a reference.
-		/// Currently just used to read enums back out of the VM, which is probably a dumb idea.
-		/// </summary>
-		/// <returns></returns>
-		public Dictionary<ValueSlot,ValueSlot> GetDictionary()
-		{
-			if (Dict == null)
-			{
-				Dict = new Dictionary<ValueSlot, ValueSlot>();
-			}
-			return Dict;
 		}
 
 		// Used to generate the status pages that tell us how much of the API is implemented.

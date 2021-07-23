@@ -19,12 +19,14 @@ namespace Miku.GMod.Lib
 
 			Dictionary<int, string> activityTable = new Dictionary<int, string>();
 
-			foreach (var pair in machine.Env.GetDictionary())
+			foreach (var pair in machine.Env.Enumerate())
 			{
-				var key_str = pair.Key.TryGetString();
+				var key = pair.Item1;
+				var val = pair.Item2;
+				var key_str = key.TryGetString();
 				if ( key_str != null && key_str.StartsWith("ACT_") )
 				{
-					var act_id = pair.Value.TryGetNumber();
+					var act_id = val.TryGetNumber();
 					if (act_id.HasValue)
 					{
 						activityTable.Add( (int)act_id, key_str );

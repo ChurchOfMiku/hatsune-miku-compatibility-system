@@ -829,6 +829,9 @@ namespace Miku.Lua
 				case OpCode.USETN:
 					Func.UpValues[A].Set( Func.Prototype.GetConstNum( D ) );
 					break;
+				case OpCode.USETP:
+					Func.UpValues[A].Set( ValueSlot.Prim( D ) );
+					break;
 				case OpCode.UCLO:
 					{
 						int upval_close_base = GetRealStackIndex( A );

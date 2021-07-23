@@ -33,6 +33,11 @@ namespace Miku.Lua.CoreLib
 				return Math.Ceiling( n );
 			} );
 
+			math_lib.DefineFunc( "log10", ( Executor ex ) => {
+				double n = ex.GetArg( 0 ).CheckNumber();
+				return Math.Log10( n );
+			} );
+
 			// OS
 			var os_lib = env.DefineLib( "os" );
 			os_lib.DefineFunc( "time", ( Executor ex ) => {

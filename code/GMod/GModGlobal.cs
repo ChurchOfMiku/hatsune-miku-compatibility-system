@@ -63,7 +63,7 @@ namespace Miku.GMod
 			}
 
 			Client?.RunString( "team.SetUp(1,'some team',Color(255,0,0))", "blah" );
-			Client?.RunFile( "scripts/free_darkrp_hud.lua" );
+			//Client?.RunFile( "scripts/free_darkrp_hud.lua" );
 
 			Client?.LoadWeapon( "glib_official/garrysmod/gamemodes/base/entities/weapons/weapon_base" );
 			Server?.LoadWeapon( "glib_official/garrysmod/gamemodes/base/entities/weapons/weapon_base" );

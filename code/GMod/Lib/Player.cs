@@ -22,6 +22,11 @@ namespace Miku.GMod.Lib
 				return ply.Health;
 			} );
 
+			class_player.DefineFunc( "Alive", ( Executor ex ) => {
+				var ply = (Sandbox.Player)ex.GetArg( 0 ).CheckUserData().CheckEntity().Entity;
+				return ply.Health > 0;
+			} );
+
 			class_player.DefineFunc( "Nick", ( Executor ex ) => {
 				var ply = (Sandbox.Player)ex.GetArg( 0 ).CheckUserData().CheckEntity().Entity;
 				var client = ply.GetClientOwner();
@@ -38,6 +43,13 @@ namespace Miku.GMod.Lib
 				var ply = (Sandbox.Player)ex.GetArg( 0 ).CheckUserData().CheckEntity().Entity;
 				var pos = ply.EyeRot.Forward; // PROBABLY EXTREMELY WRONG!
 				return machine.Vector( pos );
+			} );
+
+			class_player.DefineFunc( "GetActiveWeapon", ( Executor ex ) => {
+				var ply = (Sandbox.Player)ex.GetArg( 0 ).CheckUserData().CheckEntity().Entity;
+				return null; // TODO the following probably doesn't work on the client.
+				//var weapon = ply.Inventory.Active;
+				//return machine.Ents.Get(weapon).LuaValue;
 			} );
 
 			if (machine.IsClient)

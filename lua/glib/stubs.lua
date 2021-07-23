@@ -43,22 +43,29 @@ if CLIENT then
     end
 end
 
+function AddCSLuaFile() end
+
 function AddConsoleCommand()
 
 end
 
-function GetConVar_Internal(name)
-    return CreateConVar()
-end
+local function stub_convar(name,value)
+    local value = tostring(value or "")
+    if name == "cl_drawhud" then
+        value = "1"
+    end
 
-function AddCSLuaFile()
-
-end
-
-function CreateConVar()
     return {
-        GetInt = function() return 0 end
+        GetInt = function() return math.floor(tonumber(value) or 0) end
     }
+end
+
+function GetConVar_Internal(name)
+    return stub_convar(name)
+end
+
+function CreateConVar(name,value)
+    return stub_convar(name,value)
 end
 
 sql = {}
@@ -79,6 +86,10 @@ function file.Find()
     return {}, {}
 end
 
+function file.Exists()
+    return false
+end
+
 ents = {}
 _R.miku_debug_lib(ents,"ents")
 
@@ -90,6 +101,11 @@ _R.miku_debug_lib(team,"team")
 
 game = {}
 _R.miku_debug_lib(game,"game")
+
+function game.SinglePlayer()
+    -- Does sbox even have the notion of singleplayer yet?
+    return false
+end
 
 function game.GetAmmoID()
     -- https://wiki.facepunch.com/gmod/Default_Ammo_Types
@@ -121,6 +137,11 @@ do
     end
 
     function Player:ViewPunch( ang ) end
+
+    function Player:KeyDown() return false end
+    function Player:InVehicle() return false end
+    function Player:Ping() return 69 end
+
 
     -- DARKRP
     function Player:isWanted()

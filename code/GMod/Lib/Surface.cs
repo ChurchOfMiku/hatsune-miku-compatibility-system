@@ -192,6 +192,7 @@ namespace Miku.GMod.Lib
 				panel.Style.Width = Length.Pixels( (float)w );
 				panel.Style.Height = Length.Pixels( (float)h );
 				panel.SetTexture("/img/"+CurrentMaterial);
+				Log.Info( "draw texture: " + CurrentMaterial );
 
 				return null;
 			} );
