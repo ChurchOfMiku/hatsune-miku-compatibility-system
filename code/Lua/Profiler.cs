@@ -19,6 +19,8 @@ namespace Miku.Lua
 		static string? CurrentFunc;
 
 		static Dictionary<OpCode, double> TableOps = new Dictionary<OpCode, double>();
+		static Dictionary<OpCode, int> TableOpCounts = new Dictionary<OpCode, int>();
+
 		static Dictionary<string, double> TableFuncs = new Dictionary<string, double>();
 
 		public static void Update(OpCode op, string func)
@@ -54,6 +56,10 @@ namespace Miku.Lua
 				double x = TableOps.GetValueOrDefault(CurrentOp.Value);
 				x += t;
 				TableOps[CurrentOp.Value] = x;
+
+				int y = TableOpCounts.GetValueOrDefault(CurrentOp.Value);
+				y += 1;
+				TableOpCounts[CurrentOp.Value] = y;
 			}
 			if (CurrentFunc != null)
 			{
@@ -69,10 +75,10 @@ namespace Miku.Lua
 		{
 			DumpTable( TableFuncs );
 			Log.Info( "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" );
-			DumpTable( TableOps );
+			DumpTable( TableOps, TableOpCounts );
 		}
 
-		private static void DumpTable<K>( Dictionary<K, double> table )
+		private static void DumpTable<K>( Dictionary<K, double> table, Dictionary<K, int>? table_counts = null )
 		{
 			double total = table.Sum( ( a ) => a.Value );
 			var sorted = table.ToList();
@@ -82,7 +88,14 @@ namespace Miku.Lua
 			int i = 1;
 			foreach ( var pair in sorted )
 			{
-				Log.Info( $"{sorted.Count-i+1}. {pair} ( {(pair.Value / total * 100):F1}% )" );
+				if ( table_counts != null )
+				{
+					int count = table_counts[pair.Key];
+					Log.Info( $"{sorted.Count - i + 1}. {pair} ( {(pair.Value / total * 100):F1}% ) #{count:n0} AVG={pair.Value / count * 1_000_000:n0}ns" );
+				} else
+				{
+					Log.Info( $"{sorted.Count-i+1}. {pair} ( {(pair.Value / total * 100):F1}% )" );
+				}
 				i++;
 			}
 		}

@@ -368,9 +368,9 @@ namespace Miku.Lua
 			int safety = 0;
 			int LIMIT = 10_000_000;
 
-			while (ResultCount == -1)
+			try
 			{
-				try
+				while (ResultCount == -1)
 				{
 					Step();
 					safety++;
@@ -379,18 +379,18 @@ namespace Miku.Lua
 						//this.LogState();
 						throw new Exception( "hit safety" );
 					}
-				} catch (Exception e)
-				{
-					// TODO throw an exception that contains exectuor info, don't log anything here.
-					if (!(e is SilentExecException))
-					{
-						Log.Error( e.Message );
-						Log.Error( e.StackTrace );
-						LogStack();
-						//LogState();
-					}
-					throw new SilentExecException(e);
 				}
+			} catch (Exception e)
+			{
+				// TODO throw an exception that contains exectuor info, don't log anything here.
+				if (!(e is SilentExecException))
+				{
+					Log.Error( e.Message );
+					Log.Error( e.StackTrace );
+					LogStack();
+					//LogState();
+				}
+				throw new SilentExecException(e);
 			}
 			Profiler.Stop();
 		}
@@ -456,6 +456,11 @@ namespace Miku.Lua
 			var OP = (OpCode)(instr & 0xFF);
 
 			Profiler.Update( OP, Func.Prototype.DebugName );
+			if ( OP == OpCode.LOOP )
+			{
+				PC++;
+				return;
+			}
 			int A = (int)((instr >> 8) & 0xFF);
 			int B = (int)((instr >> 24) & 0xFF);
 			int C = (int)((instr >> 16) & 0xFF);
