@@ -1,11 +1,10 @@
 ﻿#nullable enable
 
 using System;
+using System.Diagnostics;
 
 namespace Miku.Lua
 {
-	using UserFunctionOld = Func<ValueSlot[], Executor, ValueSlot[]?>;
-
 	enum ValueKind
 	{
 		Nil,
@@ -19,18 +18,18 @@ namespace Miku.Lua
 		UserData
 	}
 
-	struct ValueSlot
+	readonly struct ValueSlot
 	{
 		public readonly ValueKind Kind;
 		private readonly object? Reference;
 		private readonly double NumberValue;
 
 		// primitives
-		public static readonly ValueSlot NIL = new ValueSlot(ValueKind.Nil);
-		public static readonly ValueSlot TRUE = new ValueSlot(ValueKind.True);
-		public static readonly ValueSlot FALSE = new ValueSlot(ValueKind.False);
+		public static readonly ValueSlot NIL = new ValueSlot( ValueKind.Nil );
+		public static readonly ValueSlot TRUE = new ValueSlot( ValueKind.True );
+		public static readonly ValueSlot FALSE = new ValueSlot( ValueKind.False );
 
-		private ValueSlot(ValueKind kind, object? ref_obj = null, double n = 0)
+		private ValueSlot( ValueKind kind, object? ref_obj = null, double n = 0 )
 		{
 			Kind = kind;
 			Reference = ref_obj;
@@ -70,23 +69,30 @@ namespace Miku.Lua
 
 		public Table CheckTable()
 		{
-			if ( Kind == ValueKind.Table ) {
+			if ( Kind == ValueKind.Table )
+			{
 				return (Table)Reference!;
 			}
 			throw new Exception( $"{this} is not a table." );
 		}
 
+		public Table UnsafeGetTable() => (Table)Reference!;
+
 		public double CheckNumber()
 		{
-			if ( Kind == ValueKind.Number ) {
+			if ( Kind == ValueKind.Number )
+			{
 				return NumberValue;
 			}
 			throw new Exception( $"{this} is not a number." );
 		}
 
+		public double UnsafeGetNumber() => NumberValue;
+
 		public ProtoFunction CheckProtoFunction()
 		{
-			if (Kind == ValueKind.ProtoFunction) {
+			if ( Kind == ValueKind.ProtoFunction )
+			{
 				return (ProtoFunction)Reference!;
 			}
 			throw new Exception( $"{this} is not a function prototype." );
@@ -94,12 +100,14 @@ namespace Miku.Lua
 
 		public string CheckString()
 		{
-			if (Kind == ValueKind.String )
+			if ( Kind == ValueKind.String )
 			{
 				return (string)Reference!;
 			}
 			throw new Exception( $"{this} is not a string." );
 		}
+
+		public string UnsafeGetString() => (string)Reference!;
 
 		public string? TryGetString()
 		{
@@ -121,7 +129,8 @@ namespace Miku.Lua
 
 		public Function CheckFunction()
 		{
-			if ( Kind == ValueKind.Function ) {
+			if ( Kind == ValueKind.Function )
+			{
 				return (Function)Reference!;
 			}
 			throw new Exception( $"{this} is not a function." );
@@ -138,7 +147,7 @@ namespace Miku.Lua
 
 		public ValueSlot CloneCheck()
 		{
-			switch (this.Kind)
+			switch ( this.Kind )
 			{
 				case ValueKind.Nil:
 				case ValueKind.True:
@@ -153,11 +162,11 @@ namespace Miku.Lua
 
 		public override string ToString()
 		{
-			if (Kind == ValueKind.String)
+			if ( Kind == ValueKind.String )
 			{
 				return Reference!.ToString()!;
 			}
-			if (Kind == ValueKind.Number)
+			if ( Kind == ValueKind.Number )
 			{
 				return NumberValue.ToString();
 			}
@@ -167,11 +176,11 @@ namespace Miku.Lua
 		public override int GetHashCode()
 		{
 			int hash = Kind.GetHashCode();
-			if (Kind == ValueKind.Number)
+			if ( Kind == ValueKind.Number )
 			{
 				hash ^= NumberValue.GetHashCode();
 			}
-			if (Reference != null)
+			if ( Reference != null )
 			{
 				hash ^= Reference.GetHashCode();
 			}
@@ -180,21 +189,23 @@ namespace Miku.Lua
 
 		public override bool Equals( object? obj )
 		{
-			if (obj is ValueSlot)
+			if ( obj is ValueSlot )
 			{
 				var val = (ValueSlot)obj;
-				if (this.Kind == val.Kind)
+				if ( this.Kind == val.Kind )
 				{
-					if (this.Kind == ValueKind.Number)
+					if ( this.Kind == ValueKind.Number )
 					{
 						return this.NumberValue == val.NumberValue;
-					} else
+					}
+					else
 					{
-						if (this.Reference == null)
+						if ( this.Reference == null )
 						{
 							return val.Reference == null;
 						}
-						return this.Reference.Equals( val.Reference ); 
+						return ReferenceEquals( Reference, val.Reference )
+							   || this.Reference.Equals( val.Reference );
 					}
 				}
 			}

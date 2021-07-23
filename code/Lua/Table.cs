@@ -120,17 +120,32 @@ namespace Miku.Lua
 			}
 		}
 
+		private bool TryGetInt( ValueSlot valueSlot, out int value )
+		{
+			if ( valueSlot.Kind == ValueKind.Number )
+			{
+				var d = valueSlot.UnsafeGetNumber();
+				var i = (int)d;
+				if ( Math.Abs( d - i ) <= double.Epsilon )
+				{
+					value = i;
+					return true;
+				}
+			}
+
+			value = default;
+			return false;
+		}
+
 		public ValueSlot Get( ValueSlot key )
 		{
 			if (Array != null)
 			{
-				if ( key.Kind == ValueKind.Number )
+				if ( TryGetInt( key, out var idx ) )
 				{
-					var i_dbl = key.CheckNumber();
-					int i = (int)i_dbl;
-					if ( i_dbl == i && i >= 1 && i <= Array.Count )
+					if ( idx >= 1 && idx <= Array.Count )
 					{
-						return ArrayGet( i );
+						return ArrayGet( idx );
 					}
 				}
 			}
