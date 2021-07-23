@@ -373,7 +373,9 @@ namespace Miku.Lua
 			{
 				while (ResultCount == -1)
 				{
-					// This was formerly it's own method
+					// This was formerly its own method, but due to .NET's *VERY GOOD* compiler tech,
+					// we can save a substantial amount of time by inlining it manually.
+					// MethodImplOptions.AggressiveInlining did not help.
 					#region Stepper
 					{
 						uint instr = Func.Prototype.Code[PC];
@@ -1066,27 +1068,6 @@ namespace Miku.Lua
 
 		public void LogState()
 		{
-			/*Log.Info( "======= STACK =======" );
-			int slot_i = 0;
-			foreach (var level in CallStack.Reverse() )
-			{
-				var slot_count = level.FrameSize;
-				for (int j = 0; j < slot_count; j++ )
-				{
-					Log.Info( $"({slot_i}) {slot_count - j - 1}: {ValueStack[slot_i]}" );
-					slot_i++;
-				}
-				Log.Info( "^^^--- " + level.Func.Prototype.DebugName );
-			}
-			{
-				var slot_count = FrameSize;
-				for ( int j = 0; j < slot_count; j++ )
-				{
-					Log.Info( $"({slot_i}) {slot_count - j - 1}: {ValueStack[slot_i]}" );
-					slot_i++;
-				}
-				Log.Info( "^^^--- " + Func.Prototype.DebugName );
-			}*/
 			Log.Info( "======= FRAME =======" );
 			for ( int i = FrameBase; i < FrameTop; i++ )
 			{
