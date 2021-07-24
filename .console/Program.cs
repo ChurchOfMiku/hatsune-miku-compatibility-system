@@ -1,4 +1,5 @@
-﻿//#define PROFILING
+//#define PROFILING
+#define TEST_HASH
 
 using System.Diagnostics;
 using System.IO;
@@ -27,9 +28,13 @@ namespace Miku.Console
             {
                 Directory.CreateDirectory( "data" );
             }
+#if TEST_HASH
+			Lua.Experimental.MikuDict.Bench();
+			return;
+#endif
 
 #if !PROFILING
-            _commandManager = new();
+			_commandManager = new();
             _commandManager.LoadCommands( typeof( Program ), null );
             _commandManager.AddHelpCommand();
             _commandManager.AddStopCommand( "exit", "stop", "quit" );
@@ -44,6 +49,7 @@ namespace Miku.Console
                 "lua\\core\\*.lua",
                 "lua\\glib\\*.lua",
                 "lua\\glib_official\\garrysmod\\lua\\*.lua" );
+			LuaStats();
 #else
             _commandManager.Start();
 #endif

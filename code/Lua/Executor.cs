@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 
 using System;
 using System.Collections.Generic;
@@ -343,11 +343,13 @@ namespace Miku.Lua
 			}
 		}
 
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		private int GetRealStackIndex( int index )
 		{
 			return FrameBase + index;
 		}
 
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		private void StackSet(int index, ValueSlot x)
 		{
 			int real_index = GetRealStackIndex( index );
@@ -362,7 +364,7 @@ namespace Miku.Lua
 		private ValueSlot StackGet(int index)
 		{
 			return ValueStack[GetRealStackIndex( index )];
-		} 
+		}
 
 		public void Run()
 		{

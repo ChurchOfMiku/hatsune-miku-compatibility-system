@@ -16,6 +16,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)CoreLib\String.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Dump.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Executor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Experimental\MikuDict.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Function.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)LuaMachine.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MetaTables.cs" />
