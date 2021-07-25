@@ -10,7 +10,7 @@ namespace Miku.Lua.Experimental
     {
 		// Uses https://github.com/slembcke/Chipmunk2D/blob/master/src/prime.h
 		// Based on http://planetmath.org/encyclopedia/GoodHashTablePrimes.html [dead link]
-		readonly int[] PRIMES = new int[] { 13, 23, 47, 97, 193, 389, 769, 1543, 3079 };
+		readonly int[] PRIMES = new int[] { 13, 23, 47, 97, 193, 389, 769, 1543, 3079, 6151, 12289, 24593 };
 
 
 		// We don't bother with lazy init. The table that wraps us should take care of that.
@@ -34,7 +34,7 @@ namespace Miku.Lua.Experimental
 
 			while (Keys[index].Kind != ValueKind.Nil)
 			{
-				if (Keys[index].Equals(key))
+				if (Keys[index].FastEquals( key))
 				{
 					return Values[index];
 				}
@@ -45,7 +45,12 @@ namespace Miku.Lua.Experimental
 			return ValueSlot.NIL;
 		}
 
-		public void Set( ValueSlot key, ValueSlot val )
+		/*public void Set( ValueSlot key, ValueSlot val )
+		{
+			SetInternal( key, val, true );
+		}*/
+
+		private void Set( ValueSlot key, ValueSlot val, bool can_replace = true )
 		{
 			if ( key.Kind == ValueKind.Nil )
 			{
@@ -54,6 +59,11 @@ namespace Miku.Lua.Experimental
 			if ( val.Kind == ValueKind.Nil )
 			{
 				throw new Exception( "TODO deletion" );
+			}
+			if (Count >= (Capacity * 0.9))
+			{
+				//Log.Info( "grow from "+Capacity );
+				Grow();
 			}
 
 			uint hash = (uint)key.GetHashCode();
@@ -64,7 +74,7 @@ namespace Miku.Lua.Experimental
 			while ( Keys[index].Kind != ValueKind.Nil )
 			{
 				// NOTE: this should not be an option once a slot is stolen
-				if ( Keys[index].Equals( key ) )
+				if ( can_replace && Keys[index].FastEquals( key ) )
 				{
 					// Just replace the value
 					Values[index] = val;
@@ -82,11 +92,14 @@ namespace Miku.Lua.Experimental
 					key = tmp_key;
 					val = tmp_val;
 					psl = tmp_psl;
+					// replacement should not be possible or necessary
+					can_replace = false;
 				}
 
 				index = (index + 1) % (uint)Keys.Length;
-				if ( psl == 255 || psl >= Keys.Length )
+				if ( psl == 255 )
 				{
+					// Don't allow probe lengths to outgrow a byte.
 					Grow();
 					Set( key, val );
 					return;
@@ -125,7 +138,7 @@ namespace Miku.Lua.Experimental
 			{
 				if ( old_keys[i].Kind != ValueKind.Nil)
 				{
-					Set( old_keys[i], old_values[i] );
+					Set( old_keys[i], old_values[i], false );
 				}
 			}
 		}
@@ -141,30 +154,37 @@ namespace Miku.Lua.Experimental
 
 		public static void Bench()
 		{
+			int REPEATS = 1000;
 			int COUNT = 1000;
+			var data = new long[COUNT, 2];
+			var timer = new Stopwatch();
+			for (int j=0;j<REPEATS;j++)
 			{
-				Stopwatch timer = new();
-				timer.Start();
-				var dict = new MikuDict();
-				for (int i=0;i< COUNT; i++ )
 				{
-					dict.Set( "key"+i.ToString(), "value"+i.ToString() );
+					var dict = new MikuDict();
+					for (int i=0;i< COUNT; i++ )
+					{
+						timer.Restart();
+						dict.Set( "key"+i.ToString(), "value"+i.ToString() );
+						data[i, 0] += timer.Elapsed.Ticks;
+					}
 				}
-				var elapsed = timer.Elapsed.TotalMilliseconds;
-				//dict.Dump();
-				Log.Info( "MIKU " + elapsed );
+				{
+					var dict = new Dictionary<ValueSlot,ValueSlot>();
+					for ( int i = 0; i < COUNT; i++ )
+					{
+						timer.Restart();
+						dict.Add( "key" + i.ToString(), "value" + i.ToString() );
+						data[i, 1] += timer.Elapsed.Ticks;
+					}
+				}
 			}
+			System.Console.WriteLine("Miku,Dict");
+			data[0, 0] = 0;
+			data[0, 1] = 0;
+			for (int i=0;i<COUNT;i++ )
 			{
-				Stopwatch timer = new();
-				timer.Start();
-				var dict = new Dictionary<ValueSlot,ValueSlot>();
-				for ( int i = 0; i < COUNT; i++ )
-				{
-					dict.Add( "key" + i.ToString(), "value" + i.ToString() );
-				}
-				var elapsed = timer.Elapsed.TotalMilliseconds;
-				//dict.Dump();
-				Log.Info( "DICT " + elapsed );
+				System.Console.WriteLine(data[i,0]+","+data[i,1]);
 			}
 		}
 	}
