@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using Sandbox;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace Miku.Lua.Experimental
 {
@@ -31,7 +31,7 @@ namespace Miku.Lua.Experimental
 		// We don't bother with lazy init. The table that wraps us should take care of that.
 		private KeyValuePair[] Pairs = new KeyValuePair[INIT_CAPACITY];
 		// PSLs are offset by one. This is so we can quickly scan for empty slots with psl = 0
-		private byte[] PSLs = new byte[5];
+		private byte[] PSLs = new byte[INIT_CAPACITY];
 
 		public int Count { get; private set; }
 		private int Capacity => Pairs.Length;
@@ -61,12 +61,7 @@ namespace Miku.Lua.Experimental
 			return ValueSlot.NIL;
 		}
 
-		/*public void Set( ValueSlot key, ValueSlot val )
-		{
-			SetInternal( key, val, true );
-		}*/
-
-		private void Set( ValueSlot key, ValueSlot val, bool can_replace = true )
+		public void Set( ValueSlot key, ValueSlot val )
 		{
 			if ( key.Kind == ValueKind.Nil )
 			{
@@ -76,14 +71,17 @@ namespace Miku.Lua.Experimental
 			{
 				throw new Exception( "TODO deletion" );
 			}
-			if (Count >= ResizeThreshold)
+			if ( Count >= ResizeThreshold )
 			{
-				//Log.Info( "grow from "+Capacity );
 				Grow();
 			}
-			var new_pair = new KeyValuePair( key, val );
+			SetInternal( new KeyValuePair( key, val ), true );
+		}
 
-			uint hash = (uint)key.GetHashCode();
+		private void SetInternal( KeyValuePair new_pair, bool can_replace )
+		{
+
+			uint hash = (uint)new_pair.Key.GetHashCode();
 
 			uint index = hash % (uint)Pairs.Length;
 			byte psl = 1;
@@ -91,7 +89,7 @@ namespace Miku.Lua.Experimental
 			while ( PSLs[index] != 0 )
 			{
 				// NOTE: this should not be an option once a slot is stolen
-				if ( can_replace && Pairs[index].Key.FastEquals( key ) )
+				if ( can_replace && Pairs[index].Key.FastEquals( new_pair.Key ) )
 				{
 					// Just replace the value
 					Pairs[index] = new_pair;
@@ -116,7 +114,7 @@ namespace Miku.Lua.Experimental
 				{
 					// Don't allow probe lengths to outgrow a byte.
 					Grow();
-					Set( key, val );
+					SetInternal( new_pair, true );
 					return;
 				}
 				psl++;
@@ -152,7 +150,7 @@ namespace Miku.Lua.Experimental
 			{
 				if ( old_psls[i] != 0 )
 				{
-					Set( old_pairs[i].Key, old_pairs[i].Value, false );
+					SetInternal( old_pairs[i], false );
 				}
 			}
 		}
@@ -188,8 +186,8 @@ namespace Miku.Lua.Experimental
 
 		public static void Bench()
 		{
-			int REPEATS = 1;
-			int COUNT = 1_000_000;
+			int REPEATS = 10000;
+			int SIZE = 100;
 			long sum_dict = 0;
 			long sum_miku = 0;
 			var timer = new Stopwatch();
@@ -198,12 +196,12 @@ namespace Miku.Lua.Experimental
 				{
 					timer.Restart();
 					var dict = new MikuDict();
-					for (int i=0;i< COUNT; i++ )
+					for (int i=0;i< SIZE; i++ )
 					{
 						dict.Set( "key"+i.ToString(), "value"+i.ToString() );
 					}
 					
-					for ( int i = 0; i < COUNT; i++ )
+					for ( int i = 0; i < SIZE; i++ )
 					{
 						var res = dict.Get( "key" + i.ToString() ).CheckString();
 						if (res != "value"+i.ToString() )
@@ -217,12 +215,12 @@ namespace Miku.Lua.Experimental
 				{
 					timer.Restart();
 					var dict = new Dictionary<ValueSlot,ValueSlot>();
-					for ( int i = 0; i < COUNT; i++ )
+					for ( int i = 0; i < SIZE; i++ )
 					{
 						dict.Add( "key" + i.ToString(), "value" + i.ToString() );
 					}
 					
-					for (int i = 0; i < COUNT; i++ )
+					for (int i = 0; i < SIZE; i++ )
 					{
 						var res = dict["key" + i.ToString()].CheckString();
 						if ( res != "value" + i.ToString() )
