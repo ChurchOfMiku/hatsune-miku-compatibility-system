@@ -26,12 +26,14 @@ namespace Miku.Lua.Experimental
 			98317, 196613, 393241, 786433, 1572869, 3145739
 		};
 		const int INIT_CAPACITY = 5;
-		const float LOAD_FACTOR = 0.9f;
+		const float LOAD_FACTOR = 0.5f;
 
 		// We don't bother with lazy init. The table that wraps us should take care of that.
 		private KeyValuePair[] Pairs = new KeyValuePair[INIT_CAPACITY];
 		// PSLs are offset by one. This is so we can quickly scan for empty slots with psl = 0
 		private byte[] PSLs = new byte[INIT_CAPACITY];
+		// We cache hashes, which is useful for quickly rejecting possible matches and rehashing.
+		private uint[] Hashes = new uint[INIT_CAPACITY];
 
 		public int Count { get; private set; }
 		private int Capacity => Pairs.Length;
@@ -50,7 +52,7 @@ namespace Miku.Lua.Experimental
 
 			while ( PSLs[index] != 0 )
 			{
-				if (Pairs[index].Key.FastEquals( key))
+				if (hash == Hashes[index] && Pairs[index].Key.FastEquals(key))
 				{
 					return Pairs[index].Value;
 				}
@@ -75,21 +77,19 @@ namespace Miku.Lua.Experimental
 			{
 				Grow();
 			}
-			SetInternal( new KeyValuePair( key, val ), true );
+			uint hash = (uint)key.GetHashCode();
+			SetInternal( new KeyValuePair( key, val ), hash, true );
 		}
 
-		private void SetInternal( KeyValuePair new_pair, bool can_replace )
+		private void SetInternal( KeyValuePair new_pair, uint hash, bool can_replace )
 		{
-
-			uint hash = (uint)new_pair.Key.GetHashCode();
-
 			uint index = hash % (uint)Pairs.Length;
 			byte psl = 1;
 
 			while ( PSLs[index] != 0 )
 			{
-				// NOTE: this should not be an option once a slot is stolen
-				if ( can_replace && Pairs[index].Key.FastEquals( new_pair.Key ) )
+				// Short path: compare the hash before checking equality
+				if ( can_replace && hash == Hashes[index] && Pairs[index].Key.FastEquals( new_pair.Key ) )
 				{
 					// Just replace the value
 					Pairs[index] = new_pair;
@@ -100,10 +100,13 @@ namespace Miku.Lua.Experimental
 					// steal the slot
 					var tmp_pair = Pairs[index];
 					var tmp_psl = PSLs[index];
+					var tmp_hash = Hashes[index];
 					Pairs[index] = new_pair;
 					PSLs[index] = psl;
+					Hashes[index] = hash;
 					new_pair = tmp_pair;
 					psl = tmp_psl;
+					hash = tmp_hash;
 					// replacement should not be possible or necessary
 					// once we're just shifting pairs around
 					can_replace = false;
@@ -114,7 +117,7 @@ namespace Miku.Lua.Experimental
 				{
 					// Don't allow probe lengths to outgrow a byte.
 					Grow();
-					SetInternal( new_pair, true );
+					SetInternal( new_pair, hash, true );
 					return;
 				}
 				psl++;
@@ -124,12 +127,14 @@ namespace Miku.Lua.Experimental
 			Count++;
 			Pairs[index] = new_pair;
 			PSLs[index] = psl;
+			Hashes[index] = hash;
 		}
 
 		void Grow()
 		{
 			var old_pairs = Pairs;
 			var old_psls = PSLs;
+			var old_hashes = Hashes;
 
 			int new_size;
 			for (int i=0; ;i++ )
@@ -143,6 +148,7 @@ namespace Miku.Lua.Experimental
 
 			Pairs = new KeyValuePair[new_size];
 			PSLs = new byte[new_size];
+			Hashes = new uint[new_size];
 			Count = 0;
 			ResizeThreshold = (int)(Capacity * LOAD_FACTOR);
 
@@ -150,7 +156,7 @@ namespace Miku.Lua.Experimental
 			{
 				if ( old_psls[i] != 0 )
 				{
-					SetInternal( old_pairs[i], false );
+					SetInternal( old_pairs[i], old_hashes[i], false );
 				}
 			}
 		}
@@ -186,11 +192,19 @@ namespace Miku.Lua.Experimental
 
 		public static void Bench()
 		{
-			int REPEATS = 10000;
-			int SIZE = 100;
+			int REPEATS = 10;
+			int SIZE = 300000;
 			long sum_dict = 0;
 			long sum_miku = 0;
 			var timer = new Stopwatch();
+			var keys = new ValueSlot[SIZE];
+			var values = new ValueSlot[SIZE];
+			for ( int i = 0; i < SIZE; i++ )
+			{
+				keys[i] = "key" + i.ToString();
+				values[i] = "value" + i.ToString();
+			}
+
 			for (int j=0;j<REPEATS;j++)
 			{
 				{
@@ -198,18 +212,18 @@ namespace Miku.Lua.Experimental
 					var dict = new MikuDict();
 					for (int i=0;i< SIZE; i++ )
 					{
-						dict.Set( "key"+i.ToString(), "value"+i.ToString() );
+						dict.Set( keys[i], values[i] );
 					}
+					sum_miku += timer.ElapsedTicks;
 					
 					for ( int i = 0; i < SIZE; i++ )
 					{
-						var res = dict.Get( "key" + i.ToString() ).CheckString();
-						if (res != "value"+i.ToString() )
+						var res = dict.Get( keys[i] );
+						if ( !res.FastEquals( values[i] ) )
 						{
 							throw new Exception("validation failed miku "+i+" "+res);
 						}
 					}
-					sum_miku += timer.ElapsedTicks;
 					dict.Validate();
 				}
 				{
@@ -217,18 +231,18 @@ namespace Miku.Lua.Experimental
 					var dict = new Dictionary<ValueSlot,ValueSlot>();
 					for ( int i = 0; i < SIZE; i++ )
 					{
-						dict.Add( "key" + i.ToString(), "value" + i.ToString() );
+						dict.Add( keys[i], values[i] );
 					}
+					sum_dict += timer.ElapsedTicks;
 					
 					for (int i = 0; i < SIZE; i++ )
 					{
-						var res = dict["key" + i.ToString()].CheckString();
-						if ( res != "value" + i.ToString() )
+						var res = dict[keys[i]];
+						if ( !res.FastEquals( values[i] ) )
 						{
 							throw new Exception( "validation failed dict " + i + " " + res );
 						}
 					}
-					sum_dict += timer.ElapsedTicks;
 				}
 			}
 
