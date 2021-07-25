@@ -11,15 +11,18 @@ namespace Miku.Lua.Experimental
 		// Uses https://github.com/slembcke/Chipmunk2D/blob/master/src/prime.h
 		// Based on http://planetmath.org/encyclopedia/GoodHashTablePrimes.html [dead link]
 		readonly int[] PRIMES = new int[] { 13, 23, 47, 97, 193, 389, 769, 1543, 3079, 6151, 12289, 24593 };
-
+		const int INIT_CAPACITY = 5;
+		const float LOAD_FACTOR = 0.9f;
 
 		// We don't bother with lazy init. The table that wraps us should take care of that.
-		private ValueSlot[] Keys = new ValueSlot[5];
-		private ValueSlot[] Values = new ValueSlot[5];
+		private ValueSlot[] Keys = new ValueSlot[INIT_CAPACITY];
+		private ValueSlot[] Values = new ValueSlot[INIT_CAPACITY];
+		// PSLs are offset by one. This is so we can quickly scan for empty slots with psl = 0
 		private byte[] PSLs = new byte[5];
 
 		public int Count { get; private set; }
 		private int Capacity => Keys.Length;
+		private int ResizeThreshold = (int)(INIT_CAPACITY * LOAD_FACTOR);
 
 		public ValueSlot Get(ValueSlot key)
 		{
@@ -60,7 +63,7 @@ namespace Miku.Lua.Experimental
 			{
 				throw new Exception( "TODO deletion" );
 			}
-			if (Count >= (Capacity * 0.9))
+			if (Count >= ResizeThreshold)
 			{
 				//Log.Info( "grow from "+Capacity );
 				Grow();
@@ -69,9 +72,9 @@ namespace Miku.Lua.Experimental
 			uint hash = (uint)key.GetHashCode();
 
 			uint index = hash % (uint)Keys.Length;
-			byte psl = 0;
+			byte psl = 1;
 
-			while ( Keys[index].Kind != ValueKind.Nil )
+			while ( PSLs[index] != 0 )
 			{
 				// NOTE: this should not be an option once a slot is stolen
 				if ( can_replace && Keys[index].FastEquals( key ) )
@@ -93,10 +96,11 @@ namespace Miku.Lua.Experimental
 					val = tmp_val;
 					psl = tmp_psl;
 					// replacement should not be possible or necessary
+					// once we're just shifting pairs around
 					can_replace = false;
 				}
 
-				index = (index + 1) % (uint)Keys.Length;
+				index = (index < Keys.Length-1) ? index + 1 : 0;
 				if ( psl == 255 )
 				{
 					// Don't allow probe lengths to outgrow a byte.
@@ -133,10 +137,11 @@ namespace Miku.Lua.Experimental
 			Values = new ValueSlot[new_size];
 			PSLs = new byte[new_size];
 			Count = 0;
+			ResizeThreshold = (int)(Capacity * LOAD_FACTOR);
 
 			for (int i=0;i<old_keys.Length; i++)
 			{
-				if ( old_keys[i].Kind != ValueKind.Nil)
+				if ( PSLs[i] != 0 )
 				{
 					Set( old_keys[i], old_values[i], false );
 				}
@@ -155,7 +160,7 @@ namespace Miku.Lua.Experimental
 		public static void Bench()
 		{
 			int REPEATS = 1000;
-			int COUNT = 1000;
+			int COUNT = 10000;
 			var data = new long[COUNT, 2];
 			var timer = new Stopwatch();
 			for (int j=0;j<REPEATS;j++)
@@ -182,10 +187,16 @@ namespace Miku.Lua.Experimental
 			System.Console.WriteLine("Miku,Dict");
 			data[0, 0] = 0;
 			data[0, 1] = 0;
+			long sum0 = 0;
+			long sum1 = 0;
 			for (int i=0;i<COUNT;i++ )
 			{
 				System.Console.WriteLine(data[i,0]+","+data[i,1]);
+				sum0 += data[i, 0];
+				sum1 += data[i, 1];
 			}
+			Log.Info( $"MIKU {sum0:n0}" );
+			Log.Info( $".NET {sum1:n0}" );
 		}
 	}
 }
