@@ -83,11 +83,7 @@ namespace Miku.Lua.Experimental
 				return ValueSlot.NIL;
 			}
 
-			uint hash = (uint)key.GetHashCode();
-			if ( hash < 2 )
-			{
-				hash += 2;
-			}
+			uint hash = Math.Max( (uint)key.GetHashCode(), 2 );
 
 			uint index = ComputeIndex( hash );
 
@@ -118,11 +114,7 @@ namespace Miku.Lua.Experimental
 			{
 				Grow();
 			}
-			uint hash = (uint)key.GetHashCode();
-			if ( hash < 2 )
-			{
-				hash += 2;
-			}
+			uint hash = Math.Max( (uint)key.GetHashCode(), 2);
 			
 			uint index = ComputeIndex( hash );
 			HashIndex current_hi;
@@ -199,6 +191,25 @@ namespace Miku.Lua.Experimental
 			}*/
 		}
 
+		void FindClusters()
+		{
+			var dist_map = new SortedDictionary<uint, uint>();
+			for (int i=0;i<HashIndices.Length;i++ )
+			{
+				if (HashIndices[i].Hash != HASH_EMPTY)
+				{
+					int count = 0;
+					while (HashIndices[(i+count) % HashIndices.Length].Hash != HASH_EMPTY)
+					{
+						count++;
+					}
+					Log.Info( "C = " + count );
+				}
+			}
+			Log.Info( "LF = " + ((float)Count / (float)HashIndices.Length) );
+			throw new Exception( "stop" );
+		}
+
 		void Dump()
 		{
 			/*Log.Info( Count + " / " + Capacity );
@@ -210,7 +221,7 @@ namespace Miku.Lua.Experimental
 
 		public static void Bench()
 		{
-			int SIZE = 144;
+			int SIZE = 35;
 			long sum_dict = 0;
 			long sum_miku = 0;
 			var timer = new Stopwatch();
@@ -234,7 +245,7 @@ namespace Miku.Lua.Experimental
 						data[i,0] += timer.ElapsedTicks;
 						sum_miku += timer.ElapsedTicks;
 					}
-					
+					//dict.FindClusters();
 					for ( int i = 0; i < SIZE; i++ )
 					{
 						//timer.Restart();
@@ -272,10 +283,13 @@ namespace Miku.Lua.Experimental
 				}
 			}
 
-			System.Console.WriteLine("MIKU,NET");
-			for ( int i = 0; i < SIZE; i++ )
+			if (SIZE <= 1000)
 			{
-				System.Console.WriteLine(data[i,0]+","+data[i,1]);
+				System.Console.WriteLine("MIKU,NET");
+				for ( int i = 0; i < SIZE; i++ )
+				{
+					System.Console.WriteLine(data[i,0]+","+data[i,1]);
+				}
 			}
 
 			Log.Info( $"MIKU {sum_miku:n0}" );
