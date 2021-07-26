@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 
 namespace Miku.Lua.Experimental
 {
+	// TODO BUG: A full table will never return when trying to access a missing key?
     class MikuDict
     {
 		private readonly struct KeyValuePair
@@ -21,27 +22,51 @@ namespace Miku.Lua.Experimental
 
 		// Uses https://github.com/slembcke/Chipmunk2D/blob/master/src/prime.h
 		// Based on http://planetmath.org/encyclopedia/GoodHashTablePrimes.html [dead link]
-		readonly int[] PRIMES = new int[] {
-			13, 23, 47, 97, 193, 389, 769, 1543, 3079, 6151, 12289, 24593, 49157,
+		const int INIT_CAPACITY = 5;
+		readonly int[] LUT_CAPACITY = new int[] {
+			5, 13, 23, 47, 97, 193, 389, 769, 1543, 3079, 6151, 12289, 24593, 49157,
 			98317, 196613, 393241, 786433, 1572869, 3145739
 		};
-		const int INIT_CAPACITY = 5;
-		const float MAX_LOAD_FACTOR = 1.0f;
-
-		// We don't bother with lazy init. The table that wraps us should take care of that.
-		private KeyValuePair[] Pairs = new KeyValuePair[INIT_CAPACITY];
-		private uint[] Hashes = new uint[INIT_CAPACITY];
+		readonly float[] LUT_RESIZE_THRESHOLDS = new float[]
+		{
+			.99f,.99f, // 5-13, allow to nearly fill
+			.9f,.9f, // 23-47, allow high fill
+			// everything else, allow moderate fill
+			.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,
+			.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,
+		};
+		private uint ComputeIndex(uint hash)
+		{
+			switch ( SizeIndex )
+			{
+				case 0: return hash % 5;
+				case 1: return hash % 13;
+				case 2: return hash % 23;
+				case 3: return hash % 47;
+				case 4: return hash % 97;
+				case 5: return hash % 193;
+				case 6: return hash % 389;
+				case 7: return hash % 769;
+				case 8: return hash % 1543;
+				case 9: return hash % 3079;
+				default: return hash % (uint)Pairs.Length;
+			}
+		}
 
 		const uint HASH_EMPTY = 0;
 		const uint HASH_TOMBSTONE = 1;
-		// PSLs are offset by one. This is so we can quickly scan for empty slots with psl = 0
-		//private byte[] PSLs = new byte[INIT_CAPACITY];
-		// We cache hashes, which is useful for quickly rejecting possible matches and rehashing.
-		//private uint[] Hashes = new uint[INIT_CAPACITY];
+
+		// We don't bother with lazy init. The table that wraps us should take care of that.
+		private KeyValuePair[] Pairs = new KeyValuePair[INIT_CAPACITY];
+		// Hashes are cached for faster lookups and rehashes.
+		// They are also used to quickly scan for empty slots.
+		private uint[] Hashes = new uint[INIT_CAPACITY];
+		// If used to index into LUT_CAPACITY, this should give us our current capacity.
+		private int SizeIndex = 0;
 
 		public int Count { get; private set; }
 		private int Capacity => Pairs.Length;
-		private int ResizeThreshold = (int)(INIT_CAPACITY * MAX_LOAD_FACTOR);
+		private int ResizeThreshold = (int)(INIT_CAPACITY * 1);
 
 		public ValueSlot Get(ValueSlot key)
 		{
@@ -55,7 +80,8 @@ namespace Miku.Lua.Experimental
 			{
 				hash += 2;
 			}
-			uint index = hash % (uint)Pairs.Length;
+
+			uint index = ComputeIndex( hash );
 
 			while ( Hashes[index] != HASH_EMPTY )
 			{
@@ -90,7 +116,8 @@ namespace Miku.Lua.Experimental
 				hash += 2;
 			}
 			var new_pair = new KeyValuePair( key, val );
-			uint index = hash % (uint)Pairs.Length;
+			
+			uint index = ComputeIndex( hash );
 
 			while ( Hashes[index] != HASH_EMPTY )
 			{
@@ -116,26 +143,19 @@ namespace Miku.Lua.Experimental
 			var old_pairs = Pairs;
 			var old_hashes = Hashes;
 
-			int new_size;
-			for (int i=0; ;i++ )
-			{
-				if (PRIMES[i] > old_pairs.Length)
-				{
-					new_size = PRIMES[i];
-					break;
-				}
-			}
+			SizeIndex++;
+			int new_size = LUT_CAPACITY[SizeIndex];
 
 			Pairs = new KeyValuePair[new_size];
 			Hashes = new uint[new_size];
-			ResizeThreshold = (int)(Capacity * MAX_LOAD_FACTOR);
+			ResizeThreshold = (int)(Capacity * LUT_RESIZE_THRESHOLDS[SizeIndex]);
 
 			for (int i=0;i< old_pairs.Length; i++)
 			{
 				uint hash = old_hashes[i];
 				if ( hash >= 2 )
 				{
-					uint index = hash % (uint)Pairs.Length;
+					uint index = ComputeIndex( hash );
 
 					// Skip filled slots. No need to check for equality, we know all keys are unique.
 					while ( Hashes[index] != HASH_EMPTY )
@@ -181,14 +201,13 @@ namespace Miku.Lua.Experimental
 
 		public static void Bench()
 		{
-			int SIZE = 10;
-			//int REPEATS = 1000000;
-			//int SIZE = 10;
+			int SIZE = 150;
 			long sum_dict = 0;
 			long sum_miku = 0;
 			var timer = new Stopwatch();
 			var keys = new ValueSlot[SIZE];
 			var values = new ValueSlot[SIZE];
+			var data = new long[SIZE, 2];
 			for ( int i = 0; i < SIZE; i++ )
 			{
 				keys[i] = "key" + i.ToString();
@@ -198,17 +217,21 @@ namespace Miku.Lua.Experimental
 			while (sum_dict < 10_000_000)
 			{
 				{
-					timer.Restart();
 					var dict = new MikuDict();
 					for (int i=0;i< SIZE; i++ )
 					{
+						timer.Restart();
 						dict.Set( keys[i], values[i] );
+						data[i,0] += timer.ElapsedTicks;
+						sum_miku += timer.ElapsedTicks;
 					}
-					sum_miku += timer.ElapsedTicks;
 					
 					for ( int i = 0; i < SIZE; i++ )
 					{
+						timer.Restart();
 						var res = dict.Get( keys[i] );
+						data[i, 0] += timer.ElapsedTicks;
+						sum_miku += timer.ElapsedTicks;
 						if ( !res.FastEquals( values[i] ) )
 						{
 							throw new Exception("validation failed miku "+i+" "+res);
@@ -217,23 +240,33 @@ namespace Miku.Lua.Experimental
 					dict.Validate();
 				}
 				{
-					timer.Restart();
 					var dict = new Dictionary<ValueSlot,ValueSlot>();
 					for ( int i = 0; i < SIZE; i++ )
 					{
+						timer.Restart();
 						dict.Add( keys[i], values[i] );
+						data[i, 1] += timer.ElapsedTicks;
+						sum_dict += timer.ElapsedTicks;
 					}
-					sum_dict += timer.ElapsedTicks;
 					
 					for (int i = 0; i < SIZE; i++ )
 					{
+						timer.Restart();
 						var res = dict[keys[i]];
+						data[i, 1] += timer.ElapsedTicks;
+						sum_dict += timer.ElapsedTicks;
 						if ( !res.FastEquals( values[i] ) )
 						{
 							throw new Exception( "validation failed dict " + i + " " + res );
 						}
 					}
 				}
+			}
+
+			System.Console.WriteLine("MIKU,NET");
+			for ( int i = 0; i < SIZE; i++ )
+			{
+				System.Console.WriteLine(data[i,0]+","+data[i,1]);
 			}
 
 			Log.Info( $"MIKU {sum_miku:n0}" );
