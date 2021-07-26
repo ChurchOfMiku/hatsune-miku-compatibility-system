@@ -9,15 +9,20 @@ namespace Miku.Lua.Experimental
 	// TODO BUG: A full table will never return when trying to access a missing key?
     class MikuDict
     {
-		private readonly struct KeyValuePair
+		private struct KeyValuePair
 		{
 			public KeyValuePair(ValueSlot key, ValueSlot val)
 			{
 				Key = key;
 				Value = val;
 			}
-			public readonly ValueSlot Key;
-			public readonly ValueSlot Value;
+			public void Set( ValueSlot key, ValueSlot val )
+			{
+				Key = key;
+				Value = val;
+			}
+			public ValueSlot Key;
+			public ValueSlot Value;
 		}
 
 		// Uses https://github.com/slembcke/Chipmunk2D/blob/master/src/prime.h
@@ -29,12 +34,16 @@ namespace Miku.Lua.Experimental
 		};
 		readonly float[] LUT_RESIZE_THRESHOLDS = new float[]
 		{
-			.99f,.99f, // 5-13, allow to nearly fill
-			.9f,.9f, // 23-47, allow high fill
+			//.99f,.99f, // 5-13, allow to nearly fill
+			//.9f,.9f, // 23-47, allow high fill
 			// everything else, allow moderate fill
-			.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,
-			.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,
+			//.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,
+			//.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,
+
+			.75f,.75f,.75f,.75f,.75f,.75f,.75f,.75f,.75f,.75f,.75f,.75f,
+			.75f,.75f,.75f,.75f,.75f,.75f,.75f,.75f,.75f,.75f,.75f,.75f
 		};
+
 		private uint ComputeIndex(uint hash)
 		{
 			switch ( SizeIndex )
@@ -115,17 +124,16 @@ namespace Miku.Lua.Experimental
 			{
 				hash += 2;
 			}
-			var new_pair = new KeyValuePair( key, val );
 			
 			uint index = ComputeIndex( hash );
-
-			while ( Hashes[index] != HASH_EMPTY )
+			uint current_hash;
+			while ( (current_hash = Hashes[index]) != HASH_EMPTY )
 			{
 				// Short path: compare the hash before checking equality
-				if ( hash == Hashes[index] && Pairs[index].Key.FastEquals( new_pair.Key ) )
+				if ( hash == current_hash && Pairs[index].Key.FastEquals( key ) )
 				{
 					// Just replace the value
-					Pairs[index] = new_pair;
+					Pairs[index].Value = val;
 					return;
 				}
 
@@ -134,7 +142,7 @@ namespace Miku.Lua.Experimental
 
 			// Place
 			Count++;
-			Pairs[index] = new_pair;
+			Pairs[index].Set( key, val ); // this is measurably faster than constructing a new Pair.
 			Hashes[index] = hash;
 		}
 
@@ -201,7 +209,7 @@ namespace Miku.Lua.Experimental
 
 		public static void Bench()
 		{
-			int SIZE = 150;
+			int SIZE = 144;
 			long sum_dict = 0;
 			long sum_miku = 0;
 			var timer = new Stopwatch();
@@ -228,10 +236,10 @@ namespace Miku.Lua.Experimental
 					
 					for ( int i = 0; i < SIZE; i++ )
 					{
-						timer.Restart();
+						//timer.Restart();
 						var res = dict.Get( keys[i] );
-						data[i, 0] += timer.ElapsedTicks;
-						sum_miku += timer.ElapsedTicks;
+						//data[i, 0] += timer.ElapsedTicks;
+						//sum_miku += timer.ElapsedTicks;
 						if ( !res.FastEquals( values[i] ) )
 						{
 							throw new Exception("validation failed miku "+i+" "+res);
@@ -251,10 +259,10 @@ namespace Miku.Lua.Experimental
 					
 					for (int i = 0; i < SIZE; i++ )
 					{
-						timer.Restart();
+						//timer.Restart();
 						var res = dict[keys[i]];
-						data[i, 1] += timer.ElapsedTicks;
-						sum_dict += timer.ElapsedTicks;
+						//data[i, 1] += timer.ElapsedTicks;
+						//sum_dict += timer.ElapsedTicks;
 						if ( !res.FastEquals( values[i] ) )
 						{
 							throw new Exception( "validation failed dict " + i + " " + res );
