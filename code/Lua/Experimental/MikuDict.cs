@@ -7,15 +7,16 @@ using System.Runtime.CompilerServices;
 namespace Miku.Lua.Experimental
 {
 	// TODO BUG: A full table will never return when trying to access a missing key?
+	// Should be fine as long as we never allow full tables, which we don't.
     class MikuDict
     {
 		private struct KeyValuePair
 		{
-			public KeyValuePair(ValueSlot key, ValueSlot val)
+			/*public KeyValuePair(ValueSlot key, ValueSlot val)
 			{
 				Key = key;
 				Value = val;
-			}
+			}*/
 			public void Set( ValueSlot key, ValueSlot val )
 			{
 				Key = key;
@@ -32,17 +33,7 @@ namespace Miku.Lua.Experimental
 			5, 13, 23, 47, 97, 193, 389, 769, 1543, 3079, 6151, 12289, 24593, 49157,
 			98317, 196613, 393241, 786433, 1572869, 3145739
 		};
-		readonly float[] LUT_RESIZE_THRESHOLDS = new float[]
-		{
-			//.99f,.99f, // 5-13, allow to nearly fill
-			//.9f,.9f, // 23-47, allow high fill
-			// everything else, allow moderate fill
-			//.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,
-			//.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,
-
-			.75f,.75f,.75f,.75f,.75f,.75f,.75f,.75f,.75f,.75f,.75f,.75f,
-			.75f,.75f,.75f,.75f,.75f,.75f,.75f,.75f,.75f,.75f,.75f,.75f
-		};
+		const float RESIZE_THRESHOLD = 0.75f;
 
 		private uint ComputeIndex(uint hash)
 		{
@@ -75,7 +66,7 @@ namespace Miku.Lua.Experimental
 
 		public int Count { get; private set; }
 		private int Capacity => Pairs.Length;
-		private int ResizeThreshold = (int)(INIT_CAPACITY * 1);
+		private int ResizeThreshold = (int)(INIT_CAPACITY * RESIZE_THRESHOLD);
 
 		public ValueSlot Get(ValueSlot key)
 		{
@@ -156,7 +147,7 @@ namespace Miku.Lua.Experimental
 
 			Pairs = new KeyValuePair[new_size];
 			Hashes = new uint[new_size];
-			ResizeThreshold = (int)(Capacity * LUT_RESIZE_THRESHOLDS[SizeIndex]);
+			ResizeThreshold = (int)(Capacity * RESIZE_THRESHOLD);
 
 			for (int i=0;i< old_pairs.Length; i++)
 			{
