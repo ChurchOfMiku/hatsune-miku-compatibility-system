@@ -30,7 +30,7 @@ namespace Miku.Lua.Experimental
 			}
 			public uint Hash;
 			public uint Index;
-			public uint Distance;
+			//public uint Distance;
 		}
 
 		// Uses https://github.com/slembcke/Chipmunk2D/blob/master/src/prime.h
@@ -43,20 +43,7 @@ namespace Miku.Lua.Experimental
 
 		private uint ComputeIndex(uint hash)
 		{
-			switch ( SizeIndex )
-			{
-				case 0: return hash % 5;
-				case 1: return hash % 13;
-				case 2: return hash % 23;
-				case 3: return hash % 47;
-				case 4: return hash % 97;
-				case 5: return hash % 193;
-				case 6: return hash % 389;
-				case 7: return hash % 769;
-				case 8: return hash % 1543;
-				case 9: return hash % 3079;
-				default: return hash % (uint)HashIndices.Length;
-			}
+			return FastMod(hash, (uint)HashIndices.Length, FastModMul);
 		}
 
 		const float RESIZE_THRESHOLD = 0.75f;
@@ -71,6 +58,7 @@ namespace Miku.Lua.Experimental
 		private HashIndex[] HashIndices = new HashIndex[INIT_CAPACITY];
 		// If used to index into LUT_CAPACITY, this should give us our current capacity.
 		private int SizeIndex = 0;
+		private ulong FastModMul = GetFastModMultiplier(INIT_CAPACITY);
 
 		public int Count { get; private set; }
 		private int Capacity => HashIndices.Length;
@@ -117,9 +105,19 @@ namespace Miku.Lua.Experimental
 			uint hash = Math.Max( (uint)key.GetHashCode(), 2);
 			
 			uint index = ComputeIndex( hash );
-			HashIndex current_hi;
-			while ( (current_hi = HashIndices[index]).Hash != HASH_EMPTY )
+
+			while ( true )
 			{
+				ref HashIndex current_hi = ref HashIndices[index];
+				// Empty slot, insert.
+				if (current_hi.Hash == HASH_EMPTY)
+				{
+					uint pair_index = (uint)Count; // TODO we're going to need to do other stuff here if we want to handle deletes
+					Count++;
+					PairChunk[pair_index].Set( key, val ); // this is measurably faster than constructing a new Pair.
+					current_hi.Set( hash, pair_index );
+					return;
+				}
 				// Short path: compare the hash before checking equality
 				if ( hash == current_hi.Hash && PairChunk[current_hi.Index].Key.FastEquals( key ) )
 				{
@@ -129,13 +127,8 @@ namespace Miku.Lua.Experimental
 				}
 
 				index = (index < HashIndices.Length - 1) ? index + 1 : 0;
+				//index = Math.Min( index + 1, index - (uint)HashIndices.Length + 1 );
 			}
-
-			// Place
-			uint pair_index = (uint)Count; // TODO we're going to need to do other stuff here if we want to handle deletes
-			Count++;
-			PairChunk[pair_index].Set( key, val ); // this is measurably faster than constructing a new Pair.
-			HashIndices[index].Set( hash, pair_index );
 		}
 
 		void Grow()
@@ -149,24 +142,28 @@ namespace Miku.Lua.Experimental
 			PairChunk = new KeyValuePair[new_size];
 			HashIndices = new HashIndex[new_size];
 			ResizeThreshold = (int)(Capacity * RESIZE_THRESHOLD);
+			FastModMul = GetFastModMultiplier( (uint)new_size );
 
 			Array.Copy( old_chunk, PairChunk, old_chunk.Length );
 
 			for (int i=0;i< old_his.Length; i++)
 			{
-				var hi = old_his[i];
-				if ( hi.Hash >= 2 )
+				HashIndex old_hi = old_his[i];
+				if ( old_hi.Hash >= 2 )
 				{
-					uint index = ComputeIndex( hi.Hash );
+					uint index = ComputeIndex( old_hi.Hash );
 
 					// Skip filled slots. No need to check for equality, we know all keys are unique.
-					while ( HashIndices[index].Hash != HASH_EMPTY )
+					while ( true )
 					{
+						ref HashIndex new_hi = ref HashIndices[index];
+						if ( new_hi.Hash == HASH_EMPTY ) {
+							// Place
+							new_hi = old_hi;
+							break;
+						}
 						index = (index < HashIndices.Length - 1) ? index + 1 : 0;
 					}
-
-					// Place
-					HashIndices[index] = hi;
 				}
 			}
 		}
@@ -296,5 +293,26 @@ namespace Miku.Lua.Experimental
 			Log.Info( $".NET {sum_dict:n0}" );
 			Log.Info( $"MIKU is {(float)sum_miku / sum_dict * 100}% of .NET" );
 		}
+
+		// From https://source.dot.net/#System.Private.CoreLib/HashHelpers.cs,de3ba4873d4ad06a
+
+		/// <summary>Returns approximate reciprocal of the divisor: ceil(2**64 / divisor).</summary>
+		/// <remarks>This should only be used on 64-bit.</remarks>
+		public static ulong GetFastModMultiplier( uint divisor ) =>
+			ulong.MaxValue / divisor + 1;
+
+		/// <summary>Performs a mod operation using the multiplier pre-computed with <see cref="GetFastModMultiplier"/>.</summary>
+		/// <remarks>This should only be used on 64-bit.</remarks>
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
+		public static uint FastMod( uint value, uint divisor, ulong multiplier )
+		{
+			// We use modified Daniel Lemire's fastmod algorithm (https://github.com/dotnet/runtime/pull/406),
+			// which allows to avoid the long multiplication if the divisor is less than 2**31.
+			// This is equivalent of (uint)Math.BigMul(multiplier * value, divisor, out _). This version
+			// is faster than BigMul currently because we only need the high bits.
+			uint highbits = (uint)(((((multiplier * value) >> 32) + 1) * divisor) >> 32);
+			return highbits;
+		}
+
 	}
 }
