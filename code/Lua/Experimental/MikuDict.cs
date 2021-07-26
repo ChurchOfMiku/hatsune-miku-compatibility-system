@@ -12,11 +12,6 @@ namespace Miku.Lua.Experimental
     {
 		private struct KeyValuePair
 		{
-			/*public KeyValuePair(ValueSlot key, ValueSlot val)
-			{
-				Key = key;
-				Value = val;
-			}*/
 			public void Set( ValueSlot key, ValueSlot val )
 			{
 				Key = key;
@@ -26,6 +21,18 @@ namespace Miku.Lua.Experimental
 			public ValueSlot Value;
 		}
 
+		private struct HashIndex
+		{
+			public void Set(uint hash, uint index)
+			{
+				Hash = hash;
+				Index = index;
+			}
+			public uint Hash;
+			public uint Index;
+			public uint Distance;
+		}
+
 		// Uses https://github.com/slembcke/Chipmunk2D/blob/master/src/prime.h
 		// Based on http://planetmath.org/encyclopedia/GoodHashTablePrimes.html [dead link]
 		const int INIT_CAPACITY = 5;
@@ -33,7 +40,6 @@ namespace Miku.Lua.Experimental
 			5, 13, 23, 47, 97, 193, 389, 769, 1543, 3079, 6151, 12289, 24593, 49157,
 			98317, 196613, 393241, 786433, 1572869, 3145739
 		};
-		const float RESIZE_THRESHOLD = 0.75f;
 
 		private uint ComputeIndex(uint hash)
 		{
@@ -49,23 +55,25 @@ namespace Miku.Lua.Experimental
 				case 7: return hash % 769;
 				case 8: return hash % 1543;
 				case 9: return hash % 3079;
-				default: return hash % (uint)Pairs.Length;
+				default: return hash % (uint)HashIndices.Length;
 			}
 		}
+
+		const float RESIZE_THRESHOLD = 0.75f;
 
 		const uint HASH_EMPTY = 0;
 		const uint HASH_TOMBSTONE = 1;
 
 		// We don't bother with lazy init. The table that wraps us should take care of that.
-		private KeyValuePair[] Pairs = new KeyValuePair[INIT_CAPACITY];
+		private KeyValuePair[] PairChunk = new KeyValuePair[INIT_CAPACITY];
 		// Hashes are cached for faster lookups and rehashes.
 		// They are also used to quickly scan for empty slots.
-		private uint[] Hashes = new uint[INIT_CAPACITY];
+		private HashIndex[] HashIndices = new HashIndex[INIT_CAPACITY];
 		// If used to index into LUT_CAPACITY, this should give us our current capacity.
 		private int SizeIndex = 0;
 
 		public int Count { get; private set; }
-		private int Capacity => Pairs.Length;
+		private int Capacity => HashIndices.Length;
 		private int ResizeThreshold = (int)(INIT_CAPACITY * RESIZE_THRESHOLD);
 
 		public ValueSlot Get(ValueSlot key)
@@ -83,14 +91,14 @@ namespace Miku.Lua.Experimental
 
 			uint index = ComputeIndex( hash );
 
-			while ( Hashes[index] != HASH_EMPTY )
+			while ( HashIndices[index].Hash != HASH_EMPTY )
 			{
-				if ( hash == Hashes[index] && Pairs[index].Key.FastEquals(key))
+				if ( hash == HashIndices[index].Hash && PairChunk[HashIndices[index].Index].Key.FastEquals(key))
 				{
-					return Pairs[index].Value;
+					return PairChunk[HashIndices[index].Index].Value;
 				}
 
-				index = (index < Pairs.Length - 1) ? index + 1 : 0;
+				index = (index < HashIndices.Length - 1) ? index + 1 : 0;
 			}
 
 			return ValueSlot.NIL;
@@ -117,54 +125,56 @@ namespace Miku.Lua.Experimental
 			}
 			
 			uint index = ComputeIndex( hash );
-			uint current_hash;
-			while ( (current_hash = Hashes[index]) != HASH_EMPTY )
+			HashIndex current_hi;
+			while ( (current_hi = HashIndices[index]).Hash != HASH_EMPTY )
 			{
 				// Short path: compare the hash before checking equality
-				if ( hash == current_hash && Pairs[index].Key.FastEquals( key ) )
+				if ( hash == current_hi.Hash && PairChunk[current_hi.Index].Key.FastEquals( key ) )
 				{
 					// Just replace the value
-					Pairs[index].Value = val;
+					PairChunk[current_hi.Index].Value = val;
 					return;
 				}
 
-				index = (index < Pairs.Length - 1) ? index + 1 : 0;
+				index = (index < HashIndices.Length - 1) ? index + 1 : 0;
 			}
 
 			// Place
+			uint pair_index = (uint)Count; // TODO we're going to need to do other stuff here if we want to handle deletes
 			Count++;
-			Pairs[index].Set( key, val ); // this is measurably faster than constructing a new Pair.
-			Hashes[index] = hash;
+			PairChunk[pair_index].Set( key, val ); // this is measurably faster than constructing a new Pair.
+			HashIndices[index].Set( hash, pair_index );
 		}
 
 		void Grow()
 		{
-			var old_pairs = Pairs;
-			var old_hashes = Hashes;
+			var old_chunk = PairChunk;
+			var old_his = HashIndices;
 
 			SizeIndex++;
 			int new_size = LUT_CAPACITY[SizeIndex];
 
-			Pairs = new KeyValuePair[new_size];
-			Hashes = new uint[new_size];
+			PairChunk = new KeyValuePair[new_size];
+			HashIndices = new HashIndex[new_size];
 			ResizeThreshold = (int)(Capacity * RESIZE_THRESHOLD);
 
-			for (int i=0;i< old_pairs.Length; i++)
+			Array.Copy( old_chunk, PairChunk, old_chunk.Length );
+
+			for (int i=0;i< old_his.Length; i++)
 			{
-				uint hash = old_hashes[i];
-				if ( hash >= 2 )
+				var hi = old_his[i];
+				if ( hi.Hash >= 2 )
 				{
-					uint index = ComputeIndex( hash );
+					uint index = ComputeIndex( hi.Hash );
 
 					// Skip filled slots. No need to check for equality, we know all keys are unique.
-					while ( Hashes[index] != HASH_EMPTY )
+					while ( HashIndices[index].Hash != HASH_EMPTY )
 					{
-						index = (index < Pairs.Length - 1) ? index + 1 : 0;
+						index = (index < HashIndices.Length - 1) ? index + 1 : 0;
 					}
 
 					// Place
-					Pairs[index] = old_pairs[i];
-					Hashes[index] = hash;
+					HashIndices[index] = hi;
 				}
 			}
 		}
@@ -191,11 +201,11 @@ namespace Miku.Lua.Experimental
 
 		void Dump()
 		{
-			Log.Info( Count + " / " + Capacity );
+			/*Log.Info( Count + " / " + Capacity );
 			for (int i=0;i< Pairs.Length; i++)
 			{
 				Log.Info( i + " " + Pairs[i].Key + " " + Pairs[i].Value + " " + Hashes[i] + " " + (uint)Pairs[i].Key.GetHashCode() % (uint)Pairs.Length );
-			}
+			}*/
 		}
 
 		public static void Bench()
