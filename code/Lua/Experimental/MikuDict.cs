@@ -30,15 +30,14 @@ namespace Miku.Lua.Experimental
 			}
 			public uint Hash;
 			public uint Index;
-			//public uint Distance;
 		}
 
 		// Uses https://github.com/slembcke/Chipmunk2D/blob/master/src/prime.h
 		// Based on http://planetmath.org/encyclopedia/GoodHashTablePrimes.html [dead link]
-		const int INIT_CAPACITY = 5;
+		const int INIT_CAPACITY = 8;
 		readonly int[] LUT_CAPACITY = new int[] {
 			5, 13, 23, 47, 97, 193, 389, 769, 1543, 3079, 6151, 12289, 24593, 49157,
-			98317, 196613, 393241, 786433, 1572869, 3145739
+			98317, 196613, 393241, 786433, 1572869, 3145739, 6291469
 		};
 
 		private uint ComputeIndex(uint hash)
@@ -75,17 +74,20 @@ namespace Miku.Lua.Experimental
 
 			uint index = ComputeIndex( hash );
 
-			while ( HashIndices[index].Hash != HASH_EMPTY )
+			while ( true )
 			{
-				if ( hash == HashIndices[index].Hash && PairChunk[HashIndices[index].Index].Key.FastEquals(key))
+				ref HashIndex current_hi = ref HashIndices[index];
+				if ( current_hi.Hash == HASH_EMPTY )
+				{
+					return ValueSlot.NIL;
+				}
+				if ( hash == current_hi.Hash && PairChunk[current_hi.Index].Key.FastEquals(key))
 				{
 					return PairChunk[HashIndices[index].Index].Value;
 				}
 
 				index = (index < HashIndices.Length - 1) ? index + 1 : 0;
 			}
-
-			return ValueSlot.NIL;
 		}
 
 		public void Set( ValueSlot key, ValueSlot val )
@@ -168,57 +170,9 @@ namespace Miku.Lua.Experimental
 			}
 		}
 
-		void Validate()
-		{
-			/*for ( int i = 0; i < Pairs.Length; i++ )
-			{
-				if (PSLs[i] == 0)
-				{
-					if ( Pairs[i].Key.Kind != ValueKind.Nil || Pairs[i].Value.Kind != ValueKind.Nil ) {
-						throw new Exception( "bad slot, should be empty" );
-					}
-				} else
-				{
-					uint goal_slot = (uint)(Pairs[i].Key.GetHashCode() + PSLs[i] - 1) % (uint)Pairs.Length;
-					if (i != goal_slot)
-					{
-						throw new Exception( "bad slot, hash/psl mismatch" );
-					}
-				}
-			}*/
-		}
-
-		void FindClusters()
-		{
-			var dist_map = new SortedDictionary<uint, uint>();
-			for (int i=0;i<HashIndices.Length;i++ )
-			{
-				if (HashIndices[i].Hash != HASH_EMPTY)
-				{
-					int count = 0;
-					while (HashIndices[(i+count) % HashIndices.Length].Hash != HASH_EMPTY)
-					{
-						count++;
-					}
-					Log.Info( "C = " + count );
-				}
-			}
-			Log.Info( "LF = " + ((float)Count / (float)HashIndices.Length) );
-			throw new Exception( "stop" );
-		}
-
-		void Dump()
-		{
-			/*Log.Info( Count + " / " + Capacity );
-			for (int i=0;i< Pairs.Length; i++)
-			{
-				Log.Info( i + " " + Pairs[i].Key + " " + Pairs[i].Value + " " + Hashes[i] + " " + (uint)Pairs[i].Key.GetHashCode() % (uint)Pairs.Length );
-			}*/
-		}
-
 		public static void Bench()
 		{
-			int SIZE = 35;
+			int SIZE = 62;
 			long sum_dict = 0;
 			long sum_miku = 0;
 			var timer = new Stopwatch();
@@ -242,19 +196,17 @@ namespace Miku.Lua.Experimental
 						data[i,0] += timer.ElapsedTicks;
 						sum_miku += timer.ElapsedTicks;
 					}
-					//dict.FindClusters();
 					for ( int i = 0; i < SIZE; i++ )
 					{
-						//timer.Restart();
+						timer.Restart();
 						var res = dict.Get( keys[i] );
-						//data[i, 0] += timer.ElapsedTicks;
-						//sum_miku += timer.ElapsedTicks;
+						data[i, 0] += timer.ElapsedTicks;
+						sum_miku += timer.ElapsedTicks;
 						if ( !res.FastEquals( values[i] ) )
 						{
 							throw new Exception("validation failed miku "+i+" "+res);
 						}
 					}
-					dict.Validate();
 				}
 				{
 					var dict = new Dictionary<ValueSlot,ValueSlot>();
@@ -268,10 +220,10 @@ namespace Miku.Lua.Experimental
 					
 					for (int i = 0; i < SIZE; i++ )
 					{
-						//timer.Restart();
+						timer.Restart();
 						var res = dict[keys[i]];
-						//data[i, 1] += timer.ElapsedTicks;
-						//sum_dict += timer.ElapsedTicks;
+						data[i, 1] += timer.ElapsedTicks;
+						sum_dict += timer.ElapsedTicks;
 						if ( !res.FastEquals( values[i] ) )
 						{
 							throw new Exception( "validation failed dict " + i + " " + res );
