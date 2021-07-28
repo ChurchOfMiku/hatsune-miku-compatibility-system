@@ -109,7 +109,7 @@ namespace Miku.Lua
 						default:
 							if (const_type >= 5)
 							{
-								proto.ConstGC[i] = reader.ReadStringN( const_type - 5 );
+								proto.ConstGC[i] = String.Intern( reader.ReadStringN( const_type - 5 ) );
 							} else
 							{
 								throw new Exception( "handle const type " + const_type );
@@ -190,7 +190,7 @@ namespace Miku.Lua
 				default:
 					if ( entry_type >= 5 )
 					{
-						return reader.ReadStringN( entry_type - 5 );
+						return String.Intern( reader.ReadStringN( entry_type - 5 ) );
 					}
 					else
 					{
