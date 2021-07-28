@@ -1,7 +1,8 @@
-﻿#nullable enable
+#nullable enable
 
 using System;
 using System.Diagnostics;
+using Miku.Lua.Objects;
 
 namespace Miku.Lua
 {
@@ -207,6 +208,26 @@ namespace Miku.Lua
 						return ReferenceEquals( Reference, val.Reference )
 							   || this.Reference.Equals( val.Reference );
 					}
+				}
+			}
+			return false;
+		}
+
+		public bool FastEquals(ValueSlot other)
+		{
+			if (this.Kind == other.Kind)
+			{
+				if (Kind == ValueKind.Number)
+				{
+					return this.NumberValue == other.NumberValue;
+				} else
+				{
+					if ( this.Reference == null )
+					{
+						return other.Reference == null;
+					}
+					return ReferenceEquals( Reference, other.Reference )
+						   || this.Reference.Equals( other.Reference );
 				}
 			}
 			return false;

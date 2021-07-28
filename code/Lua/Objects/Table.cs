@@ -1,11 +1,11 @@
-﻿#nullable enable
+#nullable enable
 
 using System.Collections.Generic;
 using System;
 
 using Sandbox;
 
-namespace Miku.Lua
+namespace Miku.Lua.Objects
 {
 	class Table
 	{

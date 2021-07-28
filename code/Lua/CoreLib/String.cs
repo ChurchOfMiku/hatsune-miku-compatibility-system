@@ -1,8 +1,10 @@
-﻿using System;
+using System;
 using System.Text;
 using System.Text.RegularExpressions;
 using Sandbox;
 using System.Collections.Generic;
+
+using Miku.Lua.Objects;
 
 namespace Miku.Lua.CoreLib
 {

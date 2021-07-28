@@ -16,14 +16,18 @@
     <Compile Include="$(MSBuildThisFileDirectory)CoreLib\String.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Dump.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Executor.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Function.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Objects\Internal\MikuDict.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Objects\Function.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)LuaMachine.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MetaTables.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)OpCode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Profiler.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Table.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UserData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Objects\Table.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Objects\UserData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ValueOperations.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ValueSlot.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\..\..\..\..\..\..\..\..\Program Files %28x86%29\Steam\steamapps\common\sbox\addons\hatsune-miku-compatibility-system\code\Lua\ValueSlot.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)Objects\" />
   </ItemGroup>
 </Project>

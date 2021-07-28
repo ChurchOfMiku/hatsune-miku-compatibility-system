@@ -1,9 +1,11 @@
-﻿#nullable enable
+#nullable enable
 
 using System;
 using System.Diagnostics;
 using System.Text;
 using Sandbox;
+
+using Miku.Lua.Objects;
 
 namespace Miku.Lua
 {

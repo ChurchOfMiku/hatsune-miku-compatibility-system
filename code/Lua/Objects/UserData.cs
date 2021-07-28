@@ -1,11 +1,11 @@
-﻿using Miku.GMod.Entities;
+using Miku.GMod.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Miku.Lua
+namespace Miku.Lua.Objects
 {
 	class UserData
 	{
