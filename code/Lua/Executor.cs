@@ -9,6 +9,8 @@ using System.Diagnostics;
 using Sandbox;
 using System.Runtime.CompilerServices;
 
+using Miku.Lua.Objects;
+
 namespace Miku.Lua
 {
 	class SilentExecException : Exception

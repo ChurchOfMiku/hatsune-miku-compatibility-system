@@ -1,4 +1,4 @@
-//#define PROFILING
+#define PROFILING
 //#define TEST_HASH
 
 using System.Diagnostics;
@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Miku.Lua;
+using Miku.Lua.Objects;
 using Tsu.CLI.Commands;
 using Tsu.Numerics;
 

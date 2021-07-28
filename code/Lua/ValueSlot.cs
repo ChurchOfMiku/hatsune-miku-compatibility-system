@@ -2,6 +2,7 @@
 
 using System;
 using System.Diagnostics;
+using Miku.Lua.Objects;
 
 namespace Miku.Lua
 {

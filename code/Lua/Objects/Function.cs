@@ -1,8 +1,8 @@
-﻿#nullable enable
+#nullable enable
 
 using System;
 
-namespace Miku.Lua
+namespace Miku.Lua.Objects
 {
 	using UserFunction = Func<Executor, ValueSlot?>;
 
