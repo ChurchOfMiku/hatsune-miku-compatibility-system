@@ -4,7 +4,7 @@ using Sandbox;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace Miku.Lua.Experimental
+namespace Miku.Lua.Objects.Internal
 {
 	// TODO BUG: A full table will never return when trying to access a missing key?
 	// Should be fine as long as we never allow full tables, which we don't.
@@ -170,6 +170,7 @@ namespace Miku.Lua.Experimental
 			}
 		}
 
+#if MIKU_CONSOLE
 		public static void Bench()
 		{
 			int SIZE = 62;
@@ -245,6 +246,7 @@ namespace Miku.Lua.Experimental
 			Log.Info( $".NET {sum_dict:n0}" );
 			Log.Info( $"MIKU is {(float)sum_miku / sum_dict * 100}% of .NET" );
 		}
+#endif
 
 		// From https://source.dot.net/#System.Private.CoreLib/HashHelpers.cs,de3ba4873d4ad06a
 

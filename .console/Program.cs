@@ -1,5 +1,5 @@
 //#define PROFILING
-#define TEST_HASH
+//#define TEST_HASH
 
 using System.Diagnostics;
 using System.IO;
@@ -29,7 +29,7 @@ namespace Miku.Console
                 Directory.CreateDirectory( "data" );
             }
 #if TEST_HASH
-			Lua.Experimental.MikuDict.Bench();
+			Lua.Objects.Internal.MikuDict.Bench();
 			return;
 #endif
 

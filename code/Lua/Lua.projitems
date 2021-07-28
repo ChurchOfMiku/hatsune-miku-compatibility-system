@@ -16,15 +16,18 @@
     <Compile Include="$(MSBuildThisFileDirectory)CoreLib\String.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Dump.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Executor.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Experimental\MikuDict.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Function.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LuaObjects\Internal\MikuDict.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LuaObjects\Function.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)LuaMachine.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MetaTables.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)OpCode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Profiler.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Table.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UserData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LuaObjects\Table.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LuaObjects\UserData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ValueOperations.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ValueSlot.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LuaObjects\ValueSlot.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)LuaObjects\" />
   </ItemGroup>
 </Project>
