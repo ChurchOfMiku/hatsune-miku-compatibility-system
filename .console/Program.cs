@@ -46,15 +46,17 @@ namespace Miku.Console
                 .GetValue( _luaMachine );
 
 #if PROFILING
+			var fullRunTimer = Stopwatch.StartNew();
             Compile(
                 "lua\\core\\*.lua",
                 "lua\\glib\\*.lua",
                 "lua\\glib_official\\garrysmod\\lua\\*.lua" );
 			LuaStats();
+			Sandbox.Log.Info( "Full runtime: " + fullRunTimer.Elapsed.TotalSeconds );
 #else
             _commandManager.Start();
 #endif
-        }
+		}
 
         private static readonly EnumerationOptions _enumOptions = new EnumerationOptions
         {

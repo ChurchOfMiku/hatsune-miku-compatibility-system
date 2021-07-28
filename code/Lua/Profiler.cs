@@ -1,4 +1,5 @@
-﻿#nullable enable
+//#define ENABLE_PROFILER
+#nullable enable
 
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,6 @@ namespace Miku.Lua
 {
     class Profiler
     {
-		static bool ENABLE = true;
 		static Stopwatch SW = new Stopwatch();
 		static OpCode? CurrentOp;
 		static string? CurrentFunc;
@@ -44,12 +44,9 @@ namespace Miku.Lua
 			CurrentFunc = null;
 		}
 
+		[Conditional("ENABLE_PROFILER")]
 		private static void Cycle()
 		{
-			if (!ENABLE)
-			{
-				return;
-			}
 			var t = SW.Elapsed.TotalMilliseconds;
 			if ( CurrentOp != null )
 			{
