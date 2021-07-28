@@ -19,7 +19,7 @@ namespace Miku.Lua
 		UserData
 	}
 
-	readonly struct ValueSlot
+	readonly struct ValueSlot : IEquatable<ValueSlot>
 	{
 		public readonly ValueKind Kind;
 		private readonly object? Reference;
@@ -193,34 +193,20 @@ namespace Miku.Lua
 			if ( obj is ValueSlot )
 			{
 				var val = (ValueSlot)obj;
-				if ( this.Kind == val.Kind )
-				{
-					if ( this.Kind == ValueKind.Number )
-					{
-						return this.NumberValue == val.NumberValue;
-					}
-					else
-					{
-						if ( this.Reference == null )
-						{
-							return val.Reference == null;
-						}
-						return ReferenceEquals( Reference, val.Reference )
-							   || this.Reference.Equals( val.Reference );
-					}
-				}
+				return Equals( val );
 			}
 			return false;
 		}
 
-		public bool FastEquals(ValueSlot other)
+		public bool Equals( ValueSlot other )
 		{
-			if (this.Kind == other.Kind)
+			if ( this.Kind == other.Kind )
 			{
-				if (Kind == ValueKind.Number)
+				if ( Kind == ValueKind.Number )
 				{
 					return this.NumberValue == other.NumberValue;
-				} else
+				}
+				else
 				{
 					if ( this.Reference == null )
 					{

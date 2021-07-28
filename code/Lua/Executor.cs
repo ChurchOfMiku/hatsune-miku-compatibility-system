@@ -487,18 +487,18 @@ namespace Miku.Lua
 
 							case OpCode.ISEQP:
 								{
-									var vA = StackGet( A );
-									var vD = ValueSlot.Prim( D );
-									if ( !vA.Equals( vD ) )
+									var lhs = StackGet( A );
+									var rhs = ValueSlot.Prim( D );
+									if ( !lhs.Equals( rhs ) )
 										PC++;
 									break;
 								}
 
 							case OpCode.ISNEP:
 								{
-									var vA = StackGet( A );
-									var vD = ValueSlot.Prim( D );
-									if ( vA.Equals( vD ) )
+									var lhs = StackGet( A );
+									var rhs = ValueSlot.Prim( D );
+									if ( lhs.Equals( rhs ) )
 										PC++;
 									break;
 								}

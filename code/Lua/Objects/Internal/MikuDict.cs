@@ -81,7 +81,7 @@ namespace Miku.Lua.Objects.Internal
 				{
 					return ValueSlot.NIL;
 				}
-				if ( hash == current_hi.Hash && PairChunk[current_hi.Index].Key.FastEquals(key))
+				if ( hash == current_hi.Hash && PairChunk[current_hi.Index].Key.Equals(key))
 				{
 					return PairChunk[HashIndices[index].Index].Value;
 				}
@@ -121,7 +121,7 @@ namespace Miku.Lua.Objects.Internal
 					return;
 				}
 				// Short path: compare the hash before checking equality
-				if ( hash == current_hi.Hash && PairChunk[current_hi.Index].Key.FastEquals( key ) )
+				if ( hash == current_hi.Hash && PairChunk[current_hi.Index].Key.Equals( key ) )
 				{
 					// Just replace the value
 					PairChunk[current_hi.Index].Value = val;
@@ -203,7 +203,7 @@ namespace Miku.Lua.Objects.Internal
 						var res = dict.Get( keys[i] );
 						data[i, 0] += timer.ElapsedTicks;
 						sum_miku += timer.ElapsedTicks;
-						if ( !res.FastEquals( values[i] ) )
+						if ( !res.Equals( values[i] ) )
 						{
 							throw new Exception("validation failed miku "+i+" "+res);
 						}
@@ -225,7 +225,7 @@ namespace Miku.Lua.Objects.Internal
 						var res = dict[keys[i]];
 						data[i, 1] += timer.ElapsedTicks;
 						sum_dict += timer.ElapsedTicks;
-						if ( !res.FastEquals( values[i] ) )
+						if ( !res.Equals( values[i] ) )
 						{
 							throw new Exception( "validation failed dict " + i + " " + res );
 						}
