@@ -3,14 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <OutputType>Exe</OutputType>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>TRACE;MIKU_CONSOLE</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DefineConstants>TRACE;MIKU_CONSOLE</DefineConstants>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
@@ -28,6 +21,6 @@
     </Content>
   </ItemGroup>
 
-  <Import Project="..\code\Lua\Lua.projitems" Label="Shared" />
+  <Import Project="..\code\Lua\Miku.Lua.projitems" Label="Shared" />
 
 </Project>
