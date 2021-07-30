@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <OutputType>Exe</OutputType>
     <DebugType>embedded</DebugType>
-    <DefineConstants>ENABLE_PROFILER</DefineConstants>
+    <!--<DefineConstants>ENABLE_PROFILER</DefineConstants>-->
   </PropertyGroup>
 
   <ItemGroup>
