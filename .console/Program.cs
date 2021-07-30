@@ -1,4 +1,4 @@
-#define PROFILING
+//#define PROFILING
 //#define TEST_HASH
 
 using System.Diagnostics;
