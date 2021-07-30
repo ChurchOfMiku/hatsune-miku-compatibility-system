@@ -15,13 +15,11 @@ namespace Miku.Lua
 {
 	class SilentExecException : Exception
 	{
-		private Exception Wrapped;
-		public SilentExecException(Exception wrapped)
+		public SilentExecException(Exception inner) : base(inner.Message, inner)
 		{
-			Wrapped = wrapped;
 		}
-		public override string Message => Wrapped.Message;
 	}
+
 	partial class Executor
 	{
 		struct FrameInfo
@@ -1037,6 +1035,8 @@ namespace Miku.Lua
 						}
 						PC++;
 					}
+
+					Profiler.Stop();
 					#endregion
 
 					safety++;
@@ -1058,7 +1058,6 @@ namespace Miku.Lua
 				}
 				throw new SilentExecException(e);
 			}
-			Profiler.Stop();
 		}
 
 		public void LogStack()

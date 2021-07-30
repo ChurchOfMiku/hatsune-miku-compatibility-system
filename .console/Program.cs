@@ -17,13 +17,24 @@ namespace Miku.Console
 
 	public static class Program
 	{
+		private static readonly Process _currentProcess = Process.GetCurrentProcess();
 		private static readonly Action profilerDump =
 			typeof( Profiler ).GetMethod( "Dump", BindingFlags.Static | BindingFlags.NonPublic )
 							  .CreateDelegate<Action>();
+		private static readonly LuaMachine _luaMachine = CreateLuaMachine();
 		private static ConsoleCommandManager _commandManager;
-		private static LuaMachine _luaMachine;
 		private static Function _compile;
 		private static int _consoleCodeCounter = 0;
+
+		private static LuaMachine CreateLuaMachine()
+		{
+			var luaMachine = new LuaMachine();
+
+			var osLib = luaMachine.Env.Get( "os" ).CheckTable();
+			osLib.DefineFunc( "clock", static ex => _currentProcess.TotalProcessorTime.TotalSeconds );
+
+			return luaMachine;
+		}
 
 		public static void Main()
 		{
@@ -31,6 +42,7 @@ namespace Miku.Console
 			{
 				Directory.CreateDirectory( "data" );
 			}
+
 #if TEST_HASH
 			Lua.Objects.Internal.MikuDict.Bench();
 			return;
@@ -42,17 +54,10 @@ namespace Miku.Console
 			_commandManager.AddHelpCommand();
 			_commandManager.AddStopCommand( "exit", "stop", "quit" );
 #endif
-			_luaMachine = new LuaMachine();
-			_compile = (Function)typeof( LuaMachine )
-				.GetField( "CompileFunction", BindingFlags.NonPublic | BindingFlags.Instance )
-				.GetValue( _luaMachine );
 
 #if PROFILING
 			var fullRunTimer = Stopwatch.StartNew();
-            Compile(
-                "lua\\core\\*.lua",
-                "lua\\glib\\*.lua",
-                "lua\\glib_official\\garrysmod\\lua\\*.lua" );
+			RunFile( "test\\speedtest.lua" );
 			LuaStats();
 			Sandbox.Log.Info( "Full runtime: " + fullRunTimer.Elapsed.TotalSeconds );
 #else
