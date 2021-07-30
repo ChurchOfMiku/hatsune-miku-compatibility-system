@@ -88,10 +88,10 @@ namespace Miku.Lua
 				if ( table_counts != null )
 				{
 					int count = table_counts[pair.Key];
-					Log.Info( $"{sorted.Count - i + 1}. {pair} ( {(pair.Value / total * 100):F1}% ) #{count:n0} AVG={pair.Value / count * 1_000_000:n0}ns" );
+					Log.Info( $"{sorted.Count - i + 1}. {pair} ( {pair.Value / total:P1}% ) #{count:n0} AVG={pair.Value / count * 1_000_000:n0}ns" );
 				} else
 				{
-					Log.Info( $"{sorted.Count-i+1}. {pair} ( {(pair.Value / total * 100):F1}% )" );
+					Log.Info( $"{sorted.Count-i+1}. {pair} ( {pair.Value / total:P1}% )" );
 				}
 				i++;
 			}
