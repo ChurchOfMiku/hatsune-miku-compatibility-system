@@ -3,7 +3,8 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <OutputType>Exe</OutputType>
-    <DebugType>embedded</DebugType>
+    <DebugType>pdbonly</DebugType>
+    <DebugSymbols>true</DebugSymbols>
     <DefineConstants>$(DefineConstants);MIKU_CONSOLE</DefineConstants>
   </PropertyGroup>
   
