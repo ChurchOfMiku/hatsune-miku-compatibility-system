@@ -1,5 +1,6 @@
-﻿
+
 using Miku.Lua;
+using Miku.Lua.Objects;
 using Miku.GMod.Entities;
 using Sandbox;
 

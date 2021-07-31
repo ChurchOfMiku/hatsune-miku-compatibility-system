@@ -1,4 +1,4 @@
-﻿using Sandbox;
+using Sandbox;
 using Sandbox.UI;
 using Sandbox.UI.Construct;
 using System;
@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Miku.GMod.Assets;
 
 using Miku.Lua;
+using Miku.Lua.Objects;
 
 namespace Miku.GMod.Entities
 {

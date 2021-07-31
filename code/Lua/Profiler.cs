@@ -44,9 +44,9 @@ namespace Miku.Lua
 			CurrentFunc = null;
 		}
 
-		[Conditional("ENABLE_PROFILER")]
 		private static void Cycle()
 		{
+#if ENABLE_PROFILER
 			var t = SW.Elapsed.TotalMilliseconds;
 			if ( CurrentOp != null )
 			{
@@ -65,6 +65,7 @@ namespace Miku.Lua
 				TableFuncs[CurrentFunc] = x;
 			}
 			SW.Restart();
+#endif
 		}
 
 		[ClientCmd("lua_stats")]

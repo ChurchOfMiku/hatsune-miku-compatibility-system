@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Sandbox;
-using Miku.Lua;
+using Miku.Lua.Objects;
 
 namespace Miku.GMod.Entities
 {
