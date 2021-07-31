@@ -1,11 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
     <OutputType>Exe</OutputType>
-    <DebugType>pdbonly</DebugType>
-    <DebugSymbols>true</DebugSymbols>
+    <TargetFramework>net6.0</TargetFramework>
+    <RootNamespace>Miku.Console</RootNamespace>
+    <Nullable>enable</Nullable>
     <DefineConstants>$(DefineConstants);MIKU_CONSOLE</DefineConstants>
+    
+    <IsPackable>false</IsPackable>
+    
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>pdbonly</DebugType>
   </PropertyGroup>
   
   <ItemGroup>
