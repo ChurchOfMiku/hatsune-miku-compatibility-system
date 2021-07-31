@@ -21,6 +21,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Miku.Benchmarks", "..\.benchmarks\Miku.Benchmarks.csproj", "{2CF75DF4-8736-4B58-BC89-1D4DFAF10A2A}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Miku.Tests", "..\.tests\Miku.Tests.csproj", "{1947D7A1-2DA5-464A-A3FA-83D600F3B584}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\code\Lua\Miku.Lua.projitems*{5142ad09-93ff-4d6c-9090-7ae4bd272c62}*SharedItemsImports = 13
@@ -39,6 +41,10 @@ Global
 		{2CF75DF4-8736-4B58-BC89-1D4DFAF10A2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2CF75DF4-8736-4B58-BC89-1D4DFAF10A2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2CF75DF4-8736-4B58-BC89-1D4DFAF10A2A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1947D7A1-2DA5-464A-A3FA-83D600F3B584}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1947D7A1-2DA5-464A-A3FA-83D600F3B584}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1947D7A1-2DA5-464A-A3FA-83D600F3B584}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1947D7A1-2DA5-464A-A3FA-83D600F3B584}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
