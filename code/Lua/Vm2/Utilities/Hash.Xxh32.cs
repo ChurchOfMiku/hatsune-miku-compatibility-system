@@ -4,7 +4,7 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace Miku.Lua.Vm2.Utilities
+namespace Miku.Lua.Vm2
 {
 	// This was implemented based on the spec:
 	// https://github.com/Cyan4973/xxHash/blob/dev/doc/xxhash_spec.md
@@ -15,16 +15,6 @@ namespace Miku.Lua.Vm2.Utilities
 		private const uint Xxh32Prime3 = 0xC2B2AE3Du;  // 0b11000010101100101010111000111101
 		private const uint Xxh32Prime4 = 0x27D4EB2Fu;  // 0b00100111110101001110101100101111
 		private const uint Xxh32Prime5 = 0x165667B1u;  // 0b00010110010101100110011110110001
-
-		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private static uint ReadUInt32LittleEndian( ReadOnlySpan<byte> data )
-		{
-#if BIG_ENDIAN_SUPPORT
-			return ((uint)data[3] << 24) | ((uint)data[2] << 16) | ((uint)data[1] << 8) | data[0];
-#else
-			return BitConverter.ToUInt32( data );
-#endif //BIG_ENDIAN_SUPPORT
-		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		private static uint Xxh32Round( uint acc, uint lane )
@@ -46,8 +36,11 @@ namespace Miku.Lua.Vm2.Utilities
 			return acc;
 		}
 
-		public static uint GetXxh32HashCode( ReadOnlySpan<byte> data, uint seed = 0 )
+		public static uint GetXXHash32HashCode( ReadOnlySpan<byte> data, uint seed = 0 )
 		{
+			if ( data.IsEmpty )
+				return Xxh32Avalanche( seed + Xxh32Prime5 );
+
 			uint acc;
 			if ( data.Length >= 16 )
 			{
@@ -58,13 +51,13 @@ namespace Miku.Lua.Vm2.Utilities
 
 				while ( data.Length >= 16 )
 				{
-					acc1 = Xxh32Round( acc1, ReadUInt32LittleEndian( data ) );
+					acc1 = Xxh32Round( acc1, BitConverter.ToUInt32( data ) );
 					data = data[4..];
-					acc2 = Xxh32Round( acc2, ReadUInt32LittleEndian( data ) );
+					acc2 = Xxh32Round( acc2, BitConverter.ToUInt32( data ) );
 					data = data[4..];
-					acc3 = Xxh32Round( acc3, ReadUInt32LittleEndian( data ) );
+					acc3 = Xxh32Round( acc3, BitConverter.ToUInt32( data ) );
 					data = data[4..];
-					acc4 = Xxh32Round( acc4, ReadUInt32LittleEndian( data ) );
+					acc4 = Xxh32Round( acc4, BitConverter.ToUInt32( data ) );
 					data = data[4..];
 				}
 
@@ -82,7 +75,7 @@ namespace Miku.Lua.Vm2.Utilities
 
 			while ( data.Length >= 4 )
 			{
-				var lane = ReadUInt32LittleEndian( data );
+				var lane = BitConverter.ToUInt32( data );
 				acc += lane * Xxh32Prime3;
 				acc = BitOperations.RotateLeft( acc, 17 ) * Xxh32Prime4;
 				data = data[4..];
