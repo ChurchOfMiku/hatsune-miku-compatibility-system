@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
-namespace Miku.Lua.Vm2.Utilities
+namespace Miku.Lua.Vm2
 {
 	internal static partial class Hash
 	{
