@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
+#nullable enable
+
 namespace Miku.Lua.Vm2
 {
 	readonly struct LuaJitInstruction
