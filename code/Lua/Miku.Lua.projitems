@@ -26,5 +26,20 @@
     <Compile Include="$(MSBuildThisFileDirectory)Profiler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ValueOperations.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ValueSlot.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Vm2\LuaJit\LuaJitInstruction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Vm2\LuaJit\LuaJitInstructionReader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Vm2\Objects\LuaString.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Vm2\Objects\LuaStringTree.cs" />
+    <Compile Include="..\code\Lua\Vm2\Objects\LuaString.cs" />
+    <Compile Include="..\code\Lua\Vm2\Objects\LuaStringTree.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Vm2\Utilities\Hash.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Vm2\Utilities\Hash.FNV-1a.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Vm2\Utilities\Hash.Xxh32.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Vm2\Utilities\SpanUtils.cs" />
+    <Compile Include="..\code\Lua\Vm2\Luajit\LuaJitInstruction.cs" />
+    <Compile Include="..\code\Lua\Vm2\Luajit\LuaJitInstructionReader.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)Vm2\Instructions\" />
   </ItemGroup>
 </Project>
