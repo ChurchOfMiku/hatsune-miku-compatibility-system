@@ -165,27 +165,13 @@ namespace Miku.Lua.Vm2
 					// Obtain a reference to the array field where the
 					// index of the child node is/will be stored in.
 					// Every time we read it we'll actually be dereferencing
-					// it so we can check it multiple times.
+					// it so we can use it instead of accessing it multiple
+					// times.
 					ref var childIdx = ref _nodes[nodeIdx].ChildrenIndexes[value];
 					if ( childIdx == 0 )
 					{
-						_nodesLock.EnterWriteLock();
-						try
-						{
-							if ( childIdx == 0 )
-							{
-								childIdx = Insert( Node.Create() );
-							}
-						}
-						finally
-						{
-							_nodesLock.ExitWriteLock();
-						}
+						childIdx = Insert( Node.Create() );
 					}
-
-#if MIKU_CONSOLE
-					Debug.Assert( childIdx != 0 );
-#endif
 					nodeIdx = childIdx;
 				}
 
