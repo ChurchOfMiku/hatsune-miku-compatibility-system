@@ -19,7 +19,7 @@ namespace Miku.Lua.Vm2
 		/// <summary>
 		/// Calculates the FNV-1a hash of the provided byte sequence.
 		/// </summary>
-		internal static int GetFNV1aHashCode( byte[] data )
+		public static int GetFNV1aHashCode( byte[] data )
 		{
 			int hashCode = Fnv1aOffsetBasis;
 			for ( int i = 0; i < data.Length; i++ )
@@ -32,7 +32,7 @@ namespace Miku.Lua.Vm2
 		/// <summary>
 		/// Calculates the FNV-1a hash of the provided byte sequence.
 		/// </summary>
-		internal static int GetFNV1aHashCode( ArraySegment<byte> data )
+		public static int GetFNV1aHashCode( ArraySegment<byte> data )
 		{
 			int hashCode = Fnv1aOffsetBasis;
 			for ( int i = 0; i < data.Count; i++ )
@@ -45,7 +45,7 @@ namespace Miku.Lua.Vm2
 		/// <summary>
 		/// Calculates the FNV-1a hash of the provided byte sequence.
 		/// </summary>
-		internal static int GetFNV1aHashCode( ReadOnlySpan<byte> data )
+		public static int GetFNV1aHashCode( ReadOnlySpan<byte> data )
 		{
 			int hashCode = Fnv1aOffsetBasis;
 			for ( int i = 0; i < data.Length; i++ )
@@ -58,7 +58,7 @@ namespace Miku.Lua.Vm2
 		/// <summary>
 		/// Calculates the FNV-1a hash of the provided byte sequence.
 		/// </summary>
-		internal static int GetFNV1aHashCode( ImmutableArray<byte> data )
+		public static int GetFNV1aHashCode( ImmutableArray<byte> data )
 		{
 			int hashCode = Fnv1aOffsetBasis;
 			for ( int i = 0; i < data.Length; i++ )
@@ -71,7 +71,7 @@ namespace Miku.Lua.Vm2
 		/// <summary>
 		/// Calculates the FNV-1a hash of the provided byte sequence.
 		/// </summary>
-		internal static int GetFNV1aHashCode( IEnumerable<byte> data )
+		public static int GetFNV1aHashCode( IEnumerable<byte> data )
 		{
 			int hashCode = Fnv1aOffsetBasis;
 			foreach ( byte v in data )
@@ -84,7 +84,7 @@ namespace Miku.Lua.Vm2
 		/// <summary>
 		/// Calculates the FNV-1a hash of the provided char sequence.
 		/// </summary>
-		internal static int GetFNV1aHashCode( ReadOnlySpan<char> data )
+		public static int GetFNV1aHashCode( ReadOnlySpan<char> data )
 		{
 			int hashCode = Fnv1aOffsetBasis;
 			for ( int i = 0; i < data.Length; i++ )
@@ -98,7 +98,7 @@ namespace Miku.Lua.Vm2
 		/// Compute the hashcode of a sub-string using FNV-1a
 		/// See http://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
 		/// </summary>
-		internal static int GetFNV1aHashCode( string text, int start, int length )
+		public static int GetFNV1aHashCode( string text, int start, int length )
 		{
 			return GetFNV1aHashCode( text.AsSpan( start, length ) );
 		}
