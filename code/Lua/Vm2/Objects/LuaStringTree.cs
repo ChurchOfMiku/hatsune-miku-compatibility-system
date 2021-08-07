@@ -43,7 +43,7 @@ namespace Miku.Lua.Vm2
 			public static Node Create( LuaString str ) => new( str );
 		}
 
-		private readonly ReaderWriterLockSlim _nodesLock = new( LockRecursionPolicy.SupportsRecursion );
+		private readonly ReaderWriterLockSlim _nodesLock = new();
 		private Node[] _nodes = new Node[1]
 		{
 			Node.Create( LuaString.Empty )
