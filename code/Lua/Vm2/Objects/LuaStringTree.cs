@@ -1,7 +1,4 @@
 using System;
-#if MIKU_CONSOLE
-using System.Diagnostics;
-#endif
 using System.Threading;
 
 #nullable enable
@@ -39,8 +36,15 @@ namespace Miku.Lua.Vm2
 				Value = new WeakReference<LuaString>( str );
 			}
 
-			public static Node Create() => new( 0 );
-			public static Node Create( LuaString str ) => new( str );
+			public static Node Create()
+			{
+				return new( 0 );
+			}
+
+			public static Node Create( LuaString str )
+			{
+				return new( str );
+			}
 		}
 
 		private readonly ReaderWriterLockSlim _nodesLock = new();
@@ -73,13 +77,18 @@ namespace Miku.Lua.Vm2
 		public LuaString? GetById( int id )
 		{
 			if ( id < 0 )
+			{
 				throw new ArgumentOutOfRangeException( nameof( id ), "Id must be positive." );
+			}
 
 			_nodesLock.EnterReadLock();
 			try
 			{
-				if ( id >= Count || !_nodes[id].Value.TryGetTarget( out var str ) )
+				if ( id >= Count || !_nodes[id].Value.TryGetTarget( out LuaString? str ) )
+				{
 					return null;
+				}
+
 				return str;
 			}
 			finally
@@ -104,11 +113,14 @@ namespace Miku.Lua.Vm2
 				int idx = 0;
 				while ( idx < bytes.Length )
 				{
-					var childIdx = node.ChildrenIndexes[idx++];
+					int childIdx = node.ChildrenIndexes[idx++];
 					// Strings can't reference the empty string so we use it
 					// as an invalid child index value.
 					if ( childIdx == 0 )
+					{
 						return null;
+					}
+
 					node = _nodes[childIdx];
 				}
 			}
@@ -130,7 +142,7 @@ namespace Miku.Lua.Vm2
 					Array.Resize( ref _nodes, Capacity << 1 );
 				}
 
-				var idx = Count++;
+				int idx = Count++;
 				_nodes[idx] = node;
 				return idx;
 			}
@@ -157,7 +169,7 @@ namespace Miku.Lua.Vm2
 			_nodesLock.EnterUpgradeableReadLock();
 			try
 			{
-				var nodeIdx = 0;
+				int nodeIdx = 0;
 				int bytesIdx = 0;
 				while ( bytesIdx < bytes.Length )
 				{
@@ -167,7 +179,7 @@ namespace Miku.Lua.Vm2
 					// Every time we read it we'll actually be dereferencing
 					// it so we can use it instead of accessing it multiple
 					// times.
-					ref var childIdx = ref _nodes[nodeIdx].ChildrenIndexes[value];
+					ref int childIdx = ref _nodes[nodeIdx].ChildrenIndexes[value];
 					if ( childIdx == 0 )
 					{
 						childIdx = Insert( Node.Create() );
@@ -190,7 +202,7 @@ namespace Miku.Lua.Vm2
 		/// <returns></returns>
 		public LuaString Intern( ReadOnlySpan<byte> bytes )
 		{
-			var index = GetOrCreateNode( bytes );
+			int index = GetOrCreateNode( bytes );
 
 			WeakReference<LuaString> value;
 			object nodeLock;
@@ -205,7 +217,7 @@ namespace Miku.Lua.Vm2
 				_nodesLock.ExitReadLock();
 			}
 
-			if ( !value.TryGetTarget( out var str ) )
+			if ( !value.TryGetTarget( out LuaString? str ) )
 			{
 				lock ( nodeLock )
 				{
@@ -230,7 +242,7 @@ namespace Miku.Lua.Vm2
 		/// <param name="str"></param>
 		public void Intern( LuaString str )
 		{
-			var nodeIdx = GetOrCreateNode( str._buffer.AsSpan() );
+			int nodeIdx = GetOrCreateNode( str._buffer.AsSpan() );
 
 			WeakReference<LuaString> value;
 			object nodeLock;

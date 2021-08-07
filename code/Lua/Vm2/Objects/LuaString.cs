@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -48,7 +47,7 @@ namespace Miku.Lua.Vm2
 
 		#region IEnumerable<byte>
 
-		ImmutableArray<byte>.Enumerator GetEnumerator()
+		private ImmutableArray<byte>.Enumerator GetEnumerator()
 		{
 			return _buffer.GetEnumerator();
 		}
@@ -72,8 +71,10 @@ namespace Miku.Lua.Vm2
 		/// <param name="start"></param>
 		/// <param name="length"></param>
 		/// <returns></returns>
-		public LuaString Substring( LuaStringTree tree, int start, int length ) =>
-			tree.Substring( this, start, length );
+		public LuaString Substring( LuaStringTree tree, int start, int length )
+		{
+			return tree.Substring( this, start, length );
+		}
 
 		public override int GetHashCode()
 		{
