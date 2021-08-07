@@ -1,8 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace Miku.Lua.Vm2
 {
@@ -39,7 +37,9 @@ namespace Miku.Lua.Vm2
 		public static uint GetXXHash32HashCode( ReadOnlySpan<byte> data, uint seed = 0 )
 		{
 			if ( data.IsEmpty )
+			{
 				return Xxh32Avalanche( seed + Xxh32Prime5 );
+			}
 
 			uint acc;
 			if ( data.Length >= 16 )
@@ -75,15 +75,15 @@ namespace Miku.Lua.Vm2
 
 			while ( data.Length >= 4 )
 			{
-				var lane = BitConverter.ToUInt32( data );
+				uint lane = BitConverter.ToUInt32( data );
 				acc += lane * Xxh32Prime3;
 				acc = BitOperations.RotateLeft( acc, 17 ) * Xxh32Prime4;
 				data = data[4..];
 			}
 
-			for ( var idx = 0; idx < data.Length; idx++ )
+			for ( int idx = 0; idx < data.Length; idx++ )
 			{
-				var lane = (uint)data[idx];
+				uint lane = data[idx];
 				acc += lane * Xxh32Prime5;
 				acc = BitOperations.RotateLeft( acc, 11 ) * Xxh32Prime1;
 			}
