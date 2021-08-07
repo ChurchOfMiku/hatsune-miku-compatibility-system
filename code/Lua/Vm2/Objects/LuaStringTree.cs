@@ -141,19 +141,23 @@ namespace Miku.Lua.Vm2
 		}
 
 		/// <summary>
-		/// Walk down the tree to get the node we want.
+		/// Walk down the tree to get the index of node we want.
 		/// Creating the nodes along the way if needed.
 		/// </summary>
 		/// <param name="bytes">The bytes of the string to get the node of.</param>
-		/// <returns></returns>
-		private ref Node GetOrCreateNode( ReadOnlySpan<byte> bytes, out int index )
+		/// <returns>The index at which the node we want is at.</returns>
+		/// NOTE: Returning an index here lets us avoid recursive locking and also
+		///       any issues with the array being reallocated between the call to
+		///       this method and the access of the node in a child method.
+		///       It *should* also let the JIT access the offset of the weak ref
+		///       directly instead of going through some indirect ways because we
+		///       get a ref to the node first.
+		private int GetOrCreateNode( ReadOnlySpan<byte> bytes )
 		{
 			_nodesLock.EnterUpgradeableReadLock();
 			try
 			{
-				index = 0;
-				ref Node node = ref _nodes[index];
-
+				var nodeIdx = 0;
 				int bytesIdx = 0;
 				while ( bytesIdx < bytes.Length )
 				{
@@ -162,7 +166,7 @@ namespace Miku.Lua.Vm2
 					// index of the child node is/will be stored in.
 					// Every time we read it we'll actually be dereferencing
 					// it so we can check it multiple times.
-					ref var childIdx = ref node.ChildrenIndexes[value];
+					ref var childIdx = ref _nodes[nodeIdx].ChildrenIndexes[value];
 					if ( childIdx == 0 )
 					{
 						_nodesLock.EnterWriteLock();
@@ -182,11 +186,10 @@ namespace Miku.Lua.Vm2
 #if MIKU_CONSOLE
 					Debug.Assert( childIdx != 0 );
 #endif
-					index = childIdx;
-					node = ref _nodes[index];
+					nodeIdx = childIdx;
 				}
 
-				return ref node;
+				return nodeIdx;
 			}
 			finally
 			{
@@ -201,23 +204,24 @@ namespace Miku.Lua.Vm2
 		/// <returns></returns>
 		public LuaString Intern( ReadOnlySpan<byte> bytes )
 		{
+			var index = GetOrCreateNode( bytes );
+
 			_nodesLock.EnterUpgradeableReadLock();
 			try
 			{
-				ref Node node = ref GetOrCreateNode( bytes, out var index );
-
-				if ( !node.Value.TryGetTarget( out var str ) )
+				var value = _nodes[index].Value;
+				if ( !value.TryGetTarget( out var str ) )
 				{
 					_nodesLock.EnterWriteLock();
 					try
 					{
-						if ( !node.Value.TryGetTarget( out str ) )
+						if ( !value.TryGetTarget( out str ) )
 						{
 							str = new LuaString(
 								index,
 								(int)Hash.GetXXHash32HashCode( bytes ),
 								bytes.ToImmutableArray() );
-							node.Value.SetTarget( str );
+							value.SetTarget( str );
 						}
 					}
 					finally
@@ -241,19 +245,20 @@ namespace Miku.Lua.Vm2
 		/// <param name="str"></param>
 		public void Intern( LuaString str )
 		{
+			var nodeIdx = GetOrCreateNode( str._buffer.AsSpan() );
+
 			_nodesLock.EnterUpgradeableReadLock();
 			try
 			{
-				ref Node node = ref GetOrCreateNode( str._buffer.AsSpan(), out var nodeIndex );
-
-				if ( !node.Value.TryGetTarget( out _ ) )
+				var value = _nodes[nodeIdx].Value;
+				if ( !value.TryGetTarget( out _ ) )
 				{
 					_nodesLock.EnterWriteLock();
 					try
 					{
-						if ( !node.Value.TryGetTarget( out _ ) )
+						if ( !value.TryGetTarget( out _ ) )
 						{
-							node.Value.SetTarget( str );
+							value.SetTarget( str );
 						}
 					}
 					finally
