@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 #if MIKU_CONSOLE
 using System.Diagnostics;
 #endif
@@ -21,6 +20,7 @@ namespace Miku.Lua.Vm2
 		/// </summary>
 		private readonly struct Node
 		{
+			public readonly object NodeLock;
 			public readonly WeakReference<LuaString> Value;
 			public readonly int[] ChildrenIndexes;
 
@@ -28,15 +28,15 @@ namespace Miku.Lua.Vm2
 			// parameterless constructors.
 			private Node( int _dummy )
 			{
+				NodeLock = new object();
 				// The constructor accepts null but isn't properly annotated for it.
 				Value = new WeakReference<LuaString>( null! );
 				ChildrenIndexes = new int[byte.MaxValue];
 			}
 
-			private Node( LuaString str )
+			private Node( LuaString str ) : this( 0 )
 			{
 				Value = new WeakReference<LuaString>( str );
-				ChildrenIndexes = new int[byte.MaxValue];
 			}
 
 			public static Node Create() => new( 0 );
@@ -206,36 +206,35 @@ namespace Miku.Lua.Vm2
 		{
 			var index = GetOrCreateNode( bytes );
 
-			_nodesLock.EnterUpgradeableReadLock();
+			WeakReference<LuaString> value;
+			object nodeLock;
+			_nodesLock.EnterReadLock();
 			try
 			{
-				var value = _nodes[index].Value;
-				if ( !value.TryGetTarget( out var str ) )
-				{
-					_nodesLock.EnterWriteLock();
-					try
-					{
-						if ( !value.TryGetTarget( out str ) )
-						{
-							str = new LuaString(
-								index,
-								(int)Hash.GetXXHash32HashCode( bytes ),
-								bytes.ToImmutableArray() );
-							value.SetTarget( str );
-						}
-					}
-					finally
-					{
-						_nodesLock.ExitWriteLock();
-					}
-				}
-
-				return str;
+				value = _nodes[index].Value;
+				nodeLock = _nodes[index].NodeLock;
 			}
 			finally
 			{
-				_nodesLock.ExitUpgradeableReadLock();
+				_nodesLock.ExitReadLock();
 			}
+
+			if ( !value.TryGetTarget( out var str ) )
+			{
+				lock ( nodeLock )
+				{
+					if ( !value.TryGetTarget( out str ) )
+					{
+						str = new LuaString(
+							index,
+							(int)Hash.GetXXHash32HashCode( bytes ),
+							bytes.ToImmutableArray() );
+						value.SetTarget( str );
+					}
+				}
+			}
+
+			return str;
 		}
 
 		/// <summary>
@@ -247,29 +246,28 @@ namespace Miku.Lua.Vm2
 		{
 			var nodeIdx = GetOrCreateNode( str._buffer.AsSpan() );
 
-			_nodesLock.EnterUpgradeableReadLock();
+			WeakReference<LuaString> value;
+			object nodeLock;
+			_nodesLock.EnterReadLock();
 			try
 			{
-				var value = _nodes[nodeIdx].Value;
-				if ( !value.TryGetTarget( out _ ) )
-				{
-					_nodesLock.EnterWriteLock();
-					try
-					{
-						if ( !value.TryGetTarget( out _ ) )
-						{
-							value.SetTarget( str );
-						}
-					}
-					finally
-					{
-						_nodesLock.ExitWriteLock();
-					}
-				}
+				value = _nodes[nodeIdx].Value;
+				nodeLock = _nodes[nodeIdx].NodeLock;
 			}
 			finally
 			{
-				_nodesLock.ExitUpgradeableReadLock();
+				_nodesLock.ExitReadLock();
+			}
+
+			if ( !value.TryGetTarget( out _ ) )
+			{
+				lock ( nodeLock )
+				{
+					if ( !value.TryGetTarget( out _ ) )
+					{
+						value.SetTarget( str );
+					}
+				}
 			}
 		}
 
