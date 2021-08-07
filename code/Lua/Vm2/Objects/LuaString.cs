@@ -11,9 +11,9 @@ namespace Miku.Lua.Vm2
 	/// A byte sequence that represents a string.
 	/// Does not validate its contents.
 	/// </summary>
-	public sealed class Utf8String : IEnumerable<byte>
+	public sealed class LuaString : IEnumerable<byte>
 	{
-		public static readonly Utf8String Empty = new( 0, 0, ImmutableArray<byte>.Empty );
+		public static readonly LuaString Empty = new( 0, 0, ImmutableArray<byte>.Empty );
 
 		/// <summary>
 		/// DO NOT USE THIS. THIS IS ONLY INTERNAL BECAUSE OF THE TREE.
@@ -32,7 +32,7 @@ namespace Miku.Lua.Vm2
 		/// <param name="id"></param>
 		/// <param name="hashCode"></param>
 		/// <param name="buffer"></param>
-		internal Utf8String( long id, int hashCode, ImmutableArray<byte> buffer )
+		internal LuaString( int id, int hashCode, ImmutableArray<byte> buffer )
 		{
 			Id = id;
 			_hashCode = hashCode;
@@ -42,7 +42,7 @@ namespace Miku.Lua.Vm2
 		/// <summary>
 		/// The unique ID of this string in the 
 		/// </summary>
-		public long Id { get; }
+		public int Id { get; }
 
 		public byte this[int index] => _buffer[index];
 
@@ -72,7 +72,7 @@ namespace Miku.Lua.Vm2
 		/// <param name="start"></param>
 		/// <param name="length"></param>
 		/// <returns></returns>
-		public Utf8String Substring( Utf8StringTree tree, int start, int length ) =>
+		public LuaString Substring( LuaStringTree tree, int start, int length ) =>
 			tree.Substring( this, start, length );
 
 		public override int GetHashCode()
