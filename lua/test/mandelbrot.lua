@@ -1,6 +1,6 @@
 local charmap = { [0]=" ", ".", ":", "-", "=", "+", "*", "#", "%", "@" }
 for y = -1.3, 1.3, 0.1 do
-    local row = ""
+  local row = ""
   for x = -2.1, 1.1, 0.04 do
     local zi, zr, i = 0, 0, 0
     while i < 100 do
