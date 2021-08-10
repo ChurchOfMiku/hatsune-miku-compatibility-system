@@ -1,29 +1,149 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Runtime.InteropServices;
 
 #nullable enable
 
 namespace Miku.Lua.Vm2
 {
-	readonly struct LuaJitInstruction
+	/// <summary>
+	/// Represents a LuaJIT instruction.
+	/// </summary>
+	/// <remarks>
+	/// LuaJIT instructions have two formats:
+	/// <list type="table">
+	/// <item>
+	/// <term>B</term>
+	/// <term>C</term>
+	/// <term>A</term>
+	/// <term>OP</term>
+	/// </item>
+	/// <item>
+	/// <term>D</term>
+	/// <term>A</term>
+	/// <term>OP</term>
+	/// </item>
+	/// </list>
+	/// For more information on which type an OP uses, check
+	/// <a href="http://wiki.luajit.org/Bytecode-2.0">http://wiki.luajit.org/Bytecode-2.0</a>
+	/// </remarks>
+	[StructLayout( LayoutKind.Explicit )]
+	internal readonly struct LuaJitInstruction : IEquatable<LuaJitInstruction>
 	{
-		public OpCode Op { get; }
-		public byte A { get; }
-		public byte B => (byte)(D >> 8);
-		public byte C => (byte)D;
-		public ushort D { get; }
+		[FieldOffset( 0 )]
+		private readonly uint _raw;
 
-		public LuaJitInstruction( OpCode op, byte a, ushort d )
+		#region Base
+
+		[FieldOffset( 0 )]
+		private readonly OpCode _opCode;
+		public OpCode OpCode => _opCode;
+
+		[FieldOffset( 1 )]
+		private readonly byte _a;
+		public byte A => _a;
+
+		#endregion Base
+
+		#region Instr Type A
+
+		[FieldOffset( 2 )]
+		private readonly ushort _d;
+		public ushort D => _d;
+
+		#endregion Instr Type A
+
+		#region Instr Type B
+
+		[FieldOffset( 2 )]
+		private readonly byte _c;
+		public byte C => _c;
+
+		[FieldOffset( 3 )]
+		private readonly byte _b;
+		public byte B => _b;
+
+		#endregion Instr Type B
+
+		// Don't use this, use Decode.
+		private LuaJitInstruction( uint raw ) : this()
 		{
-			Op = op;
-			A = a;
-			D = d;
+			_raw = raw;
 		}
 
-		public static LuaJitInstruction Decode( uint raw ) =>
-			new( (OpCode)(byte)raw, (byte)(raw >> 8), (ushort)(raw >> 16) );
+		public LuaJitInstruction( OpCode opCode, byte a, ushort d ) : this()
+		{
+			_opCode = opCode;
+			_a = a;
+			_d = d;
+		}
 
-		public override string ToString() => $"{{ Op = {Op}, A = 0x{A:X2}, B = 0x{B:X2}, C = 0x{C:X2}, D = 0x{D:X4} }}";
+		public LuaJitInstruction( OpCode opCode, byte a, byte c, byte b ) : this()
+		{
+			_opCode = opCode;
+			_a = a;
+			_c = c;
+			_b = b;
+		}
+
+		/// <summary>
+		/// Encodes this instruction.
+		/// </summary>
+		/// <returns></returns>
+		public uint Encode() => _raw;
+
+		/// <summary>
+		/// Decodes an instruction without validating it.
+		/// <see cref="Decode(uint)"/> is recommended as it does validation.
+		/// </summary>
+		/// <param name="raw">The instruction to decode.</param>
+		/// <returns></returns>
+		public static LuaJitInstruction UnsafeDecode( uint raw ) => new( raw );
+
+		/// <summary>
+		/// Decodes an instruction and validates it.
+		/// </summary>
+		/// <param name="raw"></param>
+		/// <returns></returns>
+		/// <remarks>
+		/// Currently only validates the OpCode.
+		/// </remarks>
+		/// <exception cref="InvalidOperationException">
+		/// Thrown when the instruction has an invalid opcode.
+		/// </exception>
+		public static LuaJitInstruction Decode( uint raw )
+		{
+			var instr = new LuaJitInstruction( raw );
+			if ( instr.OpCode is < OpCode.First or > OpCode.Last )
+				throw new InvalidOperationException( $"Instruction has an invalid opcode." );
+			return instr;
+		}
+
+		/// <inheritdoc/>
+		public override string ToString() => $"{{ Op = {OpCode}, A = 0x{A:X2}, B = 0x{B:X2}, C = 0x{C:X2}, D = 0x{D:X4} }}";
+
+		/// <inheritdoc/>
+		public override bool Equals( object? obj ) => obj is LuaJitInstruction instruction && Equals( instruction );
+
+		/// <inheritdoc/>
+		public bool Equals( LuaJitInstruction other ) => _raw == other._raw;
+
+		/// <inheritdoc/>
+		public override int GetHashCode() => HashCode.Combine( _raw );
+
+		/// <summary>
+		/// Checks whether an instruction is equal to another.
+		/// </summary>
+		/// <param name="left"></param>
+		/// <param name="right"></param>
+		/// <returns>Whether both instructions are equal.</returns>
+		public static bool operator ==( LuaJitInstruction left, LuaJitInstruction right ) => left.Equals( right );
+
+		/// <summary>
+		/// Checks whether an instruction is not equal to another.
+		/// </summary>
+		/// <param name="left"></param>
+		/// <param name="right"></param>
+		/// <returns>Whether both instructions are not equal.</returns>
+		public static bool operator !=( LuaJitInstruction left, LuaJitInstruction right ) => !(left == right);
 	}
 }
