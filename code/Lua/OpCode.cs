@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +8,7 @@ namespace Miku.Lua
 {
 	enum OpCode : byte
 	{
+		// If something is added here, don't forget to update the First and Last at the end.
 		ISLT, ISGE, ISLE, ISGT, // DONE
 		ISEQV, ISNEV, ISEQS, ISNES, ISEQN, ISNEN, ISEQP, ISNEP,
 		ISTC, ISFC, IST, ISF, ISTYPE, ISNUM,
@@ -26,6 +27,9 @@ namespace Miku.Lua
 		ITERL, IITERL, JITERL,
 		LOOP, ILOOP, JLOOP,
 		JMP,
-		FUNCF, IFUNCF, JFUNCF, FUNCV, IFUNCV, JFUNCV, FUNCC, FUNCCW
+		FUNCF, IFUNCF, JFUNCF, FUNCV, IFUNCV, JFUNCV, FUNCC, FUNCCW,
+
+		First = ISLT,
+		Last = FUNCCW,
 	}
 }
