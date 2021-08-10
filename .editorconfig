@@ -22,3 +22,5 @@ csharp_space_between_method_call_parameter_list_parentheses = true
 csharp_space_between_method_declaration_parameter_list_parentheses = true
 #place a space character after the opening parenthesis and before the closing parenthesis of a control flow statement
 csharp_space_between_parentheses = control_flow_statements
+csharp_style_expression_bodied_operators=when_on_single_line:silent
+csharp_style_expression_bodied_methods=when_on_single_line:silent
