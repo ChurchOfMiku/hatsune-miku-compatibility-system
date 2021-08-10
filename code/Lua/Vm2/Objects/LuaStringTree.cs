@@ -99,9 +99,10 @@ namespace Miku.Lua.Vm2
 
 		/// <summary>
 		/// Gets a deduplicated string from the tree.
+		/// Does not intern the string if it hasn't been interned.
 		/// </summary>
 		/// <param name="bytes">The bytes that compose the string.</param>
-		/// <returns></returns>
+		/// <returns>The string if it has been interned or null if it hasn't.</returns>
 		public LuaString? GetInterned( ReadOnlySpan<byte> bytes )
 		{
 			_nodesLock.EnterReadLock();
