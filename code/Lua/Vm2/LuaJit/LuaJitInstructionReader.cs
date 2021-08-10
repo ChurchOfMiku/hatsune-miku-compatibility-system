@@ -2,7 +2,7 @@ using System;
 
 #nullable enable
 
-namespace Miku.Lua.Vm2.Luajit
+namespace Miku.Lua.Vm2
 {
 	class LuaJitInstructionReader
 	{
@@ -42,6 +42,8 @@ namespace Miku.Lua.Vm2.Luajit
 			}
 		}
 
+		public int Length => _buffer.Length;
+
 		public bool TryPeek( out LuaJitInstruction instruction )
 		{
 			if ( Position >= _buffer.Length )
@@ -56,7 +58,7 @@ namespace Miku.Lua.Vm2.Luajit
 
 		public bool TryRead( out LuaJitInstruction instruction )
 		{
-			if ( !TryPeek( out instruction ) )
+			if ( TryPeek( out instruction ) )
 			{
 				Position++;
 				return true;
