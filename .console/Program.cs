@@ -1,10 +1,13 @@
 //#define PROFILING
 //#define TEST_HASH
 
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using Miku.Lua;
 using Miku.Lua.Objects;
 using Tsu.CLI.Commands;
@@ -13,25 +16,29 @@ using Tsu.Numerics;
 namespace Miku.Console
 {
 	using System;
-	using System.Threading;
 
 	public static class Program
 	{
 		private static readonly Process _currentProcess = Process.GetCurrentProcess();
 		private static readonly Action profilerDump =
-			typeof( Profiler ).GetMethod( "Dump", BindingFlags.Static | BindingFlags.NonPublic )
+			typeof( Profiler ).GetMethod( "Dump", BindingFlags.Static | BindingFlags.NonPublic )!
 							  .CreateDelegate<Action>();
 		private static readonly LuaMachine _luaMachine = CreateLuaMachine();
-		private static ConsoleCommandManager _commandManager;
 		private static Function _compile;
 		private static int _consoleCodeCounter = 0;
+		private static ConsoleCommandManager _commandManager = null!;
 
+		[MemberNotNull( nameof( _compile ) )]
 		private static LuaMachine CreateLuaMachine()
 		{
-			var luaMachine = new LuaMachine();
+			LuaMachine luaMachine = new();
 
-			var osLib = luaMachine.Env.Get( "os" ).CheckTable();
+			Table osLib = luaMachine.Env.Get( "os" ).CheckTable();
 			osLib.DefineFunc( "clock", static ex => _currentProcess.TotalProcessorTime.TotalSeconds );
+
+			_compile = (Function)typeof( LuaMachine )
+				.GetField( "CompileFunction", BindingFlags.NonPublic | BindingFlags.Instance )!
+				.GetValue( luaMachine )!;
 
 			return luaMachine;
 		}
@@ -72,16 +79,16 @@ namespace Miku.Console
 		};
 
 		[Command( "compile" )]
-		private static void Compile( params string[] globs )
+		private static void CompileFiles( params string[] globs )
 		{
-			var files = globs.SelectMany( glob => Directory.EnumerateFiles( ".", glob, _enumOptions ) );
+			IEnumerable<string> files = globs.SelectMany( glob => Directory.EnumerateFiles( ".", glob, _enumOptions ) );
 
-			foreach ( var path in files )
+			foreach ( string path in files )
 			{
-				var code = File.ReadAllText( path );
-				var start = Stopwatch.GetTimestamp();
+				string code = File.ReadAllText( path );
+				long start = Stopwatch.GetTimestamp();
 				_compile.Call( _luaMachine, new ValueSlot[] { code, path } );
-				var end = Stopwatch.GetTimestamp();
+				long end = Stopwatch.GetTimestamp();
 				Console.WriteLine( $"{path} {end - start} {Duration.Format( end - start )}" );
 			}
 		}
