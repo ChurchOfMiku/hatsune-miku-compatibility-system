@@ -61,7 +61,7 @@ local function const(cons, indent)
     return format("%snew Constant( \"%s\" ),\n",
       indent, csstrescape(cons))
   elseif type(cons) == "number" then
-    return format("%snew Constant( %f ),\n", indent, cons)
+    return format("%snew Constant( %g ),\n", indent, cons)
   elseif type(cons) == "proto" then
     local pi = funcinfo(cons)
     return format("%snew Constant( %s__%d_%d ),\n",
@@ -95,6 +95,19 @@ local function sdump(name, func, out)
   out:write(format("public static LuaJitFunction %s { get; }\n", name))
   out:write(format("%s = new(\n", name))
   out:write(format("    nameof( %s ),\n", name))
+
+  if fi.nconsts then
+    out:write("    ImmutableArray.Create( new double[]\n")
+    out:write("    {\n")
+    for n = 1, fi.nconsts do
+      local k = funck(func, n-1)
+      if type(k) ~= "number" then error("Non-numeric constant in constants?") end
+      out:write(format("        %g,\n", k))
+    end
+    out:write("    } ),\n")
+  else
+    out:write("    ImmutableArray<Constant>.Empty,\n")
+  end
 
   if fi.gcconsts then
     out:write("    ImmutableArray.Create( new[]\n")

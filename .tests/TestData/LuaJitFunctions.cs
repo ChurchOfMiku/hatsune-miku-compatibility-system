@@ -1,6 +1,4 @@
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using System.Reflection;
 using Miku.Lua;
 
@@ -12,6 +10,11 @@ namespace Miku.Tests.TestData
 		{
 			FizzBuzz = new(
 				nameof( FizzBuzz ),
+				ImmutableArray.Create( new double[]
+				{
+					2,
+					0,
+				} ),
 				ImmutableArray.Create( new[]
 				{
 					new Constant( "fizz" ),
@@ -37,6 +40,10 @@ namespace Miku.Tests.TestData
 
 			Factorial = new(
 				nameof( Factorial ),
+				ImmutableArray.Create( new double[]
+				{
+					1,
+				} ),
 				ImmutableArray.Create( new[]
 				{
 					new Constant( "fact" ),
@@ -59,6 +66,18 @@ namespace Miku.Tests.TestData
 
 			Mandelbrot = new(
 				nameof( Mandelbrot ),
+				ImmutableArray.Create( new double[]
+				{
+					-1.3,
+					1.3,
+					0.1,
+					-2.1,
+					1.1,
+					0.04,
+					2,
+					1,
+					10,
+				} ),
 				ImmutableArray.Create( new[]
 				{
 					new Constant( new Dictionary<Constant, Constant>
