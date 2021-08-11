@@ -1,4 +1,3 @@
-using System;
 using System.Runtime.InteropServices;
 
 #nullable enable
@@ -112,9 +111,11 @@ namespace Miku.Lua.Vm2
 		/// </exception>
 		public static LuaJitInstruction Decode( uint raw )
 		{
-			var instr = new LuaJitInstruction( raw );
+			LuaJitInstruction instr = new( raw );
 			if ( instr.OpCode is < OpCode.First or > OpCode.Last )
+			{
 				throw new InvalidOperationException( $"Instruction has an invalid opcode." );
+			}
 			return instr;
 		}
 
