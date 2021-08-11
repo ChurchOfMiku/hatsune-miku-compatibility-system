@@ -101,7 +101,7 @@ local function sdump(name, func, out)
     out:write("    {\n")
     for n = 1, fi.gcconsts do
       local k = funck(func, -n)
-      if not k then break end
+      if not k then error("Missing constant") end
       out:write(const(k, "        "))
     end
     out:write("    } ),\n")
