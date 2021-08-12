@@ -8,35 +8,53 @@ namespace Miku.Tests.TestData
 	{
 		static LuaJitFunctions()
 		{
+			#region FizzBuzz
 			FizzBuzz = new(
 				nameof( FizzBuzz ),
-				ImmutableArray.Create( new double[]
-				{
-					2,
-					0,
-				} ),
-				ImmutableArray.Create( new[]
-				{
+				ImmutableArray.Create(
+					3d,
+					0d,
+					5d ),
+				ImmutableArray.Create(
+					new Constant( "print" ),
+					new Constant( "fizzbuzz" ),
 					new Constant( "fizz" ),
-					new Constant( "buzz" ),
-				} ),
-				ImmutableArray.Create( new[]
-				{
-					new Instruction( "0001    TNEW     0   0", 0x00000034u, OpCode.TNEW  , 0, 0 ),
-					new Instruction( "0002    KSHORT   1   1", 0x00010129u, OpCode.KSHORT, 1, 1 ),
-					new Instruction( "0003    KSHORT   2 100", 0x00640229u, OpCode.KSHORT, 2, 100 ),
-					new Instruction( "0004    KSHORT   3   1", 0x00010329u, OpCode.KSHORT, 3, 1 ),
-					new Instruction( "0005    FORI     1 => 0014", 0x8008014Du, OpCode.FORI  , 1, 32776 ),
-					new Instruction( "0006 => MODVN    5   4   0  ; 2", 0x0400051Au, OpCode.MODVN , 5, 1024 ),
-					new Instruction( "0007    ISNEN    5   1      ; 0", 0x00010509u, OpCode.ISNEN , 5, 1 ),
-					new Instruction( "0008    JMP      5 => 0011", 0x80020558u, OpCode.JMP   , 5, 32770 ),
-					new Instruction( "0009    KSTR     5   0      ; \"fizz\"", 0x00000527u, OpCode.KSTR  , 5, 0 ),
-					new Instruction( "0010    JMP      6 => 0012", 0x80010658u, OpCode.JMP   , 6, 32769 ),
-					new Instruction( "0011 => KSTR     5   1      ; \"buzz\"", 0x00010527u, OpCode.KSTR  , 5, 1 ),
-					new Instruction( "0012 => TSETV    5   0   4", 0x0004053Cu, OpCode.TSETV , 5, 4 ),
-					new Instruction( "0013    FORL     1 => 0006", 0x7FF8014Fu, OpCode.FORL  , 1, 32760 ),
-					new Instruction( "0014 => RET0     0   1", 0x0001004Bu, OpCode.RET0  , 0, 1 ),
-				} ) );
+					new Constant( "buzz" ) ),
+				ImmutableArray.Create(
+					new Instruction( "0001    KSHORT   0   1", 0x00010029u, OpCode.KSHORT, 0, 1 ),
+					new Instruction( "0002    KSHORT   1 100", 0x00640129u, OpCode.KSHORT, 1, 100 ),
+					new Instruction( "0003    KSHORT   2   1", 0x00010229u, OpCode.KSHORT, 2, 1 ),
+					new Instruction( "0004    FORI     0 => 0033", 0x801C004Du, OpCode.FORI, 0, 32796 ),
+					new Instruction( "0005 => MODVN    4   3   0  ; 3", 0x0300041Au, OpCode.MODVN, 4, 768 ),
+					new Instruction( "0006    ISNEN    4   1      ; 0", 0x00010409u, OpCode.ISNEN, 4, 1 ),
+					new Instruction( "0007    JMP      4 => 0015", 0x80070458u, OpCode.JMP, 4, 32775 ),
+					new Instruction( "0008    MODVN    4   3   2  ; 5", 0x0302041Au, OpCode.MODVN, 4, 770 ),
+					new Instruction( "0009    ISNEN    4   1      ; 0", 0x00010409u, OpCode.ISNEN, 4, 1 ),
+					new Instruction( "0010    JMP      4 => 0015", 0x80040458u, OpCode.JMP, 4, 32772 ),
+					new Instruction( "0011    GGET     4   0      ; \"print\"", 0x00000436u, OpCode.GGET, 4, 0 ),
+					new Instruction( "0012    KSTR     6   1      ; \"fizzbuzz\"", 0x00010627u, OpCode.KSTR, 6, 1 ),
+					new Instruction( "0013    CALL     4   1   2", 0x01020442u, OpCode.CALL, 4, 258 ),
+					new Instruction( "0014    JMP      4 => 0032", 0x80110458u, OpCode.JMP, 4, 32785 ),
+					new Instruction( "0015 => MODVN    4   3   0  ; 3", 0x0300041Au, OpCode.MODVN, 4, 768 ),
+					new Instruction( "0016    ISNEN    4   1      ; 0", 0x00010409u, OpCode.ISNEN, 4, 1 ),
+					new Instruction( "0017    JMP      4 => 0022", 0x80040458u, OpCode.JMP, 4, 32772 ),
+					new Instruction( "0018    GGET     4   0      ; \"print\"", 0x00000436u, OpCode.GGET, 4, 0 ),
+					new Instruction( "0019    KSTR     6   2      ; \"fizz\"", 0x00020627u, OpCode.KSTR, 6, 2 ),
+					new Instruction( "0020    CALL     4   1   2", 0x01020442u, OpCode.CALL, 4, 258 ),
+					new Instruction( "0021    JMP      4 => 0032", 0x800A0458u, OpCode.JMP, 4, 32778 ),
+					new Instruction( "0022 => MODVN    4   3   2  ; 5", 0x0302041Au, OpCode.MODVN, 4, 770 ),
+					new Instruction( "0023    ISNEN    4   1      ; 0", 0x00010409u, OpCode.ISNEN, 4, 1 ),
+					new Instruction( "0024    JMP      4 => 0029", 0x80040458u, OpCode.JMP, 4, 32772 ),
+					new Instruction( "0025    GGET     4   0      ; \"print\"", 0x00000436u, OpCode.GGET, 4, 0 ),
+					new Instruction( "0026    KSTR     6   3      ; \"buzz\"", 0x00030627u, OpCode.KSTR, 6, 3 ),
+					new Instruction( "0027    CALL     4   1   2", 0x01020442u, OpCode.CALL, 4, 258 ),
+					new Instruction( "0028    JMP      4 => 0032", 0x80030458u, OpCode.JMP, 4, 32771 ),
+					new Instruction( "0029 => GGET     4   0      ; \"print\"", 0x00000436u, OpCode.GGET, 4, 0 ),
+					new Instruction( "0030    MOV      6   3", 0x00030612u, OpCode.MOV, 6, 3 ),
+					new Instruction( "0031    CALL     4   1   2", 0x01020442u, OpCode.CALL, 4, 258 ),
+					new Instruction( "0032 => FORL     0 => 0005", 0x7FE4004Fu, OpCode.FORL, 0, 32740 ),
+					new Instruction( "0033 => RET0     0   1", 0x0001004Bu, OpCode.RET0, 0, 1 ) ) );
+			#endregion FizzBuzz
 
 			Factorial = new(
 				nameof( Factorial ),
