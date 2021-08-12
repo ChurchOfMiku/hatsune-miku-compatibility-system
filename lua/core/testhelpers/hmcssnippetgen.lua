@@ -32,6 +32,7 @@ local bcline, bctargets = jbc.line, jbc.targets
 local funcinfo, funcbc, funck = jutil.funcinfo, jutil.funcbc, jutil.funck
 local bcnames = vmdef.bcnames
 local stdout, stderr = io.stdout, io.stderr
+local name
 
 local function csstrescape(str)
   str = gsub(str, "\"", "\\\"")
@@ -74,7 +75,7 @@ local function const(cons, indent)
   elseif type(cons) == "proto" then
     local pi = funcinfo(cons)
     return format("%snew Constant( %s__%d_%d )",
-      indent, originalname, pi.linedefined, pi.lastlinedefined)
+      indent, name, pi.linedefined, pi.lastlinedefined)
   elseif type(cons) == "table" then
     local r = format("%snew Constant( new Dictionary<Constant, Constant>\n", indent)
     r = r .. format("%s{\n", indent)
@@ -148,7 +149,7 @@ end
 ------------------------------------------------------------------------------
 
 -- Active flag and output file handle.
-local name, active, out
+local active, out
 
 -- List handler.
 local function h_list(func)
