@@ -6,4 +6,4 @@ function fact (n)
   end
 end
 
-return fact(10)
+print(fact(10))
