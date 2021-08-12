@@ -26,6 +26,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Profiler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ValueOperations.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ValueSlot.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Vm2\LuaJit\ILuaJitInstructionReader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Vm2\LuaJit\LuaJitInstruction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Vm2\LuaJit\LuaJitInstructionReader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Vm2\Objects\LuaString.cs" />

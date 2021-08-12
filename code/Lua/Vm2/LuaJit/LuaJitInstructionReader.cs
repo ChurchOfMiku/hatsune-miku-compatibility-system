@@ -4,7 +4,7 @@ using System;
 
 namespace Miku.Lua.Vm2
 {
-	class LuaJitInstructionReader
+	class LuaJitInstructionReader : ILuaJitInstructionReader
 	{
 		private readonly ReadOnlyMemory<uint> _buffer;
 		private int _position;
