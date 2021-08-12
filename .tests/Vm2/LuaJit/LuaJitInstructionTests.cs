@@ -20,13 +20,9 @@ namespace Miku.Tests.Vm2.LuaJit
 		[MemberData( nameof( GetDecodeData ) )]
 		internal void Decode_DecodesProperly( string disasm, uint raw, OpCode opcode, byte a, ushort d )
 		{
-			//Setup
-
-			// Act
 			LuaJitInstruction instr = LuaJitInstruction.Decode( raw );
 			_testOutputHelper.WriteLine( $"Decoded instruction {disasm} ({raw:X8}): {instr}" );
 
-			// Check
 			Assert.Equal( opcode, instr.OpCode );
 			Assert.Equal( a, instr.A );
 			Assert.Equal( d, instr.D );
@@ -38,14 +34,11 @@ namespace Miku.Tests.Vm2.LuaJit
 		[MemberData( nameof( GetEncodeData ) )]
 		internal void Encode_EncodesProperly( OpCode opCode, byte a, ushort d, uint expected )
 		{
-			// Setup
 			LuaJitInstruction instr = new( opCode, a, d );
 
-			// Act
 			uint encoded = instr.Encode();
 			_testOutputHelper.WriteLine( $"Encoded instruction {instr}: {encoded:X8} (expected {expected})" );
 
-			// Check
 			Assert.Equal( expected, encoded );
 		}
 
@@ -53,13 +46,10 @@ namespace Miku.Tests.Vm2.LuaJit
 		[MemberData( nameof( GetEncodeAndDecodeData ) )]
 		internal void DecodeAndEncode_RoundTripsProperly( uint raw )
 		{
-			// Setup
 			LuaJitInstruction instr = LuaJitInstruction.Decode( raw );
 
-			// Act
 			uint encoded = instr.Encode();
 
-			// Check
 			Assert.Equal( raw, encoded );
 		}
 
