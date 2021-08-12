@@ -35,6 +35,15 @@ local stdout, stderr = io.stdout, io.stderr
 
 local function csstrescape(str)
   str = gsub(str, "\"", "\\\"")
+  str = gsub(str, "([^%w%p ])", function(c)
+    if c == "\n" then
+      return "\\n"
+    elseif c == "\r" then
+      return "\\r"
+    else
+      return format("\\x%02X", byte(c))
+    end
+  end)
   return str
 end
 
@@ -51,29 +60,29 @@ local function iline(func, pc, prefix)
   local oidx = 6*opcode
   local opname = sub(bcnames, oidx+1, oidx+6)
   local a, d = band(shr(ins, 8), 0xff), band(shr(ins, 16), 0xffff)
-  return format("new Instruction( \"%s\", 0x%04X%02X%02Xu, OpCode.%s, %d, %d ),\n",
+  return format("new Instruction( \"%s\", 0x%04X%02X%02Xu, OpCode.%s, %d, %d )",
     csstrescape(bline(func, pc, prefix)), d, a, opcode, opname, a, d)
 end
 
 local function const(cons, indent)
   indent = indent or "        "
   if type(cons) == "string" then
-    return format("%snew Constant( \"%s\" ),\n",
+    return format("%snew Constant( \"%s\" )",
       indent, csstrescape(cons))
   elseif type(cons) == "number" then
-    return format("%snew Constant( %g ),\n", indent, cons)
+    return format("%snew Constant( %g )", indent, cons)
   elseif type(cons) == "proto" then
     local pi = funcinfo(cons)
-    return format("%snew Constant( %s__%d_%d ),\n",
+    return format("%snew Constant( %s__%d_%d )",
       indent, originalname, pi.linedefined, pi.lastlinedefined)
   elseif type(cons) == "table" then
     local r = format("%snew Constant( new Dictionary<Constant, Constant>\n", indent)
     r = r .. format("%s{\n", indent)
     for k, v in pairs(cons) do
-      r = r .. format("%s    [%s] = %s",
-        indent, sub(const(k, ""), 1, -3), const(v, ""))
+      r = r .. format("%s    [%s] = %s,\n",
+        indent, const(k, ""), const(v, ""))
     end
-    r = r .. format("%s} ),\n", indent)
+    r = r .. format("%s} )", indent)
     return r
   else
     error(format("Type %s is not being handled by the constants loop", type(k)))
@@ -97,42 +106,42 @@ local function sdump(name, func, out)
   out:write(format("    nameof( %s ),\n", name))
 
   if fi.nconsts then
-    out:write("    ImmutableArray.Create( new double[]\n")
-    out:write("    {\n")
+    out:write("    ImmutableArray.Create(\n")
     for n = 1, fi.nconsts do
       local k = funck(func, n-1)
       if type(k) ~= "number" then error("Non-numeric constant in constants?") end
-      out:write(format("        %g,\n", k))
+      out:write(format("        %gd", k))
+      if n < fi.nconsts then out:write(",\n") end
     end
-    out:write("    } ),\n")
+    out:write(" ),\n")
   else
-    out:write("    ImmutableArray<Constant>.Empty,\n")
+    out:write("    ImmutableArray<double>.Empty,\n")
   end
 
   if fi.gcconsts then
-    out:write("    ImmutableArray.Create( new[]\n")
-    out:write("    {\n")
+    out:write("    ImmutableArray.Create(\n")
     for n = 1, fi.gcconsts do
       local k = funck(func, -n)
       if not k then error("Missing constant") end
       out:write(const(k, "        "))
+      if n < fi.gcconsts then out:write(",\n") end
     end
-    out:write("    } ),\n")
+    out:write(" ),\n")
   else
     out:write("    ImmutableArray<Constant>.Empty,\n")
   end
 
   -- Print out instructions.
-  out:write("    ImmutableArray.Create( new[]\n");
-  out:write("    {\n")
+  out:write("    ImmutableArray.Create(\n");
   local target = bctargets(func)
-  for pc = 1, fi.bytecodes do
+  for pc = 1, fi.bytecodes - 1 do
     local s = iline(func, pc, target[pc] and "=>")
-    if not s then break end
+    if not s then error("Less instructions than expected?") end
     out:write("        ")
     out:write(s)
+    if pc < fi.bytecodes - 1 then out:write(",\n") end
   end
-  out:write("    } ) );\n")
+  out:write(" ) );\n")
   out:flush()
 end
 
