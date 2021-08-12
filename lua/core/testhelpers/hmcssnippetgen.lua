@@ -105,7 +105,7 @@ local function sdump(name, func, out)
   out:write(format("%s = new(\n", name))
   out:write(format("    nameof( %s ),\n", name))
 
-  if fi.nconsts then
+  if fi.nconsts and fi.nconsts > 0 then
     out:write("    ImmutableArray.Create(\n")
     for n = 1, fi.nconsts do
       local k = funck(func, n-1)
@@ -118,7 +118,7 @@ local function sdump(name, func, out)
     out:write("    ImmutableArray<double>.Empty,\n")
   end
 
-  if fi.gcconsts then
+  if fi.gcconsts and fi.gcconsts > 0 then
     out:write("    ImmutableArray.Create(\n")
     for n = 1, fi.gcconsts do
       local k = funck(func, -n)
