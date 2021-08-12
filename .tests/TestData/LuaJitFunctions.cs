@@ -57,8 +57,8 @@ namespace Miku.Tests.TestData
 			#endregion FizzBuzz
 
 			#region Factorial
-			Factorial = new(
-				nameof( Factorial ),
+			Factorial__fact = new(
+				nameof( Factorial__fact ),
 				ImmutableArray.Create(
 					1d ),
 				ImmutableArray.Create(
@@ -76,6 +76,22 @@ namespace Miku.Tests.TestData
 					new Instruction( "0010    MULVV    1   0   1", 0x00010122u, OpCode.MULVV, 1, 1 ),
 					new Instruction( "0011    RET1     1   2", 0x0002014Cu, OpCode.RET1, 1, 2 ),
 					new Instruction( "0012 => RET0     0   1", 0x0001004Bu, OpCode.RET0, 0, 1 ) ) );
+			Factorial__root = new(
+				nameof( Factorial__root ),
+				ImmutableArray<double>.Empty,
+				ImmutableArray.Create(
+					new Constant( Factorial__fact ),
+					new Constant( "fact" ),
+					new Constant( "print" ) ),
+				ImmutableArray.Create(
+					new Instruction( "0001    FNEW     0   0      ; factorial.lua:1", 0x00000033u, OpCode.FNEW, 0, 0 ),
+					new Instruction( "0002    GSET     0   1      ; \"fact\"", 0x00010037u, OpCode.GSET, 0, 1 ),
+					new Instruction( "0003    GGET     0   2      ; \"print\"", 0x00020036u, OpCode.GGET, 0, 2 ),
+					new Instruction( "0004    GGET     2   1      ; \"fact\"", 0x00010236u, OpCode.GGET, 2, 1 ),
+					new Instruction( "0005    KSHORT   4  10", 0x000A0429u, OpCode.KSHORT, 4, 10 ),
+					new Instruction( "0006    CALL     2   0   2", 0x00020242u, OpCode.CALL, 2, 2 ),
+					new Instruction( "0007    CALLM    0   1   0", 0x01000041u, OpCode.CALLM, 0, 256 ),
+					new Instruction( "0008    RET0     0   1", 0x0001004Bu, OpCode.RET0, 0, 1 ) ) );
 			#endregion Factorial
 
 			#region Mandelbrot
@@ -265,7 +281,9 @@ namespace Miku.Tests.TestData
 
 		public static LuaJitFunction FizzBuzz { get; }
 
-		public static LuaJitFunction Factorial { get; }
+		public static LuaJitFunction Factorial__root { get; }
+
+		public static LuaJitFunction Factorial__fact { get; }
 
 		public static LuaJitFunction Mandelbrot { get; }
 
