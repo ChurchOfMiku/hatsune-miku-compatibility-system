@@ -1,9 +1,6 @@
-using System.Collections.Generic;
-using Miku.Lua.Objects;
-
 namespace Miku.Tests.TestData
 {
-	internal sealed class Constant
+	internal sealed class Constant : IEquatable<Constant?>
 	{
 		public ConstantType Type { get; }
 		public object? Value { get; }
@@ -34,5 +31,12 @@ namespace Miku.Tests.TestData
 		public Constant( Dictionary<Constant, Constant> table ) : this( ConstantType.Table, table )
 		{
 		}
+
+		public override bool Equals( object? obj ) => Equals( obj as Constant );
+		public bool Equals( Constant? other ) => other != null && Type == other.Type && EqualityComparer<object?>.Default.Equals( Value, other.Value );
+		public override int GetHashCode() => HashCode.Combine( Type, Value );
+
+		public static bool operator ==( Constant? left, Constant? right ) => EqualityComparer<Constant>.Default.Equals( left, right );
+		public static bool operator !=( Constant? left, Constant? right ) => !(left == right);
 	}
 }
