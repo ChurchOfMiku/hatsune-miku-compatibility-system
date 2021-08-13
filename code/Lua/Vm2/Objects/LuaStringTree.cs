@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Immutable;
 using System.Threading;
 
 #nullable enable
@@ -48,10 +49,7 @@ namespace Miku.Lua.Vm2
 		}
 
 		private readonly ReaderWriterLockSlim _nodesLock = new();
-		private Node[] _nodes = new Node[1]
-		{
-			Node.Create( LuaString.Empty )
-		};
+		private Node[] _nodes;
 		private bool disposedValue;
 
 		/// <summary>
@@ -59,6 +57,11 @@ namespace Miku.Lua.Vm2
 		/// </summary>
 		public LuaStringTree()
 		{
+			Empty = new LuaString( this, 0, 0, ImmutableArray<byte>.Empty );
+			_nodes = new Node[1]
+			{
+				Node.Create( Empty )
+			};
 		}
 
 		~LuaStringTree()
@@ -68,6 +71,7 @@ namespace Miku.Lua.Vm2
 
 		public int Count { get; private set; } = 1;
 		public int Capacity => _nodes.Length;
+		public LuaString Empty { get; }
 
 		/// <summary>
 		/// Gets a string by its id.
@@ -225,6 +229,7 @@ namespace Miku.Lua.Vm2
 					if ( !value.TryGetTarget( out str ) )
 					{
 						str = new LuaString(
+							this,
 							index,
 							(int)Hash.GetXXHash32HashCode( bytes ),
 							bytes.ToImmutableArray() );
@@ -243,7 +248,18 @@ namespace Miku.Lua.Vm2
 		/// <param name="str"></param>
 		public void Intern( LuaString str )
 		{
-			int nodeIdx = GetOrCreateNode( str._buffer.AsSpan() );
+			int nodeIdx;
+
+			// If this tree is the parent of the string, then we use its ID
+			// directly instead of navigating the tree.
+			if ( str.Parent == this )
+			{
+				nodeIdx = str.Id;
+			}
+			else
+			{
+				nodeIdx = GetOrCreateNode( str.AsSpan() );
+			}
 
 			WeakReference<LuaString> value;
 			object nodeLock;
@@ -264,27 +280,10 @@ namespace Miku.Lua.Vm2
 				{
 					if ( !value.TryGetTarget( out _ ) )
 					{
-						value.SetTarget( str );
+						value.SetTarget( str.WithParent( this ) );
 					}
 				}
 			}
-		}
-
-		/// <summary>
-		/// Creates and interns a part of a string.
-		/// </summary>
-		/// <param name="str"></param>
-		/// <param name="start"></param>
-		/// <param name="length"></param>
-		/// <returns></returns>
-		public LuaString Substring( LuaString str, int start, int length )
-		{
-			if ( str is null )
-			{
-				throw new ArgumentNullException( nameof( str ) );
-			}
-
-			return Intern( str._buffer.AsSpan().Slice( start, length ) );
 		}
 
 		#region IDisposable
