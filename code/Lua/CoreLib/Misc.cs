@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Sandbox;
 
 namespace Miku.Lua.CoreLib
@@ -13,10 +13,29 @@ namespace Miku.Lua.CoreLib
 			var table_lib = env.DefineLib( "table" );
 
 			table_lib.DefineFunc( "insert", ( Executor ex ) => {
-				Assert.True( ex.GetArgCount() == 2 );
 				var table = ex.GetArg(0).CheckTable();
-				var new_val = ex.GetArg( 1 );
-				table.PushVal( new_val );
+				if (ex.GetArgCount() == 2)
+				{
+					var new_val = ex.GetArg( 1 );
+					table.PushVal( new_val );
+				} else
+				{
+					Assert.True( ex.GetArgCount() == 3 );
+					int index = (int)ex.GetArg( 1 ).CheckNumber();
+					var new_val = ex.GetArg( 2 );
+					// not optimal, but should handle all cases without turning into an over-engineered mess
+					while (true)
+					{
+						var tmp = table.Get( index );
+						table.Set( index, new_val );
+						if (tmp.Kind == ValueKind.Nil)
+						{
+							break;
+						}
+						index++;
+						new_val = tmp;
+					}
+				}
 				return null;
 			} );
 
