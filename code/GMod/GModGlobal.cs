@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Sandbox;
 
 using Miku.Lua;
+using Miku.Lua.Objects;
 
 using Sandbox.UI;
 
@@ -56,7 +57,12 @@ namespace Miku.GMod
 				Client = new GmodMachineClient();
 			}
 
-			if (DUMP_STATUS)
+			// Initialize gamemode
+			GetMachine().Env.Set( "GM", new Table() );
+			Client?.RunFile( "glib_official/garrysmod/gamemodes/base/gamemode/cl_init.lua" );
+			Server?.RunFile( "glib_official/garrysmod/gamemodes/base/gamemode/init.lua" );
+
+			if ( DUMP_STATUS)
 			{
 				Client?.Env.Dump( "client.json" );
 				Server?.Env.Dump( "server.json" );

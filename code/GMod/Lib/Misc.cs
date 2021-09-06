@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,6 +25,14 @@ namespace Miku.GMod.Lib
 				// is properly affected by host_timescale
 				return Time.Delta;
 			} );
+
+			if (machine.IsClient)
+			{
+				machine.Env.DefineFunc( "FrameNumber", ( Executor ex ) =>
+				{
+					return ((GmodMachineClient)machine).FrameNumber;
+				} );
+			}
 		}
 	}
 }

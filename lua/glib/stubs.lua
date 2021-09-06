@@ -16,6 +16,11 @@ function Angle()
 
 end
 
+timer = {}
+function timer.Create()
+
+end
+
 util = {}
 if SERVER then
     function util.AddNetworkString(str)
@@ -40,6 +45,12 @@ if CLIENT then
 
     function render.GetScreenEffectTexture()
         return "NO_TEXTURE"
+    end
+
+    derma = {}
+    function derma.DefineControl(name,desc,tab,base)
+        print("register control",name)
+        return tab
     end
 end
 

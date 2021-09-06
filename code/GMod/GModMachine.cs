@@ -150,6 +150,7 @@ namespace Miku.GMod
 	class GmodMachineClient : GModMachine
 	{
 		public override bool IsClient => true;
+		public int FrameNumber { get; private set; } = 0;
 
 		public GmodMachineClient()
 		{
@@ -165,6 +166,7 @@ namespace Miku.GMod
 		{
 			Host.AssertClient();
 			Local.Hud.DeleteChildren( true );
+			FrameNumber++;
 
 			RunHook( "HUDPaint", new ValueSlot[0] );
 		}

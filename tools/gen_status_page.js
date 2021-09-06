@@ -31,7 +31,7 @@ function makeBar(counts,width,height) {
         let status_class = "st-"+key.toLowerCase();
         contents+=`<div style='width: ${c/total*100}%;' class='${status_class}'></div>`;
     });
-    contents += `<span>${(good/total*100).toFixed(1)}%</span>`
+    contents += `<span>${(good/total*100).toFixed(2)}%</span>`
     return `<div class='bar' style='width: ${width}px; height: ${height}px; font-size: ${height}px;'>${contents}</div>`;
 }
 
