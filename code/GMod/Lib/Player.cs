@@ -1,3 +1,4 @@
+using System;
 using Miku.Lua;
 using Sandbox;
 
@@ -10,6 +11,8 @@ namespace Miku.GMod.Lib
 		{
 			var class_player = machine.DefineClass( "Player" );
 			machine.Ents.ClassPlayer = class_player;
+
+			class_player.DefineFunc( "__newindex", Entity.EntityNewIndex);
 
 			class_player.DefineFunc( "Health", ( Executor ex ) => {
 				var ply = (Sandbox.Player)ex.GetArg( 0 ).CheckUserData().CheckEntity().Entity;

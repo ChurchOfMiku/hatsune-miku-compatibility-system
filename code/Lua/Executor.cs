@@ -841,7 +841,7 @@ namespace Miku.Lua
 							case OpCode.GSET:
 								{
 									var str = Func.Prototype.GetConstGC( D );
-									Func.Env.Set( str, StackGet( A ) );
+									ValueOperations.Set( this, Func.Env, str, StackGet( A ) );
 									break;
 								}
 							case OpCode.TGETV:
@@ -858,31 +858,28 @@ namespace Miku.Lua
 								break;
 							case OpCode.TSETV:
 								{
-									var table = StackGet( B ).CheckTable();
-									table.Set( StackGet( C ), StackGet( A ) );
+									ValueOperations.Set( this, StackGet( B ), StackGet( C ), StackGet( A ) );
 									break;
 								}
 							case OpCode.TSETS:
 								{
-									var table = StackGet( B ).CheckTable();
 									var str = Func.Prototype.GetConstGC( C );
-									table.Set( str, StackGet( A ) );
+									ValueOperations.Set( this, StackGet( B ), str, StackGet( A ) );
 									break;
 								}
 							case OpCode.TSETB:
 								{
-									var table = StackGet( B ).CheckTable();
-									table.Set( C, StackGet( A ) );
+									ValueOperations.Set( this, StackGet( B ), C, StackGet( A ) );
 									break;
 								}
 							case OpCode.TSETM:
 								{
-									var table = StackGet( A - 1 ).CheckTable();
+									var table = StackGet( A - 1 );
 									var num = Func.Prototype.GetConstNum( D );
 									var start_index = (int)BitConverter.DoubleToInt64Bits( num );
 									for ( int i = 0; i < MultiRes; i++ )
 									{
-										table.Set( start_index + i, StackGet( A + i ) );
+										ValueOperations.Set( this, table, start_index + i, StackGet( A + i ) );
 									}
 									break;
 								}

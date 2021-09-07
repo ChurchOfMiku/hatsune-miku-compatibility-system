@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,6 +11,15 @@ namespace Miku.GMod.Lib
 {
 	class Entity
 	{
+		public static ValueSlot? EntityNewIndex( Executor ex )
+		{
+			var ent_info = ex.GetArg( 0 ).CheckUserData().CheckEntity();
+			var key = ex.GetArg( 1 );
+			var val = ex.GetArg( 2 );
+			ent_info.LuaTable.Set( key, val );
+			return null;
+		}
+
 		public Entity( GModMachine machine )
 		{
 			var class_entity = machine.DefineClass( "Entity" );
@@ -19,6 +28,8 @@ namespace Miku.GMod.Lib
 				var ent_info = ex.GetArg( 0 ).CheckUserData().CheckEntity();
 				return ent_info.LuaTable;
 			} );
+
+			class_entity.DefineFunc( "__newindex", EntityNewIndex );
 
 			class_entity.DefineFunc( "GetOwner", ( Executor ex ) =>
 			{
