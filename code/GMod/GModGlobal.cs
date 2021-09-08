@@ -75,6 +75,7 @@ namespace Miku.GMod
 			Server?.LoadWeapon( "glib_official/garrysmod/gamemodes/base/entities/weapons/weapon_base" );
 
 			GetMachine().RunFile("scripts/H0L-D4/lua/autorun/holohud.lua");
+			//GetMachine().RunString("local x = 10 x()","test");
 
 			GetMachine().RunHook( "Initialize", new ValueSlot[0] );
 

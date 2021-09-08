@@ -1048,22 +1048,22 @@ namespace Miku.Lua
 				// TODO throw an exception that contains exectuor info, don't log anything here.
 				if (!(e is SilentExecException))
 				{
-					Log.Error( e.Message );
-					Log.Error( e.StackTrace );
-					LogStack();
-					//LogState();
+					Log.Error( "Lua Error: " + ErrorHelper.Check( Func, PC ) );
+					Log.Error(StackTrace());
 				}
 				throw new SilentExecException(e);
 			}
 		}
 
-		public void LogStack()
+		public string StackTrace()
 		{
-			Log.Info( " at " + Func.Prototype.GetDebugLine(PC) );
+			StringBuilder builder = new StringBuilder();
+			builder.AppendLine( "    at " + Func.Prototype.GetDebugLine(PC) );
 			foreach ( var level in CallStack )
 			{
-				Log.Info( " at " + level.Func.Prototype.GetDebugLine(level.PC) );
+				builder.AppendLine( "    at " + level.Func.Prototype.GetDebugLine(level.PC) );
 			}
+			return builder.ToString();
 		}
 
 		public void LogState()

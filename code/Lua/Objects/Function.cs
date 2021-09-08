@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using System.Collections.Generic;
 
 namespace Miku.Lua.Objects
 {
@@ -31,6 +32,13 @@ namespace Miku.Lua.Objects
 		}
 	}
 
+	struct LocalInfo
+	{
+		public string Name;
+		public int Start;
+		public int End;
+	}
+
 	class ProtoFunction
 	{
 		public byte Flags;
@@ -44,6 +52,8 @@ namespace Miku.Lua.Objects
 		public double[] ConstNum = null!;
 		public string ChunkName = null!;
 		public uint[] LineInfo = null!;
+		public string[] UpValueInfo = null!;
+		public List<LocalInfo> LocalInfo = null!;
 
 		/// <summary>
 		/// Used to tag User-Functions and for our crappy profiler.

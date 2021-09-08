@@ -135,7 +135,6 @@ namespace Miku.Lua
 					}
 				}
 
-				// skip debuginfo for now
 				var debug_bytes = reader.ReadBytes(debugSize);
 				{
 					var debug_reader = new BinaryReader( new MemoryStream( debug_bytes ) );
@@ -159,6 +158,39 @@ namespace Miku.Lua
 							proto.LineInfo[i] = debug_reader.ReadUInt32() + debugFirstLine;
 						}
 					}
+					var upvalue_names = new string[proto.UpValues.Length];
+					for (int i =0; i<proto.UpValues.Length;i++ )
+					{
+						upvalue_names[i] = ReadStringNT( debug_reader );
+					}
+					proto.UpValueInfo = upvalue_names;
+					var local_info = new List<LocalInfo>();
+					// Luajit's impl doesn't even parse variable names until one is needed, which is probably a better idea.
+					int last_start = 0;
+					while (true)
+					{
+						var x = debug_reader.PeekChar();
+						var local = new LocalInfo();
+						if ( x == 0 )
+						{
+							debug_reader.ReadByte();
+							break;
+						} else if (x < 7) {
+							local.Name = "for_" + x;
+							debug_reader.ReadByte();
+						} else if (x < 32)
+						{
+							throw new Exception( "??? " + x );
+						} else
+						{
+							local.Name = ReadStringNT( debug_reader );
+						}
+						local.Start = last_start + debug_reader.Read7BitEncodedInt();
+						local.End = local.Start + debug_reader.Read7BitEncodedInt();
+						last_start = local.Start;
+						local_info.Add(local);
+					}
+					proto.LocalInfo = local_info;
 				}
 
 				protos.Push(proto);
@@ -166,6 +198,24 @@ namespace Miku.Lua
 
 			var result = protos.Pop();
 			Assert.NotNull(result);
+			return result;
+		}
+
+		/// <summary>
+		/// Reads a null-terminated string. Used for debug info.
+		/// </summary>
+		private static string ReadStringNT( BinaryReader reader )
+		{
+			var stream = (MemoryStream)reader.BaseStream;
+			long start = stream.Position;
+			int length = 0;
+			while (reader.ReadByte() != 0)
+			{
+				length++;
+			}
+			stream.Position = start;
+			var result = Encoding.UTF8.GetString(reader.ReadBytes( length ));
+			reader.ReadByte(); // skip terminator
 			return result;
 		}
 
