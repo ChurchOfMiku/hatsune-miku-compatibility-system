@@ -46,6 +46,12 @@ namespace Miku.GMod.Lib
 				return null;
 			} );
 
+			class_entity.DefineFunc( "EyePos", ( Executor ex ) => {
+				var ply = ex.GetArg( 0 ).CheckUserData().CheckEntity().Entity;
+				var pos = ply.EyePos;
+				return machine.Vector( pos );
+			} );
+
 			class_entity.DefineFunc( "FireBullets", ( Executor ex ) => {
 				// TODO the spread isn't consistentent between CL and SV.
 				// TODO a bunch of settings aren't supported

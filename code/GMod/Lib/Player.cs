@@ -32,13 +32,13 @@ namespace Miku.GMod.Lib
 
 			class_player.DefineFunc( "GetShootPos", ( Executor ex ) => {
 				var ply = (Sandbox.Player)ex.GetArg( 0 ).CheckUserData().CheckEntity().Entity;
-				var pos = ply.EyePos; // PROBABLY EXTREMELY WRONG!
+				var pos = ply.EyePos;
 				return machine.Vector(pos);
 			} );
 
 			class_player.DefineFunc( "GetAimVector", ( Executor ex ) => {
 				var ply = (Sandbox.Player)ex.GetArg( 0 ).CheckUserData().CheckEntity().Entity;
-				var pos = ply.EyeRot.Forward; // PROBABLY EXTREMELY WRONG!
+				var pos = ply.EyeRot.Forward;
 				return machine.Vector( pos );
 			} );
 
