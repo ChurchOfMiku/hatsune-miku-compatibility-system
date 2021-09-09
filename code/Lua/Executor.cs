@@ -566,13 +566,8 @@ namespace Miku.Lua
 							// Binary Ops
 							#region Arithmetic - *NV
 							case OpCode.ADDVN:
-								{
-									double nB = StackGet( B ).CheckNumber();
-									double nC = Func.Prototype.GetConstNum( C );
-									StackSet( A, nB + nC );
-									break;
-								}
-
+								ValueOperations.Add( this, A, StackGet( B ), Func.Prototype.GetConstNum( C ) );
+								break;
 							case OpCode.SUBVN:
 								{
 									double nB = StackGet( B ).CheckNumber();
@@ -582,13 +577,8 @@ namespace Miku.Lua
 								}
 
 							case OpCode.MULVN:
-								{
-									double nB = StackGet( B ).CheckNumber();
-									double nC = Func.Prototype.GetConstNum( C );
-									StackSet( A, nB * nC );
-									break;
-								}
-
+								ValueOperations.Mul( this, A, StackGet( B ), Func.Prototype.GetConstNum( C ) );
+								break;
 							case OpCode.DIVVN:
 								{
 									double nB = StackGet( B ).CheckNumber();
@@ -608,13 +598,8 @@ namespace Miku.Lua
 
 							#region Arithmetic - *NV
 							case OpCode.ADDNV:
-								{
-									double nB = StackGet( B ).CheckNumber();
-									double nC = Func.Prototype.GetConstNum( C );
-									StackSet( A, nC + nB );
-									break;
-								}
-
+								ValueOperations.Add( this, A, Func.Prototype.GetConstNum( C ), StackGet( B ) );
+								break;
 							case OpCode.SUBNV:
 								{
 									double nB = StackGet( B ).CheckNumber();
@@ -624,13 +609,8 @@ namespace Miku.Lua
 								}
 
 							case OpCode.MULNV:
-								{
-									double nB = StackGet( B ).CheckNumber();
-									double nC = Func.Prototype.GetConstNum( C );
-									StackSet( A, nC * nB );
-									break;
-								}
-
+								ValueOperations.Mul( this, A, Func.Prototype.GetConstNum( C ), StackGet( B ) );
+								break;
 							case OpCode.DIVNV:
 								{
 									double nB = StackGet( B ).CheckNumber();
@@ -650,13 +630,8 @@ namespace Miku.Lua
 
 							#region Arithmetic - *VV
 							case OpCode.ADDVV:
-								{
-									double nB = StackGet( B ).CheckNumber();
-									double nC = StackGet( C ).CheckNumber();
-									StackSet( A, nB + nC );
-									break;
-								}
-
+								ValueOperations.Add( this, A, StackGet( B ), StackGet( C ) );
+								break;
 							case OpCode.SUBVV:
 								{
 									double nB = StackGet( B ).CheckNumber();
@@ -666,13 +641,8 @@ namespace Miku.Lua
 								}
 
 							case OpCode.MULVV:
-								{
-									double nB = StackGet( B ).CheckNumber();
-									double nC = StackGet( C ).CheckNumber();
-									StackSet( A, nB * nC );
-									break;
-								}
-
+								ValueOperations.Mul( this, A, StackGet( B ), StackGet( C ) );
+								break;
 							case OpCode.DIVVV:
 								{
 									double nB = StackGet( B ).CheckNumber();

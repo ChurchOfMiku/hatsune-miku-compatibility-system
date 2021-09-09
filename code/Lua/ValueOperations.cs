@@ -20,9 +20,84 @@ namespace Miku.Lua
 					return val.CheckTable().GetLength();
 				} else if (val.Kind == ValueKind.String)
 				{
+					// TODO should this be a metamethod instead?
 					return val.CheckString().Length;
 				}
 				throw new Exception( $"Attempt to get length of {val.Kind}." );
+			}
+
+			public static void Add( Executor ex, int out_slot, ValueSlot lhs, ValueSlot rhs )
+			{
+				string mm = "__add";
+				if ( lhs.Kind == ValueKind.Number && rhs.Kind == ValueKind.Number )
+				{
+					var result = lhs.CheckNumber() + rhs.CheckNumber();
+					ex.StackSet( out_slot, result );
+					return;
+				}
+
+				{
+					var mm_lhs = ex.Machine.PrimitiveMeta.Get( lhs )?.Get( mm ) ?? ValueSlot.NIL;
+					if ( mm_lhs.Kind != ValueKind.Nil )
+					{
+						ex.CallPrepare( mm_lhs, out_slot, 1 );
+						ex.StackSet( 0, lhs );
+						ex.StackSet( 1, rhs );
+						ex.CallArgsReady( 2 );
+						return;
+					}
+				}
+
+				{
+					var mm_rhs = ex.Machine.PrimitiveMeta.Get( rhs )?.Get( mm ) ?? ValueSlot.NIL;
+					if ( mm_rhs.Kind != ValueKind.Nil )
+					{
+						ex.CallPrepare( mm_rhs, out_slot, 1 );
+						ex.StackSet( 0, lhs );
+						ex.StackSet( 1, rhs );
+						ex.CallArgsReady( 2 );
+						return;
+					}
+				}
+
+				throw new Exception( $"Attempt to multiply {lhs} and {rhs}." );
+			}
+
+			public static void Mul( Executor ex, int out_slot, ValueSlot lhs, ValueSlot rhs)
+			{
+				string mm = "__mul";
+				if (lhs.Kind == ValueKind.Number && rhs.Kind == ValueKind.Number)
+				{
+					var result = lhs.CheckNumber() * rhs.CheckNumber();
+					ex.StackSet( out_slot, result );
+					return;
+				}
+
+				{
+					var mm_lhs = ex.Machine.PrimitiveMeta.Get( lhs )?.Get( mm ) ?? ValueSlot.NIL;
+					if (mm_lhs.Kind != ValueKind.Nil)
+					{
+						ex.CallPrepare( mm_lhs, out_slot, 1 );
+						ex.StackSet( 0, lhs );
+						ex.StackSet( 1, rhs );
+						ex.CallArgsReady( 2 );
+						return;
+					}
+				}
+
+				{
+					var mm_rhs = ex.Machine.PrimitiveMeta.Get( rhs )?.Get( mm ) ?? ValueSlot.NIL;
+					if ( mm_rhs.Kind != ValueKind.Nil )
+					{
+						ex.CallPrepare( mm_rhs, out_slot, 1 );
+						ex.StackSet( 0, lhs );
+						ex.StackSet( 1, rhs );
+						ex.CallArgsReady( 2 );
+						return;
+					}
+				}
+
+				throw new Exception( $"Attempt to multiply {lhs} and {rhs}." );
 			}
 
 			public static void Get(Executor ex, int out_slot, ValueSlot arg, ValueSlot key, ValueSlot? orig_arg = null )
@@ -59,15 +134,6 @@ namespace Miku.Lua
 				if ( is_table )
 				{
 					ex.StackSet( out_slot, ValueSlot.NIL );
-					// Print debug info, but only if this is the first lookup in the meta chain.
-					//if (orig_arg == null)
-					/*{
-						var table = arg.CheckTable();
-						if (table.DebugLibName != null)
-						{
-							Log.Warning( "GET " + table.DebugLibName + "." + key );
-						}
-					}*/
 				} else
 				{
 					throw new Exception( "Attempt to index " + arg );

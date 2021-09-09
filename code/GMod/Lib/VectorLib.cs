@@ -27,6 +27,32 @@ namespace Miku.GMod.Lib
 		{
 			ClassVector = machine.DefineClass( "Vector" );
 
+			ClassVector.DefineFunc( "__add", ( Executor ex ) =>
+			{
+				var lhs = ex.GetArg( 0 );
+				var rhs = ex.GetArg( 1 );
+				return MakeVector( lhs.CheckUserData().CheckVector() + rhs.CheckUserData().CheckVector() );
+			} );
+
+			ClassVector.DefineFunc( "__mul", ( Executor ex ) =>
+			{
+				var lhs = ex.GetArg( 0 );
+				var rhs = ex.GetArg( 1 );
+				if (lhs.Kind == ValueKind.Number)
+				{
+					return MakeVector( rhs.CheckUserData().CheckVector() * (float)lhs.CheckNumber() );
+				} else
+				{
+					if (rhs.Kind == ValueKind.Number)
+					{
+						return MakeVector( lhs.CheckUserData().CheckVector() * (float)rhs.CheckNumber() );
+					} else
+					{
+						throw new Exception($"Vector.__mul: {lhs} {rhs}");
+					}
+				}
+			} );
+
 			machine.Env.DefineFunc( "Vector", ( Executor ex ) =>
 			{
 				var arg_count = ex.GetArgCount();
