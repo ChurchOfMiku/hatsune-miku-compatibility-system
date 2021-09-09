@@ -12,7 +12,8 @@ namespace Miku.GMod
 		Function RegisterWeaponFunction;
 		Function MakeWeaponFunction;
 
-		Function MakeVectorFunction;
+		private Lib.VectorLib VectorLib;
+
 		public EntityRegistry Ents = new EntityRegistry();
 
 		public abstract bool IsClient { get; }
@@ -43,6 +44,7 @@ namespace Miku.GMod
 				RunFile( "glib/enums_server.lua" );
 			}
 
+			VectorLib = new Lib.VectorLib(this);
 			new Lib.Entity( this );
 			new Lib.Player( this );
 			new Lib.Weapon( this );
@@ -58,29 +60,13 @@ namespace Miku.GMod
 			RunHookFunction = Env.Get( "hook" ).CheckTable().Get( "Run" ).CheckFunction();
 			RegisterWeaponFunction = Env.Get( "weapons" ).CheckTable().Get( "Register" ).CheckFunction();
 			MakeWeaponFunction = Env.Get( "weapons" ).CheckTable().Get( "Get" ).CheckFunction();
-
-			// STUPID:
-			MakeVectorFunction = Env.Get( "Vector" ).CheckFunction();
 		}
 
 		protected abstract void SetupRealmInternalLibs();
 
 		public ValueSlot Vector(Vector3 vec)
 		{
-			return MakeVectorFunction.Call( this, new ValueSlot[] {
-				vec.x,
-				vec.y,
-				vec.z } ).GetResult( 0 );
-		}
-
-		public Vector3 VectorFromValue( ValueSlot v )
-		{
-			var t = v.CheckTable();
-			var x = (float)t.Get( "x" ).CheckNumber();
-			var y = (float)t.Get( "y" ).CheckNumber();
-			var z = (float)t.Get( "z" ).CheckNumber();
-
-			return new Vector3( x, y, z );
+			return VectorLib.MakeVector( vec );
 		}
 
 		public Color ColorFromValue( ValueSlot v )

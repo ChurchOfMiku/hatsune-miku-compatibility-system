@@ -63,9 +63,9 @@ namespace Miku.GMod.Lib
 					throw new Exception( "supress host events?" );
 				}
 
-				var src = machine.VectorFromValue( bullet_info.Get( "Src" ) );
-				var base_dir = machine.VectorFromValue( bullet_info.Get( "Dir" ) );
-				var spread = machine.VectorFromValue( bullet_info.Get( "Spread" ) );
+				var src = bullet_info.Get( "Src" ).CheckUserData().CheckVector();
+				var base_dir = bullet_info.Get( "Dir" ).CheckUserData().CheckVector();
+				var spread = bullet_info.Get( "Spread" ).CheckUserData().CheckVector();
 
 				var damage = (float)bullet_info.Get( "Damage" ).CheckNumber();
 				var force = (float)bullet_info.Get( "Force" ).CheckNumber();

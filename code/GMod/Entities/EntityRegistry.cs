@@ -90,7 +90,7 @@ namespace Miku.GMod.Entities
 
 			{
 				// There's a gross cycle here:
-				var ud = new UserData((int)TypeID.Entity, null, class_table );
+				var ud = new UserData(TypeID.Entity, null, class_table );
 				var ent_data = new EntityData(ent, ud, table ?? new Table());
 				ud.Reference = ent_data;
 
