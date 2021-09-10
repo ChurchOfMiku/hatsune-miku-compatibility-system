@@ -285,7 +285,8 @@ namespace Miku.Lua.Objects
 			{
 				throw new Exception( "DefineLib should only be called on Env or libraries with debug names." );
 			}
-			var table = new Table();
+			var old_value = Get( name );
+			var table = (old_value.Kind == ValueKind.Table) ? old_value.CheckTable() : new Table();
 			if (DebugLibName == "_G")
 			{
 				table.DebugLibName = name;

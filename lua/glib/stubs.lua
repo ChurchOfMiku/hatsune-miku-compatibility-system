@@ -1,4 +1,4 @@
-net = {}
+net = net or {}
 
 function Material(name)
     return name
@@ -8,12 +8,12 @@ function Angle()
 
 end
 
-timer = {}
+timer = timer or {}
 function timer.Create()
 
 end
 
-util = {}
+util = util or {}
 if SERVER then
     function util.AddNetworkString(str)
         
@@ -25,14 +25,14 @@ if CLIENT then
         return {}
     end
 
-    vgui = {}
+    vgui = vgui or {}
     _R.miku_debug_lib(vgui,"vgui")
 
     function surface.GetTextureID( name )
         return 0
     end
 
-    render = {}
+    render = render or {}
     _R.miku_debug_lib(vgui,"render")
 
     function render.GetScreenEffectTexture()
@@ -117,7 +117,7 @@ function game.GetAmmoID()
 end
 
 if CLIENT then
-    input = {}
+    input = input or {}
     _R.miku_debug_lib(input,"input")
     
     function input.SelectWeapon()
@@ -125,7 +125,7 @@ if CLIENT then
     end
 end
 
-motionsensor = {}
+motionsensor = motionsensor or {}
 _R.miku_debug_lib(motionsensor,"motionsensor")
 
 -- Player stubs
@@ -181,7 +181,7 @@ do
 end
 
 -- DARKRP
-DarkRP = {}
+DarkRP = DarkRP or {}
 _R.miku_debug_lib(DarkRP,"DarkRP")
 
 function DarkRP.formatMoney(x)

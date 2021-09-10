@@ -48,6 +48,7 @@ namespace Miku.GMod
 			new Lib.Entity( this );
 			new Lib.Player( this );
 			new Lib.Weapon( this );
+			new Lib.TraceLib( this );
 			new Lib.Misc( this );
 			SetupRealmInternalLibs();
 

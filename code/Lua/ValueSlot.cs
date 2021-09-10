@@ -110,6 +110,15 @@ namespace Miku.Lua
 
 		public string UnsafeGetString() => (string)Reference!;
 
+		public double? TryGetNumber()
+		{
+			if ( Kind == ValueKind.Number )
+			{
+				return NumberValue;
+			}
+			return null;
+		}
+
 		public string? TryGetString()
 		{
 			if ( Kind == ValueKind.String )
@@ -119,11 +128,11 @@ namespace Miku.Lua
 			return null;
 		}
 
-		public double? TryGetNumber()
+		public UserData? TryGetUserData()
 		{
-			if ( Kind == ValueKind.Number )
+			if (Kind == ValueKind.UserData)
 			{
-				return NumberValue;
+				return (UserData)Reference!;
 			}
 			return null;
 		}
