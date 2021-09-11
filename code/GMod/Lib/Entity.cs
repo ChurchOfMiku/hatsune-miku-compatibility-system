@@ -14,9 +14,12 @@ namespace Miku.GMod.Lib
 		public static ValueSlot? EntityNewIndex( Executor ex )
 		{
 			var ent_info = ex.GetArg( 0 ).CheckUserData().CheckEntity();
-			var key = ex.GetArg( 1 );
-			var val = ex.GetArg( 2 );
-			ent_info.LuaTable.Set( key, val );
+			if (ent_info.LuaTable != null)
+			{
+				var key = ex.GetArg( 1 );
+				var val = ex.GetArg( 2 );
+				ent_info.LuaTable.Set( key, val );
+			}
 			return null;
 		}
 
@@ -26,36 +29,41 @@ namespace Miku.GMod.Lib
 			class_entity.DefineFunc( "GetTable", ( Executor ex ) =>
 			{
 				var ent_info = ex.GetArg( 0 ).CheckUserData().CheckEntity();
-				return ent_info.LuaTable;
+				var table = ent_info.LuaTable;
+				if (table != null)
+				{
+					return table;
+				}
+				return ValueSlot.NIL;
 			} );
 
 			class_entity.DefineFunc( "__newindex", EntityNewIndex );
 
 			class_entity.DefineFunc( "GetOwner", ( Executor ex ) =>
 			{
-				var ent_info = ex.GetArg( 0 ).CheckUserData().CheckEntity();
-				var owner_info = machine.Ents.Get( ent_info.Entity.Owner );
+				var ent = ex.GetArg( 0 ).CheckUserData().CheckEntity().GetEntity();
+				var owner_info = machine.Ents.Get( ent.Owner );
 				return owner_info.LuaValue;
 			} );
 
 			class_entity.DefineFunc( "EmitSound", ( Executor ex ) =>
 			{
-				var ent_info = ex.GetArg( 0 ).CheckUserData().CheckEntity();
+				var ent = ex.GetArg( 0 ).CheckUserData().CheckEntity().GetEntity();
 				var sound_name = ex.GetArg( 1 ).CheckString();
-				ent_info.Entity.PlaySound( sound_name );
+				ent.PlaySound( sound_name );
 				return null;
 			} );
 
 			class_entity.DefineFunc( "EyePos", ( Executor ex ) => {
-				var ply = ex.GetArg( 0 ).CheckUserData().CheckEntity().Entity;
-				var pos = ply.EyePos;
+				var ent = ex.GetArg( 0 ).CheckUserData().CheckEntity().GetEntity();
+				var pos = ent.EyePos;
 				return machine.Vector( pos );
 			} );
 
 			class_entity.DefineFunc( "FireBullets", ( Executor ex ) => {
 				// TODO the spread isn't consistentent between CL and SV.
 				// TODO a bunch of settings aren't supported
-				var ent = ex.GetArg( 0 ).CheckUserData().CheckEntity().Entity;
+				var ent = ex.GetArg( 0 ).CheckUserData().CheckEntity().GetEntity();
 				var bullet_info = ex.GetArg( 1 ).CheckTable();
 				//bullet_info.Log();
 				if ( ex.GetArg( 2 ).IsTruthy() )

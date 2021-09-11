@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -36,8 +36,8 @@ namespace Miku.GMod.Lib
 
 			class_weapon.DefineFunc( "SendWeaponAnim", ( Executor ex ) =>
 			{
-				var ent_info = ex.GetArg( 0 ).CheckUserData().CheckEntity();
-				var view_model = ((GmodWeapon)ent_info.Entity).ViewModelEntity;
+				var weapon = (GmodWeapon)ex.GetArg( 0 ).CheckUserData().CheckEntity().GetEntity();
+				var view_model = weapon.ViewModelEntity;
 				if (view_model != null)
 				{
 					int act_id = (int)ex.GetArg( 1 ).CheckNumber();
@@ -52,8 +52,8 @@ namespace Miku.GMod.Lib
 			// this is just pasta'd SendWeaponAnim at the moment.
 			class_weapon.DefineFunc( "DefaultReload", ( Executor ex ) =>
 			{
-				var ent_info = ex.GetArg( 0 ).CheckUserData().CheckEntity();
-				var view_model = ((GmodWeapon)ent_info.Entity).ViewModelEntity;
+				var weapon = (GmodWeapon)ex.GetArg( 0 ).CheckUserData().CheckEntity().GetEntity();
+				var view_model = weapon.ViewModelEntity;
 				if ( view_model != null )
 				{
 					int act_id = (int)ex.GetArg( 1 ).CheckNumber();

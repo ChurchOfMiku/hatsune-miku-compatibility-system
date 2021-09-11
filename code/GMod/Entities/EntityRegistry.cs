@@ -13,15 +13,24 @@ namespace Miku.GMod.Entities
 {
 	class EntityData
 	{
-		public Entity Entity;
-		public UserData LuaValue;
-		public Table LuaTable;
+		public Entity GetEntity()
+		{
+			if (Entity == null)
+			{
+				throw new Exception("Attempt to use NULL entity.");
+			}
+			return Entity;
+		}
 
-		public EntityData(Entity ent, UserData ud, Table tab)
+		private Entity? Entity;
+		public UserData LuaValue;
+		public Table? LuaTable;
+
+		public EntityData(Entity? ent, UserData ud, Table? tab)
 		{
 			Entity = ent;
 			LuaValue = ud;
-			LuaTable = tab ?? new Table();
+			LuaTable = tab;
 		}
 	}
 

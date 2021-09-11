@@ -33,7 +33,7 @@ namespace Miku.GMod.Lib
 				var filter = trace_input.Get( "filter" ).TryGetUserData()?.CheckEntity();
 				if ( filter != null )
 				{
-					trace.Ignore( filter.Entity );
+					trace.Ignore( filter.GetEntity() );
 				}
 				var res = trace.Run();
 
