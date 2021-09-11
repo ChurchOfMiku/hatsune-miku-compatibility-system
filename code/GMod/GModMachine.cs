@@ -15,6 +15,7 @@ namespace Miku.GMod
 		private Lib.VectorLib VectorLib;
 
 		public EntityRegistry Ents = new EntityRegistry();
+		public EntityData NullEntity;
 
 		public abstract bool IsClient { get; }
 		public bool IsServer { get => !IsClient; }
@@ -50,7 +51,10 @@ namespace Miku.GMod
 			new Lib.Weapon( this );
 			new Lib.TraceLib( this );
 			new Lib.Misc( this );
+			new Lib.Ents( this );
 			SetupRealmInternalLibs();
+
+			Env.Set( "NULL", Ents.GetNullEntity().LuaValue );
 
 			RunFile( "glib/types.lua" );
 			RunFile( "glib/stubs.lua" );

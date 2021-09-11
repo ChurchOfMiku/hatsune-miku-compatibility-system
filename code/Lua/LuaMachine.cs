@@ -148,7 +148,8 @@ namespace Miku.Lua
 
 		public Table DefineClass(string name)
 		{
-			var table = new Table();
+			var old_value = Registry.Get( name );
+			var table = (old_value.Kind == ValueKind.Table) ? old_value.CheckTable() : new Table();
 			table.DebugLibName = "[class "+name+"]";
 			Registry.Set( name, table );
 			return table;

@@ -26,6 +26,8 @@ namespace Miku.GMod.Lib
 		public Entity( GModMachine machine )
 		{
 			var class_entity = machine.DefineClass( "Entity" );
+			machine.Ents.ClassEntity = class_entity;
+
 			class_entity.DefineFunc( "GetTable", ( Executor ex ) =>
 			{
 				var ent_info = ex.GetArg( 0 ).CheckUserData().CheckEntity();

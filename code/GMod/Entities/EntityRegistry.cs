@@ -38,8 +38,22 @@ namespace Miku.GMod.Entities
 	{
 		private Dictionary<Entity, EntityData> Map = new Dictionary<Entity, EntityData>();
 
+		public Table? ClassEntity = null;
 		public Table? ClassPlayer = null;
 		public Table? ClassWeapon = null;
+
+		private EntityData? Null = null;
+
+		public EntityData GetNullEntity()
+		{
+			if (Null == null)
+			{
+				var null_ud = new UserData( TypeID.Entity, null, ClassEntity );
+				Null = new EntityData( null, null_ud, null );
+				null_ud.Reference = Null;
+			}
+			return Null;
+		}
 
 		/*public void RegisterClass(string name, ScriptedEntityKind kind, Table table)
 		{
@@ -71,7 +85,12 @@ namespace Miku.GMod.Entities
 			}
 		}*/
 
-		public EntityData Get(Entity ent, Table? table = null) {
+		public EntityData Get(Entity? ent, Table? table = null) {
+			if (ent == null)
+			{
+				return GetNullEntity();
+			}
+
 			{
 				if (Map.TryGetValue(ent, out EntityData? result))
 				{

@@ -93,16 +93,16 @@ function file.Exists()
     return false
 end
 
-ents = {}
+ents = ents or {}
 _R.miku_debug_lib(ents,"ents")
 
-player = {}
+player = player or {}
 _R.miku_debug_lib(player,"player")
 
-team = {}
+team = team or {}
 _R.miku_debug_lib(team,"team")
 
-game = {}
+game = game or {}
 _R.miku_debug_lib(game,"game")
 
 function game.SinglePlayer()

@@ -18,6 +18,10 @@ namespace Miku.Lua
 	{
 		public static string Check(Function func, int pc)
 		{
+			if (func.Prototype.UserFunc != null)
+			{
+				return "Error occured in C# code.";
+			}
 			uint instr = func.Prototype.Code[pc];
 			var OP = (OpCode)(instr & 0xFF);
 			int A = (int)((instr >> 8) & 0xFF);
