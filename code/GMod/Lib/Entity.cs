@@ -41,6 +41,12 @@ namespace Miku.GMod.Lib
 
 			class_entity.DefineFunc( "__newindex", EntityNewIndex );
 
+			class_entity.DefineFunc( "IsPlayer", ( Executor ex ) =>
+			{
+				var ent = ex.GetArg( 0 ).CheckUserData().CheckEntity().GetEntityOrNull();
+				return (ent != null && ent is Sandbox.Player);
+			} );
+
 			class_entity.DefineFunc( "GetOwner", ( Executor ex ) =>
 			{
 				var ent = ex.GetArg( 0 ).CheckUserData().CheckEntity().GetEntity();

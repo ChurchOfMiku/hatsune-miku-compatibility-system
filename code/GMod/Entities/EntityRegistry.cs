@@ -22,6 +22,15 @@ namespace Miku.GMod.Entities
 			return Entity;
 		}
 
+		/// <summary>
+		/// A subset of methods work on NULL entities. Use this on those.
+		/// </summary>
+		/// <returns></returns>
+		public Entity? GetEntityOrNull()
+		{
+			return Entity;
+		}
+
 		private Entity? Entity;
 		public UserData LuaValue;
 		public Table? LuaTable;
