@@ -37,7 +37,7 @@ namespace Miku.GMod.Lib
 				}
 				var res = trace.Run();
 
-				Log.Info( "??? " + res );
+				//Log.Info( "??? " + res );
 
 				var lua_res = new Table();
 

@@ -8,6 +8,11 @@ function Angle()
 
 end
 
+os = os or {}
+function os.date(fmt)
+    return fmt
+end
+
 timer = timer or {}
 function timer.Create()
 
@@ -99,6 +104,10 @@ _R.miku_debug_lib(ents,"ents")
 player = player or {}
 _R.miku_debug_lib(player,"player")
 
+function player.GetCount()
+    return 1
+end
+
 team = team or {}
 _R.miku_debug_lib(team,"team")
 
@@ -136,6 +145,14 @@ do
     end
 
     function Player:Armor()
+        return 0
+    end
+
+    function Player:IsSuitEquipped()
+        return false
+    end
+
+    function Player:GetSuitPower()
         return 0
     end
 
