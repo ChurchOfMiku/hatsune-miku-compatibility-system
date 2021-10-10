@@ -1,4 +1,5 @@
 using System;
+using System.Buffers.Binary;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
@@ -51,13 +52,13 @@ namespace Miku.Lua.Vm2
 
 				while ( data.Length >= 16 )
 				{
-					acc1 = Xxh32Round( acc1, BitConverter.ToUInt32( data ) );
+					acc1 = Xxh32Round( acc1, BinaryPrimitives.ReadUInt32LittleEndian( data ) );
 					data = data[4..];
-					acc2 = Xxh32Round( acc2, BitConverter.ToUInt32( data ) );
+					acc2 = Xxh32Round( acc2, BinaryPrimitives.ReadUInt32LittleEndian( data ) );
 					data = data[4..];
-					acc3 = Xxh32Round( acc3, BitConverter.ToUInt32( data ) );
+					acc3 = Xxh32Round( acc3, BinaryPrimitives.ReadUInt32LittleEndian( data ) );
 					data = data[4..];
-					acc4 = Xxh32Round( acc4, BitConverter.ToUInt32( data ) );
+					acc4 = Xxh32Round( acc4, BinaryPrimitives.ReadUInt32LittleEndian( data ) );
 					data = data[4..];
 				}
 
@@ -75,7 +76,7 @@ namespace Miku.Lua.Vm2
 
 			while ( data.Length >= 4 )
 			{
-				uint lane = BitConverter.ToUInt32( data );
+				uint lane = BinaryPrimitives.ReadUInt32LittleEndian( data );
 				acc += lane * Xxh32Prime3;
 				acc = BitOperations.RotateLeft( acc, 17 ) * Xxh32Prime4;
 				data = data[4..];
