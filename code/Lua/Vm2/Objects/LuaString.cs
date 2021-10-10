@@ -1,6 +1,9 @@
+using System;
+using System.Buffers;
 using System.Collections;
+using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Numerics;
+using System.Linq;
 
 #nullable enable
 
@@ -63,17 +66,19 @@ namespace Miku.Lua.Vm2
 		/// Creates a slice of this string and interns it into the provided tree.
 		/// </summary>
 		/// <param name="tree">The tree to add the interned slice to.</param>
-		/// <param name="start"></param>
-		/// <param name="length"></param>
+		/// <param name="start">The index at which the substring begins.</param>
+		/// <param name="length">The desired length of the substring.</param>
 		/// <returns></returns>
+		/// <exception cref="ArgumentOutOfRangeException">
+		/// <paramref name="start"/> is less than zero or greater than <see cref="LuaString.Length"/>.
+		/// </exception>
 		public LuaString Substring( int start, int length )
 		{
-			if ( start < 0 || start >= _buffer.Length )
-				throw new ArgumentOutOfRangeException( nameof( start ), "Start must be inside the string." );
-			if ( length < 0 || start + length >= _buffer.Length )
-				throw new ArgumentOutOfRangeException( nameof( length ), "The start + length must end within the string." );
 			if ( length == 0 )
+			{
 				return Parent.Empty;
+			}
+
 			return Parent.Intern( _buffer.AsSpan().Slice( start, length ) );
 		}
 
@@ -82,12 +87,15 @@ namespace Miku.Lua.Vm2
 		public ReadOnlySpan<byte> AsSpan() => _buffer.AsSpan();
 		public override string ToString()
 		{
-			var buffer = _buffer;
+			ImmutableArray<byte> buffer = _buffer;
 			if ( buffer.Length < 256 )
 			{
 				Span<char> charBuffer = stackalloc char[buffer.Length];
-				for ( var idx = 0; idx < buffer.Length; idx++ )
+				for ( int idx = 0; idx < buffer.Length; idx++ )
+				{
 					charBuffer[idx] = (char)buffer[idx];
+				}
+
 				return new string( charBuffer );
 			}
 			return string.Concat( buffer.Select( c => (char)c ) );
@@ -127,10 +135,7 @@ namespace Miku.Lua.Vm2
 
 			return CompareTo( str );
 		}
-		public int CompareTo( LuaString? otherStr )
-		{
-			return Compare( this, otherStr );
-		}
+		public int CompareTo( LuaString? otherStr ) => Compare( this, otherStr );
 
 		/// <summary>
 		/// Compares the two strings without taking into account any type of encoding.
@@ -146,13 +151,58 @@ namespace Miku.Lua.Vm2
 			}
 
 			if ( left is null )
+			{
 				return -1;
-			if ( right is null )
-				return 1;
+			}
 
-			var leftSpan = left._buffer.AsSpan();
-			var rightSpan = right._buffer.AsSpan();
+			if ( right is null )
+			{
+				return 1;
+			}
+
+			ReadOnlySpan<byte> leftSpan = left._buffer.AsSpan();
+			ReadOnlySpan<byte> rightSpan = right._buffer.AsSpan();
 			return leftSpan.SequenceCompareTo( rightSpan );
+		}
+
+		/// <summary>
+		/// Concatenates two strings.
+		/// Both strings must belong to the same tree.
+		/// </summary>
+		/// <param name="left"></param>
+		/// <param name="right"></param>
+		/// <returns></returns>
+		public static LuaString? Concat( LuaString? left, LuaString? right )
+		{
+			if ( left is null )
+			{
+				return right;
+			}
+
+			if ( right is null )
+			{
+				return left;
+			}
+
+			if ( left.Parent != right.Parent )
+			{
+				throw new InvalidOperationException( "Can't concatenate two strings that don't belong to the same tree." );
+			}
+
+			if ( (uint)(left.Length + right.Length) < 256 )
+			{
+				Span<byte> concatBuffer = stackalloc byte[left.Length + right.Length];
+				left._buffer.AsSpan().CopyTo( concatBuffer );
+				right._buffer.AsSpan().CopyTo( concatBuffer[left.Length..] );
+				return left.Parent.Intern( concatBuffer );
+			}
+			else
+			{
+				byte[]? concatBuffer = ArrayPool<byte>.Shared.Rent( left.Length + right.Length );
+				left._buffer.CopyTo( concatBuffer );
+				right._buffer.CopyTo( concatBuffer, left.Length );
+				return left.Parent.Intern( concatBuffer );
+			}
 		}
 
 		/// <summary>
